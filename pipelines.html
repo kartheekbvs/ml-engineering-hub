@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ML Pipelines — ML Engineering Hub</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+    <script src="js/shared-layout.js"></script>
+    <div class="app-layout has-toc">
+        <main class="main-content">
+            <div class="content-inner">
+
+                <div class="page-header">
+                    <div class="page-breadcrumb"><a href="index.html">Home</a> › Pipelines</div>
+                    <h1 class="page-title">ML Pipelines & Advanced Patterns</h1>
+                    <p class="page-subtitle">Production Pipeline patterns: full sklearn-to-Keras pipelines, feature
+                        engineering, custom transformers, serialization, and deployment-ready code.</p>
+                    <div class="page-meta"><span class="page-badge badge-sklearn">⚙️ sklearn</span><span
+                            class="page-badge badge-tensorflow">🧠 Keras</span></div>
+                </div>
+
+                <!-- ═══ SECTION: Full Pipeline ═══ -->
+                <h2 class="section-title" id="s-full-pipeline">End-to-End Sklearn Pipeline</h2>
+
+                <div class="func-card expanded" id="full-pipe">
+                    <div class="func-card-header">
+                        <div class="func-icon">🔩</div>
+                        <div class="func-info">
+                            <div class="func-name">Full Production Pipeline</div>
+                            <div class="func-tagline">Preprocessing + model in one object — train once, predict safely,
+                                serialize cleanly</div>
+                            <div class="func-tags"><span class="func-tag">Pipeline</span><span
+                                    class="func-tag">ColumnTransformer</span><span class="func-tag">production</span>
+                            </div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Full Example</div>
+                            <div class="func-tab">Why Pipeline</div>
+                            <div class="func-tab">Serialization</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">from</span> sklearn.pipeline <span class="kw">import</span> Pipeline
+<span class="kw">from</span> sklearn.compose <span class="kw">import</span> ColumnTransformer
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> StandardScaler, OneHotEncoder
+<span class="kw">from</span> sklearn.impute <span class="kw">import</span> SimpleImputer
+<span class="kw">from</span> sklearn.ensemble <span class="kw">import</span> HistGradientBoostingClassifier
+<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> train_test_split, cross_val_score
+<span class="kw">from</span> sklearn.metrics <span class="kw">import</span> classification_report
+
+<span class="cmt"># ── 1. Define feature groups ──────────────────────────────</span>
+num_features = [<span class="str">'age'</span>, <span class="str">'income'</span>, <span class="str">'balance'</span>]
+cat_features = [<span class="str">'job'</span>, <span class="str">'education'</span>, <span class="str">'marital'</span>]
+target       = <span class="str">'churn'</span>
+
+X = df[num_features + cat_features]
+y = df[target]
+
+X_train, X_test, y_train, y_test = <span class="fn">train_test_split</span>(
+    X, y, test_size=<span class="num">0.2</span>, stratify=y, random_state=<span class="num">42</span>
+)
+
+<span class="cmt"># ── 2. Sub-pipelines per feature type ────────────────────</span>
+num_pipe = <span class="fn">Pipeline</span>([
+    (<span class="str">'imputer'</span>, <span class="fn">SimpleImputer</span>(strategy=<span class="str">'median'</span>)),
+    (<span class="str">'scaler'</span>,  <span class="fn">StandardScaler</span>())
+])
+
+cat_pipe = <span class="fn">Pipeline</span>([
+    (<span class="str">'imputer'</span>, <span class="fn">SimpleImputer</span>(strategy=<span class="str">'most_frequent'</span>)),
+    (<span class="str">'ohe'</span>,     <span class="fn">OneHotEncoder</span>(
+        handle_unknown=<span class="str">'ignore'</span>,  <span class="cmt"># unseen categories → zero vector</span>
+        sparse_output=<span class="kw">False</span>
+    ))
+])
+
+<span class="cmt"># ── 3. ColumnTransformer ─────────────────────────────────</span>
+preprocessor = <span class="fn">ColumnTransformer</span>([
+    (<span class="str">'num'</span>, num_pipe, num_features),
+    (<span class="str">'cat'</span>, cat_pipe, cat_features),
+], remainder=<span class="str">'drop'</span>)
+
+<span class="cmt"># ── 4. Full pipeline ──────────────────────────────────────</span>
+clf = <span class="fn">Pipeline</span>([
+    (<span class="str">'preprocessor'</span>, preprocessor),
+    (<span class="str">'model'</span>,        <span class="fn">HistGradientBoostingClassifier</span>(
+        max_iter=<span class="num">300</span>, learning_rate=<span class="num">0.05</span>,
+        max_depth=<span class="num">6</span>, early_stopping=<span class="kw">True</span>, random_state=<span class="num">42</span>
+    ))
+])
+
+<span class="cmt"># ── 5. Cross-validate on training set ────────────────────</span>
+scores = <span class="fn">cross_val_score</span>(clf, X_train, y_train,
+                          cv=<span class="num">5</span>, scoring=<span class="str">'roc_auc'</span>, n_jobs=-<span class="num">1</span>)
+<span class="fn">print</span>(<span class="str">f'CV ROC-AUC: {scores.mean():.4f} ± {scores.std():.4f}'</span>)
+
+<span class="cmt"># ── 6. Fit on full training set, evaluate on test ────────</span>
+clf.<span class="fn">fit</span>(X_train, y_train)
+y_prob = clf.<span class="fn">predict_proba</span>(X_test)[:, <span class="num">1</span>]
+y_pred = clf.<span class="fn">predict</span>(X_test)
+<span class="fn">print</span>(<span class="fn">classification_report</span>(y_test, y_pred))</code></pre>
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <ul class="doc-list">
+                                <li><strong>Prevents data leakage:</strong> All transformers (imputer, scaler, encoder)
+                                    are fit only on training folds inside cross-validation. They never see validation
+                                    data during fitting.</li>
+                                <li><strong>Single object to serve:</strong> <code>clf.predict(X_new)</code>
+                                    automatically applies all preprocessing. No need to manually pre-process new data at
+                                    inference time.</li>
+                                <li><strong>Safe for GridSearchCV:</strong> <code>GridSearchCV(clf, param_grid)</code>
+                                    tunes the model inside the pipeline with leakage-safe CV.</li>
+                                <li><strong>Introspect via named_steps:</strong>
+                                    <code>clf.named_steps['model'].feature_importances_</code> and
+                                    <code>clf['preprocessor'].transformers_</code> allow post-fit inspection.
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="kw">import</span> joblib
+
+<span class="cmt"># Serialize entire pipeline (preprocessing + model)</span>
+joblib.<span class="fn">dump</span>(clf, <span class="str">'churn_clf_v1.joblib'</span>, compress=<span class="num">3</span>)
+
+<span class="cmt"># Load and predict in production</span>
+loaded_clf = joblib.<span class="fn">load</span>(<span class="str">'churn_clf_v1.joblib'</span>)
+
+<span class="cmt"># New raw data — pipeline handles all preprocessing</span>
+new_customer = pd.<span class="fn">DataFrame</span>([{
+    <span class="str">'age'</span>: <span class="num">35</span>, <span class="str">'income'</span>: <span class="num">58000</span>, <span class="str">'balance'</span>: <span class="num">12000</span>,
+    <span class="str">'job'</span>: <span class="str">'technician'</span>, <span class="str">'education'</span>: <span class="str">'university.degree'</span>,
+    <span class="str">'marital'</span>: <span class="str">'married'</span>
+}])
+
+churn_prob = loaded_clf.<span class="fn">predict_proba</span>(new_customer)[<span class="num">0</span>, <span class="num">1</span>]
+<span class="fn">print</span>(<span class="str">f'Churn probability: {churn_prob:.2%}'</span>)
+
+<span class="cmt"># Version metadata alongside model</span>
+<span class="kw">import</span> json
+metadata = {
+    <span class="str">'model_version'</span>: <span class="str">'1.0'</span>,
+    <span class="str">'features'</span>: num_features + cat_features,
+    <span class="str">'cv_roc_auc'</span>: <span class="fn">float</span>(scores.<span class="fn">mean</span>()),
+}
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">'model_metadata.json'</span>, <span class="str">'w'</span>) <span class="kw">as</span> f:
+    json.<span class="fn">dump</span>(metadata, f, indent=<span class="num">2</span>)</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION: Custom Transformer ═══ -->
+                <h2 class="section-title" id="s-custom-transformer">Custom Transformers</h2>
+
+                <div class="func-card" id="custom-transform">
+                    <div class="func-card-header">
+                        <div class="func-icon">🛠️</div>
+                        <div class="func-info">
+                            <div class="func-name">BaseEstimator + TransformerMixin</div>
+                            <div class="func-tagline">Build custom feature engineering steps that plug into sklearn
+                                Pipelines</div>
+                            <div class="func-tags"><span class="func-tag">custom transformer</span><span
+                                    class="func-tag">BaseEstimator</span><span class="func-tag">fit/transform</span>
+                            </div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Example</div>
+                            <div class="func-tab">Internals</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="kw">from</span> sklearn.base <span class="kw">import</span> BaseEstimator, TransformerMixin
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">class</span> <span class="fn">LogTransformer</span>(BaseEstimator, TransformerMixin):
+    <span class="str">"""Apply log1p transform to specified features (for skewed distributions)."""</span>
+    
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, columns=<span class="kw">None</span>):
+        self.columns = columns  <span class="cmt"># list of column names or indices</span>
+    
+    <span class="kw">def</span> <span class="fn">fit</span>(self, X, y=<span class="kw">None</span>):
+        <span class="kw">return</span> self    <span class="cmt"># stateless transform — nothing to fit</span>
+    
+    <span class="kw">def</span> <span class="fn">transform</span>(self, X):
+        X_out = X.<span class="fn">copy</span>()
+        <span class="kw">if</span> self.columns <span class="kw">is not None</span>:
+            X_out[self.columns] = np.<span class="fn">log1p</span>(X_out[self.columns])
+        <span class="kw">else</span>:
+            X_out = np.<span class="fn">log1p</span>(X_out)
+        <span class="kw">return</span> X_out
+
+
+<span class="kw">class</span> <span class="fn">DomainFeatures</span>(BaseEstimator, TransformerMixin):
+    <span class="str">"""Create domain-specific engineered features."""</span>
+    
+    <span class="kw">def</span> <span class="fn">fit</span>(self, X, y=<span class="kw">None</span>):
+        <span class="kw">return</span> self
+    
+    <span class="kw">def</span> <span class="fn">transform</span>(self, X):
+        X_out = X.<span class="fn">copy</span>()
+        X_out[<span class="str">'balance_to_income'</span>] = X[<span class="str">'balance'</span>] / (X[<span class="str">'income'</span>] + <span class="num">1e-9</span>)
+        X_out[<span class="str">'age_group'</span>] = pd.<span class="fn">cut</span>(X[<span class="str">'age'</span>],
+            bins=[<span class="num">0</span>, <span class="num">30</span>, <span class="num">50</span>, <span class="num">100</span>],
+            labels=[<span class="str">'young'</span>, <span class="str">'mid'</span>, <span class="str">'senior'</span>]
+        )
+        <span class="kw">return</span> X_out
+
+
+<span class="cmt"># Plug into a Pipeline — fully compatible</span>
+pipe = <span class="fn">Pipeline</span>([
+    (<span class="str">'domain_feats'</span>, <span class="fn">DomainFeatures</span>()),
+    (<span class="str">'log_skewed'</span>,   <span class="fn">LogTransformer</span>(columns=[<span class="str">'income'</span>, <span class="str">'balance'</span>])),
+    (<span class="str">'preprocessor'</span>, preprocessor),
+    (<span class="str">'model'</span>,        <span class="fn">HistGradientBoostingClassifier</span>(random_state=<span class="num">42</span>))
+])
+
+pipe.<span class="fn">fit</span>(X_train, y_train)
+<span class="fn">print</span>(pipe.<span class="fn">score</span>(X_test, y_test))</code></pre>
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <ul class="doc-list">
+                                <li><strong>BaseEstimator:</strong> Provides <code>get_params()</code> /
+                                    <code>set_params()</code> automatically from <code>__init__</code> arguments —
+                                    required for GridSearchCV compatibility.
+                                </li>
+                                <li><strong>TransformerMixin:</strong> Provides <code>fit_transform(X, y)</code> =
+                                    <code>fit(X, y).transform(X)</code> for free.
+                                </li>
+                                <li><strong>Stateless transformers:</strong> If no data is learned during
+                                    <code>fit()</code>, just <code>return self</code>. Stateful: compute stats in fit
+                                    (e.g., log-transform bounds learned from training data), store as
+                                    <code>self.attr_</code> (trailing underscore convention).
+                                </li>
+                                <li><strong>set_output API:</strong> Call
+                                    <code>pipe.set_output(transform='pandas')</code> to propagate DataFrame column names
+                                    through all transforms (sklearn ≥1.2).
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION: Keras + Sklearn ═══ -->
+                <h2 class="section-title" id="s-keras-sklearn">Keras Model in Sklearn Pipeline</h2>
+
+                <div class="func-card" id="keras-in-sklearn">
+                    <div class="func-card-header">
+                        <div class="func-icon">🔗</div>
+                        <div class="func-info">
+                            <div class="func-name">SciKeras — Wrap Keras in a Sklearn Estimator</div>
+                            <div class="func-tagline">Use a Keras model inside a sklearn Pipeline for cross-validation
+                                and hyperparameter search</div>
+                            <div class="func-tags"><span class="func-tag">SciKeras</span><span
+                                    class="func-tag">KerasClassifier</span><span class="func-tag">integration</span>
+                            </div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Setup</div>
+                            <div class="func-tab">Example</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="sig-box"><span class="cmt"># Install: pip install scikeras</span>
+                                <span class="kw">from</span> scikeras.wrappers <span class="kw">import</span>
+                                KerasClassifier, KerasRegressor
+
+                                <span class="cmt"># Define model factory function</span>
+                                <span class="kw">def</span> <span class="fn">build_model</span>(n_units=<span
+                                    class="num">128</span>, dropout=<span class="num">0.3</span>):
+                                model = keras.<span class="fn">Sequential</span>([...])
+                                model.<span class="fn">compile</span>(...)
+                                <span class="kw">return</span> model
+
+                                <span class="cmt"># Wrap as sklearn estimator</span>
+                                clf = <span class="fn">KerasClassifier</span>(
+                                model=build_model,
+                                n_units=<span class="num">128</span>, dropout=<span class="num">0.3</span>,
+                                epochs=<span class="num">50</span>, batch_size=<span class="num">32</span>,
+                                verbose=<span class="num">0</span>
+                                )
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="kw">from</span> scikeras.wrappers <span class="kw">import</span> KerasClassifier
+<span class="kw">from</span> sklearn.pipeline <span class="kw">import</span> Pipeline
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> StandardScaler
+<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> RandomizedSearchCV
+
+<span class="kw">def</span> <span class="fn">build_model</span>(n_units=<span class="num">64</span>, dropout=<span class="num">0.2</span>, lr=<span class="num">1e-3</span>):
+    model = keras.<span class="fn">Sequential</span>([
+        keras.layers.<span class="fn">Input</span>(shape=(<span class="num">30</span>,)),
+        keras.layers.<span class="fn">Dense</span>(n_units, activation=<span class="str">'relu'</span>),
+        keras.layers.<span class="fn">Dropout</span>(dropout),
+        keras.layers.<span class="fn">Dense</span>(<span class="num">1</span>, activation=<span class="str">'sigmoid'</span>)
+    ])
+    model.<span class="fn">compile</span>(
+        optimizer=keras.optimizers.<span class="fn">Adam</span>(lr),
+        loss=<span class="str">'binary_crossentropy'</span>,
+        metrics=[<span class="str">'accuracy'</span>]
+    )
+    <span class="kw">return</span> model
+
+<span class="cmt"># Wrap + pipeline</span>
+keras_clf = <span class="fn">KerasClassifier</span>(
+    model=build_model, epochs=<span class="num">50</span>, batch_size=<span class="num">32</span>, verbose=<span class="num">0</span>
+)
+pipe = <span class="fn">Pipeline</span>([
+    (<span class="str">'scaler'</span>, <span class="fn">StandardScaler</span>()),
+    (<span class="str">'model'</span>,  keras_clf)
+])
+
+<span class="cmt"># Tune Keras hyperparams via RandomizedSearchCV</span>
+param_dist = {
+    <span class="str">'model__n_units'</span>:  [<span class="num">32</span>, <span class="num">64</span>, <span class="num">128</span>, <span class="num">256</span>],
+    <span class="str">'model__dropout'</span>: [<span class="num">0.1</span>, <span class="num">0.2</span>, <span class="num">0.3</span>, <span class="num">0.4</span>],
+    <span class="str">'model__lr'</span>:      [<span class="num">1e-4</span>, <span class="num">1e-3</span>, <span class="num">5e-4</span>]
+}
+rs = <span class="fn">RandomizedSearchCV</span>(
+    pipe, param_dist, n_iter=<span class="num">15</span>, cv=<span class="num">5</span>,
+    scoring=<span class="str">'roc_auc'</span>, n_jobs=<span class="num">1</span>  <span class="cmt"># n_jobs=1 with GPU-based Keras</span>
+)
+rs.<span class="fn">fit</span>(X_train, y_train)
+<span class="fn">print</span>(<span class="str">f'Best ROC-AUC: {rs.best_score_:.4f}'</span>)
+<span class="fn">print</span>(rs.best_params_)</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-footer">
+                    <span>Pipelines — ML Engineering Hub</span>
+                    <div class="footer-links">
+                        <a href="tensorflow.html">← TensorFlow</a>
+                        <a href="index.html">Home ↑</a>
+                    </div>
+                </div>
+
+            </div><!-- /content-inner -->
+        </main>
+
+        <div class="toc-panel">
+            <div class="toc-heading">On This Page</div>
+            <a href="#s-full-pipeline" class="toc-link">End-to-End Pipeline</a>
+            <a href="#full-pipe" class="toc-link toc-h3">Full Production Pipeline</a>
+            <a href="#s-custom-transformer" class="toc-link">Custom Transformers</a>
+            <a href="#custom-transform" class="toc-link toc-h3">BaseEstimator mixin</a>
+            <a href="#s-keras-sklearn" class="toc-link">Keras in Sklearn</a>
+            <a href="#keras-in-sklearn" class="toc-link toc-h3">SciKeras wrapper</a>
+        </div>
+    </div>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

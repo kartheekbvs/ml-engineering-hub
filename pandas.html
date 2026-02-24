@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pandas Reference — ML Engineering Hub</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+    <script src="js/shared-layout.js"></script>
+    <div class="app-layout has-toc">
+        <main class="main-content">
+            <div class="content-inner">
+
+                <div class="page-header">
+                    <div class="page-breadcrumb"><a href="index.html">Home</a> › Pandas</div>
+                    <h1 class="page-title">Pandas</h1>
+                    <p class="page-subtitle">Data loading, inspection, cleaning, indexing, feature engineering, groupby,
+                        merging, time-series, and performance patterns for ML workflows.</p>
+                    <div class="page-meta">
+                        <span class="page-badge badge-pandas">🐼 Pandas</span>
+                        <span class="page-badge badge-pandas">8 Sections · 30+ Functions</span>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 1: Loading ═══ -->
+                <h2 class="section-title" id="s-loading">Data Loading</h2>
+
+                <div class="func-card expanded" id="read-csv">
+                    <div class="func-card-header">
+                        <div class="func-icon">📂</div>
+                        <div class="func-info">
+                            <div class="func-name">pd.read_csv / read_parquet / read_excel / read_sql</div>
+                            <div class="func-tagline">Efficient data ingestion with memory control, chunking, and type
+                                inference</div>
+                            <div class="func-tags"><span class="func-tag">I/O</span><span
+                                    class="func-tag">memory</span><span class="func-tag">chunking</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Syntax</div>
+                            <div class="func-tab">Example</div>
+                            <div class="func-tab">Performance</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="sig-box"><span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+                                pd.<span class="fn">read_csv</span>(
+                                filepath, sep=<span class="str">','</span>,
+                                dtype=<span class="kw">None</span>, <span class="cmt"># dict of col→dtype; avoids
+                                    inference cost</span>
+                                usecols=<span class="kw">None</span>, <span class="cmt"># list of cols to load — skip
+                                    unwanted cols</span>
+                                nrows=<span class="kw">None</span>, <span class="cmt"># load first N rows for
+                                    exploration</span>
+                                chunksize=<span class="kw">None</span>, <span class="cmt"># returns iterator of
+                                    DataFrames</span>
+                                parse_dates=<span class="kw">False</span>,
+                                na_values=<span class="kw">None</span>,
+                                low_memory=<span class="kw">False</span> <span class="cmt"># avoid mixed-type
+                                    columns</span>
+                                )
+                                pd.<span class="fn">read_parquet</span>(path, columns=<span class="kw">None</span>)
+                                <span class="cmt"># preferred binary format</span>
+                                pd.<span class="fn">read_sql</span>(query, con) <span class="cmt"># SQLAlchemy
+                                    connection</span></div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="cmt"># Minimal memory: specify dtypes + load only needed cols</span>
+dtype_map = {<span class="str">'age'</span>: np.int8, <span class="str">'salary'</span>: np.float32, <span class="str">'label'</span>: np.int8}
+df = pd.<span class="fn">read_csv</span>(<span class="str">'data.csv'</span>, dtype=dtype_map,
+                  usecols=[<span class="str">'age'</span>, <span class="str">'salary'</span>, <span class="str">'label'</span>])
+
+<span class="cmt"># Preview large file without loading all</span>
+df_head = pd.<span class="fn">read_csv</span>(<span class="str">'big.csv'</span>, nrows=<span class="num">1000</span>)
+
+<span class="cmt"># Chunked processing for OOM situations</span>
+results = []
+<span class="kw">for</span> chunk <span class="kw">in</span> pd.<span class="fn">read_csv</span>(<span class="str">'huge.csv'</span>, chunksize=<span class="num">50_000</span>):
+    chunk_feats = chunk.<span class="fn">groupby</span>(<span class="str">'user_id'</span>)[<span class="str">'amount'</span>].<span class="fn">sum</span>()
+    results.<span class="fn">append</span>(chunk_feats)
+agg = pd.<span class="fn">concat</span>(results).<span class="fn">groupby</span>(level=<span class="num">0</span>).<span class="fn">sum</span>()
+
+<span class="cmt"># Check memory usage</span>
+<span class="fn">print</span>(df.<span class="fn">memory_usage</span>(deep=<span class="kw">True</span>).<span class="fn">sum</span>() / <span class="num">1e6</span>, <span class="str">'MB'</span>)
+
+<span class="cmt"># Save as parquet (5-10× smaller than CSV, faster to read)</span>
+df.<span class="fn">to_parquet</span>(<span class="str">'data.parquet'</span>, index=<span class="kw">False</span>)</code></pre>
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="perf-grid">
+                                <div class="perf-item">
+                                    <div class="perf-item-label">Format Speed</div>
+                                    <div class="perf-item-value">Parquet > Feather > CSV. For ML datasets > 100MB always
+                                        store as parquet. <code>pd.read_parquet</code> is 5-10× faster than CSV.</div>
+                                </div>
+                                <div class="perf-item">
+                                    <div class="perf-item-label">dtype=str</div>
+                                    <div class="perf-item-value">Force string dtype to avoid mixed-type inference:
+                                        <code>dtype={'id': str}</code>. Prevents silent int→float conversion on IDs with
+                                        NaN.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 2: Inspection ═══ -->
+                <h2 class="section-title" id="s-inspection">Inspection & EDA</h2>
+
+                <div class="func-card" id="inspection">
+                    <div class="func-card-header">
+                        <div class="func-icon">🔍</div>
+                        <div class="func-info">
+                            <div class="func-name">head / info / describe / value_counts / dtypes / nunique</div>
+                            <div class="func-tagline">Know your data before modelling — the essential EDA toolkit</div>
+                            <div class="func-tags"><span class="func-tag">EDA</span><span
+                                    class="func-tag">inspection</span><span class="func-tag">profiling</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Example</div>
+                            <div class="func-tab">EDA Script</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code>df.<span class="fn">head</span>(<span class="num">5</span>)               <span class="cmt"># first rows</span>
+df.<span class="fn">tail</span>(<span class="num">5</span>)               <span class="cmt"># last rows</span>
+df.<span class="fn">sample</span>(<span class="num">10</span>)            <span class="cmt"># random rows (more representative than head)</span>
+df.<span class="fn">info</span>()               <span class="cmt"># dtypes, non-null counts, memory</span>
+df.<span class="fn">describe</span>()            <span class="cmt"># numeric stats</span>
+df.<span class="fn">describe</span>(include=<span class="str">'object'</span>)  <span class="cmt"># categorical stats</span>
+df.<span class="fn">shape</span>                 <span class="cmt"># (rows, cols)</span>
+df.<span class="fn">dtypes</span>               <span class="cmt"># column types</span>
+df.<span class="fn">nunique</span>()             <span class="cmt"># unique count per column</span>
+df[<span class="str">'col'</span>].<span class="fn">value_counts</span>(normalize=<span class="kw">True</span>)  <span class="cmt"># freq table</span>
+df.<span class="fn">isnull</span>().<span class="fn">sum</span>()         <span class="cmt"># missing per column</span></code></pre>
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="cmt"># Full EDA summary function</span>
+<span class="kw">def</span> <span class="fn">eda_summary</span>(df):
+    <span class="fn">print</span>(<span class="str">f"Shape: {df.shape}"</span>)
+    summary = pd.<span class="fn">DataFrame</span>({
+        <span class="str">'dtype'</span>:    df.<span class="fn">dtypes</span>,
+        <span class="str">'n_null'</span>:   df.<span class="fn">isnull</span>().<span class="fn">sum</span>(),
+        <span class="str">'pct_null'</span>: df.<span class="fn">isnull</span>().<span class="fn">mean</span>().<span class="fn">mul</span>(<span class="num">100</span>).<span class="fn">round</span>(<span class="num">2</span>),
+        <span class="str">'n_unique'</span>: df.<span class="fn">nunique</span>(),
+        <span class="str">'example'</span>:  df.<span class="fn">iloc</span>[<span class="num">0</span>]
+    })
+    <span class="fn">print</span>(summary)
+    <span class="fn">print</span>(<span class="str">"\nClass balance:"</span>)
+    <span class="fn">print</span>(df[<span class="str">'target'</span>].<span class="fn">value_counts</span>(normalize=<span class="kw">True</span>))
+    <span class="kw">return</span> summary
+
+<span class="fn">eda_summary</span>(df)</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 3: Missing Values ═══ -->
+                <h2 class="section-title" id="s-missing">Missing Values</h2>
+
+                <div class="func-card" id="missing">
+                    <div class="func-card-header">
+                        <div class="func-icon">❓</div>
+                        <div class="func-info">
+                            <div class="func-name">isnull / dropna / fillna / interpolate</div>
+                            <div class="func-tagline">Detect, drop, fill, and flag missing data — with data leakage
+                                awareness</div>
+                            <div class="func-tags"><span class="func-tag">NaN</span><span
+                                    class="func-tag">imputation</span><span class="func-tag">leakage</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Syntax</div>
+                            <div class="func-tab">Example</div>
+                            <div class="func-tab">Mistakes</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="sig-box">df.<span class="fn">isnull</span>() / df.<span
+                                    class="fn">notnull</span>()
+                                df.<span class="fn">dropna</span>(axis=<span class="num">0</span>, how=<span
+                                    class="str">'any'</span>, subset=<span class="kw">None</span>, thresh=<span
+                                    class="kw">None</span>)
+                                df.<span class="fn">fillna</span>(value=<span class="kw">None</span>, method=<span
+                                    class="kw">None</span>) <span class="cmt"># method: 'ffill','bfill'</span>
+                                df[<span class="str">'col'</span>].<span class="fn">interpolate</span>(method=<span
+                                    class="str">'linear'</span>) <span class="cmt"># for time-series</span></div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="cmt"># Flag missing as feature BEFORE filling</span>
+df[<span class="str">'income_missing'</span>] = df[<span class="str">'income'</span>].<span class="fn">isnull</span>().<span class="fn">astype</span>(<span class="kw">int</span>)
+
+<span class="cmt"># Fill numeric with TRAIN median (compute on train only!)</span>
+train_median = X_train[<span class="str">'age'</span>].<span class="fn">median</span>()
+X_train[<span class="str">'age'</span>] = X_train[<span class="str">'age'</span>].<span class="fn">fillna</span>(train_median)
+X_test[<span class="str">'age'</span>]  = X_test[<span class="str">'age'</span>].<span class="fn">fillna</span>(train_median)  <span class="cmt"># same value!</span>
+
+<span class="cmt"># Drop cols with > 40% missing</span>
+thresh = <span class="kw">int</span>(<span class="num">0.6</span> * <span class="fn">len</span>(df))
+df.<span class="fn">dropna</span>(axis=<span class="num">1</span>, thresh=thresh, inplace=<span class="kw">True</span>)
+
+<span class="cmt"># Forward-fill for time-series (last known value)</span>
+df.<span class="fn">sort_values</span>(<span class="str">'date'</span>, inplace=<span class="kw">True</span>)
+df[<span class="str">'price'</span>] = df[<span class="str">'price'</span>].<span class="fn">ffill</span>()  <span class="cmt"># or .bfill()</span></code></pre>
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <ul class="warning-list">
+                                <li><strong>fillna(df.mean()):</strong> If computed on the full dataset (train+test),
+                                    you leak test info into train imputation. Always compute fill values on train only.
+                                </li>
+                                <li><strong>inplace=True:</strong> Doesn't save memory and is deprecated-in-spirit.
+                                    Prefer <code>df = df.dropna(...)</code>.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 4: Indexing ═══ -->
+                <h2 class="section-title" id="s-indexing">Indexing: loc / iloc / query</h2>
+
+                <div class="func-card" id="indexing">
+                    <div class="func-card-header">
+                        <div class="func-icon">🎯</div>
+                        <div class="func-info">
+                            <div class="func-name">loc / iloc / at / query / eval</div>
+                            <div class="func-tagline">Label vs position indexing — view/copy semantics, boolean
+                                filtering, and fast query expressions</div>
+                            <div class="func-tags"><span class="func-tag">loc</span><span
+                                    class="func-tag">iloc</span><span class="func-tag">query</span><span
+                                    class="func-tag">view vs copy</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Syntax</div>
+                            <div class="func-tab">Internals</div>
+                            <div class="func-tab">Example</div>
+                            <div class="func-tab">Mistakes</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="sig-box">df.<span class="fn">loc</span>[row_label, col_label] <span
+                                    class="cmt"># label-based, inclusive stop</span>
+                                df.<span class="fn">iloc</span>[row_int, col_int] <span class="cmt"># position-based,
+                                    exclusive stop</span>
+                                df.<span class="fn">at</span>[label, col] <span class="cmt"># single scalar —
+                                    fastest</span>
+                                df.<span class="fn">iat</span>[row_int, col_int] <span class="cmt"># single scalar by
+                                    position</span>
+                                df.<span class="fn">query</span>(<span class="str">'col > 5 and label == 1'</span>)
+                                <span class="cmt"># string expression</span>
+                                df.<span class="fn">eval</span>(<span class="str">'new_col = col1 + col2'</span>,
+                                inplace=<span class="kw">True</span>)</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <p class="body-text"><strong>View vs Copy rulebook:</strong></p>
+                            <ul class="doc-list">
+                                <li>Chain indexing (<code>df[col][mask]</code>) → always a copy. Assignment is silently
+                                    ignored.</li>
+                                <li><code>df.loc[mask, col] = val</code> → modifies in-place (safe).</li>
+                                <li>After boolean filtering: result is usually a copy. Use <code>.copy()</code> to be
+                                    explicit.</li>
+                                <li>Copy-on-Write (pandas 2.0+) makes this more predictable — single indexing = view,
+                                    chained = copy.</li>
+                            </ul>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="cmt"># loc — label-based (index value, not position)</span>
+df.<span class="fn">loc</span>[<span class="num">100</span>:<span class="num">200</span>, [<span class="str">'age'</span>, <span class="str">'income'</span>]]
+
+<span class="cmt"># iloc — positional (row 0-99, col 0-3)</span>
+X_train = df.<span class="fn">iloc</span>[:<span class="num">2000</span>, <span class="num">1</span>:<span class="num">10</span>]
+
+<span class="cmt"># Boolean filter via loc</span>
+high_earners = df.<span class="fn">loc</span>[df[<span class="str">'income'</span>] > <span class="num">100_000</span>].<span class="fn">copy</span>()
+
+<span class="cmt"># Multiple conditions</span>
+mask = (df[<span class="str">'age'</span>] > <span class="num">30</span>) & (df[<span class="str">'churn'</span>] == <span class="num">1</span>)
+df_subset = df.<span class="fn">loc</span>[mask, [<span class="str">'age'</span>, <span class="str">'income'</span>]]
+
+<span class="cmt"># query — cleaner for multi-condition filters</span>
+df.<span class="fn">query</span>(<span class="str">'age > 30 and churn == 1 and income > 50_000'</span>)
+
+<span class="cmt"># eval — vectorized column creation (faster than assign)</span>
+df.<span class="fn">eval</span>(<span class="str">'ratio = income / (age + 1)'</span>, inplace=<span class="kw">True</span>)
+
+<span class="cmt"># at — fastest single cell access</span>
+df.<span class="fn">at</span>[idx, <span class="str">'label'</span>] = <span class="num">1</span></code></pre>
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <ul class="warning-list">
+                                <li><strong>SettingWithCopyWarning:</strong> <code>df[mask]['col'] = val</code> —
+                                    chained indexing fails silently. Always use <code>df.loc[mask, 'col'] = val</code>.
+                                </li>
+                                <li><strong>loc vs iloc with reset_index:</strong> After <code>reset_index()</code>,
+                                    integer index labels equal positions — but <code>loc[5]</code> and
+                                    <code>iloc[5]</code> may differ if index has gaps.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 5: Transformation ═══ -->
+                <h2 class="section-title" id="s-transform">Transformation & Feature Engineering</h2>
+
+                <div class="func-card" id="apply-map">
+                    <div class="func-card-header">
+                        <div class="func-icon">⚙️</div>
+                        <div class="func-info">
+                            <div class="func-name">apply / map / assign / cut / qcut / get_dummies</div>
+                            <div class="func-tagline">Create engineered features — row/column functions, binning, and
+                                encoding</div>
+                            <div class="func-tags"><span class="func-tag">apply</span><span
+                                    class="func-tag">map</span><span class="func-tag">binning</span><span
+                                    class="func-tag">encoding</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Syntax</div>
+                            <div class="func-tab">Example</div>
+                            <div class="func-tab">Performance</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="sig-box">df[<span class="str">'col'</span>].<span
+                                    class="fn">map</span>(dict_or_func) <span class="cmt"># element-wise on
+                                    Series</span>
+                                df.<span class="fn">apply</span>(func, axis=<span class="num">0</span>) <span
+                                    class="cmt"># 0=column-wise, 1=row-wise</span>
+                                df.<span class="fn">assign</span>(new_col=<span class="kw">lambda</span> x: ...) <span
+                                    class="cmt"># returns new df, chainable</span>
+
+                                pd.<span class="fn">cut</span>(series, bins, labels=<span class="kw">None</span>) <span
+                                    class="cmt"># equal-width binning</span>
+                                pd.<span class="fn">qcut</span>(series, q, labels=<span class="kw">None</span>) <span
+                                    class="cmt"># quantile binning</span>
+                                pd.<span class="fn">get_dummies</span>(df, columns=<span class="kw">None</span>,
+                                drop_first=<span class="kw">True</span>, dtype=np.uint8)</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="cmt"># Encode ordinal with map</span>
+edu_map = {<span class="str">'high_school'</span>: <span class="num">0</span>, <span class="str">'bachelor'</span>: <span class="num">1</span>, <span class="str">'master'</span>: <span class="num">2</span>, <span class="str">'phd'</span>: <span class="num">3</span>}
+df[<span class="str">'edu_enc'</span>] = df[<span class="str">'education'</span>].<span class="fn">map</span>(edu_map)
+
+<span class="cmt"># Feature engineering with assign (chainable)</span>
+df = (df
+  .<span class="fn">assign</span>(age_sq=<span class="kw">lambda</span> x: x[<span class="str">'age'</span>]**<span class="num">2</span>)
+  .<span class="fn">assign</span>(log_income=<span class="kw">lambda</span> x: np.<span class="fn">log1p</span>(x[<span class="str">'income'</span>]))
+  .<span class="fn">assign</span>(income_per_year=<span class="kw">lambda</span> x: x[<span class="str">'income'</span>] / x[<span class="str">'tenure'</span>].clip(<span class="num">1</span>))
+)
+
+<span class="cmt"># Age binning (equal-width)</span>
+df[<span class="str">'age_group'</span>] = pd.<span class="fn">cut</span>(df[<span class="str">'age'</span>],
+    bins=[<span class="num">0</span>, <span class="num">25</span>, <span class="num">40</span>, <span class="num">60</span>, <span class="num">100</span>],
+    labels=[<span class="str">'young'</span>, <span class="str">'adult'</span>, <span class="str">'senior'</span>, <span class="str">'elder'</span>])
+
+<span class="cmt"># Quantile binning (income quartiles)</span>
+df[<span class="str">'income_q'</span>] = pd.<span class="fn">qcut</span>(df[<span class="str">'income'</span>], q=<span class="num">4</span>,
+    labels=[<span class="str">'Q1'</span>, <span class="str">'Q2'</span>, <span class="str">'Q3'</span>, <span class="str">'Q4'</span>])
+
+<span class="cmt"># One-hot encode (drop one for linear models)</span>
+df_ohe = pd.<span class="fn">get_dummies</span>(df, columns=[<span class="str">'job'</span>, <span class="str">'education'</span>],
+                          drop_first=<span class="kw">True</span>, dtype=np.uint8)</code></pre>
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="perf-grid">
+                                <div class="perf-item">
+                                    <div class="perf-item-label">apply is slow</div>
+                                    <div class="perf-item-value"><code>df.apply(func, axis=1)</code> (row-wise) iterates
+                                        in Python — can be 100× slower than vectorized. Always prefer vectorized column
+                                        ops or <code>df.eval()</code>.</div>
+                                </div>
+                                <div class="perf-item">
+                                    <div class="perf-item-label">Series.map vs apply</div>
+                                    <div class="perf-item-value"><code>Series.map(dict)</code> is fastest for encoding —
+                                        pure C-level dict lookup. For numeric ops, use vectorized NumPy directly on the
+                                        Series.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- String Methods -->
+                <div class="func-card" id="string-methods">
+                    <div class="func-card-header">
+                        <div class="func-icon">🔤</div>
+                        <div class="func-info">
+                            <div class="func-name">str accessor — String Feature Engineering</div>
+                            <div class="func-tagline">Vectorized string operations on text columns — extract, clean, and
+                                encode</div>
+                            <div class="func-tags"><span class="func-tag">str accessor</span><span
+                                    class="func-tag">regex</span><span class="func-tag">text features</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Syntax</div>
+                            <div class="func-tab">Example</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="sig-box">s.<span class="fn">str</span>.<span class="fn">lower</span>() / <span
+                                    class="fn">upper</span>() / <span class="fn">strip</span>() / <span
+                                    class="fn">replace</span>(pat, repl)
+                                s.<span class="fn">str</span>.<span class="fn">contains</span>(pat, regex=<span
+                                    class="kw">True</span>, na=<span class="kw">False</span>)
+                                s.<span class="fn">str</span>.<span class="fn">startswith</span>(prefix) / <span
+                                    class="fn">endswith</span>(suffix)
+                                s.<span class="fn">str</span>.<span class="fn">split</span>(pat, expand=<span
+                                    class="kw">True</span>) <span class="cmt"># expand=True → DataFrame</span>
+                                s.<span class="fn">str</span>.<span class="fn">extract</span>(r<span
+                                    class="str">'(\d+)'</span>) <span class="cmt"># regex capture group</span>
+                                s.<span class="fn">str</span>.<span class="fn">len</span>() <span class="cmt">#
+                                    character count</span>
+                                s.<span class="fn">str</span>.<span class="fn">count</span>(pat) <span class="cmt">#
+                                    regex occurrences</span></div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="cmt"># Clean text column</span>
+df[<span class="str">'name'</span>] = df[<span class="str">'name'</span>].<span class="fn">str</span>.<span class="fn">strip</span>().<span class="fn">str</span>.<span class="fn">lower</span>()
+
+<span class="cmt"># Extract numeric from text ('$42,000' → 42000)</span>
+df[<span class="str">'salary_num'</span>] = (df[<span class="str">'salary_text'</span>]
+    .<span class="fn">str</span>.<span class="fn">replace</span>(<span class="str">r'[\$,]'</span>, <span class="str">''</span>, regex=<span class="kw">True</span>)
+    .<span class="fn">astype</span>(<span class="kw">float</span>))
+
+<span class="cmt"># Binary feature: does text contain keyword?</span>
+df[<span class="str">'has_degree'</span>] = df[<span class="str">'notes'</span>].<span class="fn">str</span>.<span class="fn">contains</span>(
+    r'bachelor|master|phd', regex=<span class="kw">True</span>, case=<span class="kw">False</span>, na=<span class="kw">False</span>).<span class="fn">astype</span>(<span class="kw">int</span>)
+
+<span class="cmt"># Split 'First Last' into two columns</span>
+df[[<span class="str">'first'</span>, <span class="str">'last'</span>]] = df[<span class="str">'full_name'</span>].<span class="fn">str</span>.<span class="fn">split</span>(<span class="str">' '</span>, n=<span class="num">1</span>, expand=<span class="kw">True</span>)
+
+<span class="cmt"># Compute text length as feature</span>
+df[<span class="str">'review_len'</span>] = df[<span class="str">'review'</span>].<span class="fn">str</span>.<span class="fn">len</span>()
+df[<span class="str">'word_count'</span>] = df[<span class="str">'review'</span>].<span class="fn">str</span>.<span class="fn">split</span>().<span class="fn">str</span>.<span class="fn">len</span>()</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 6: GroupBy ═══ -->
+                <h2 class="section-title" id="s-groupby">GroupBy & Aggregation</h2>
+
+                <div class="func-card" id="groupby">
+                    <div class="func-card-header">
+                        <div class="func-icon">📦</div>
+                        <div class="func-info">
+                            <div class="func-name">groupby / agg / transform / pivot_table</div>
+                            <div class="func-tagline">Aggregate, compute group statistics, and create powerful
+                                group-level features</div>
+                            <div class="func-tags"><span class="func-tag">groupby</span><span
+                                    class="func-tag">agg</span><span class="func-tag">transform</span><span
+                                    class="func-tag">pivot_table</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Syntax</div>
+                            <div class="func-tab">Example</div>
+                            <div class="func-tab">Internals</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="sig-box">df.<span class="fn">groupby</span>(by, sort=<span
+                                    class="kw">True</span>, observed=<span class="kw">False</span>)[cols].<span
+                                    class="fn">agg</span>(func)
+                                <span class="cmt"># agg with multiple functions</span>
+                                .<span class="fn">agg</span>([<span class="str">'mean'</span>, <span
+                                    class="str">'std'</span>, <span class="str">'count'</span>])
+                                .<span class="fn">agg</span>({<span class="str">'col1'</span>: <span
+                                    class="str">'sum'</span>, <span class="str">'col2'</span>: [<span
+                                    class="str">'min'</span>, <span class="str">'max'</span>]})
+                                .<span class="fn">agg</span>(new_name=pd.<span class="fn">NamedAgg</span>(column=<span
+                                    class="str">'col'</span>, aggfunc=<span class="str">'mean'</span>))
+
+                                <span class="cmt"># transform: returns same-shape Series (for feature eng.)</span>
+                                df.<span class="fn">groupby</span>(<span class="str">'group'</span>)[<span
+                                    class="str">'val'</span>].<span class="fn">transform</span>(<span
+                                    class="str">'mean'</span>)
+
+                                pd.<span class="fn">pivot_table</span>(df, values, index, columns, aggfunc, fill_value)
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="cmt"># ML feature: mean encoding (leakage-safe on train only)</span>
+group_means = X_train.<span class="fn">groupby</span>(<span class="str">'category'</span>)[<span class="str">'target'</span>].<span class="fn">mean</span>()
+X_train[<span class="str">'cat_mean_enc'</span>] = X_train[<span class="str">'category'</span>].<span class="fn">map</span>(group_means)
+X_test[<span class="str">'cat_mean_enc'</span>]  = X_test[<span class="str">'category'</span>].<span class="fn">map</span>(group_means)
+
+<span class="cmt"># Aggregation: user-level feature engineering</span>
+user_feats = df.<span class="fn">groupby</span>(<span class="str">'user_id'</span>).<span class="fn">agg</span>(
+    n_transactions=(<span class="str">'amount'</span>, <span class="str">'count'</span>),
+    total_spend=(<span class="str">'amount'</span>, <span class="str">'sum'</span>),
+    avg_spend=(<span class="str">'amount'</span>, <span class="str">'mean'</span>),
+    max_spend=(<span class="str">'amount'</span>, <span class="str">'max'</span>),
+    days_active=(<span class="str">'date'</span>, <span class="str">'nunique'</span>)
+).<span class="fn">reset_index</span>()
+
+<span class="cmt"># transform: add group mean as new column (same length)</span>
+df[<span class="str">'dept_avg_salary'</span>] = df.<span class="fn">groupby</span>(<span class="str">'dept'</span>)[<span class="str">'salary'</span>].<span class="fn">transform</span>(<span class="str">'mean'</span>)
+df[<span class="str">'salary_vs_dept'</span>]  = df[<span class="str">'salary'</span>] - df[<span class="str">'dept_avg_salary'</span>]
+
+<span class="cmt"># pivot_table: churn rate by segment × age group</span>
+pivot = pd.<span class="fn">pivot_table</span>(df,
+    values=<span class="str">'churn'</span>, index=<span class="str">'segment'</span>, columns=<span class="str">'age_group'</span>,
+    aggfunc=<span class="str">'mean'</span>, fill_value=<span class="num">0</span>).<span class="fn">round</span>(<span class="num">3</span>)</code></pre>
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <p class="body-text"><strong>groupby internals:</strong></p>
+                            <ul class="doc-list">
+                                <li>Creates a hash map from group keys to row indices. Multi-key groupby creates a
+                                    composite hash.</li>
+                                <li><code>transform</code> is equivalent to <code>groupby().agg() + merge</code> back —
+                                    but faster (no join).</li>
+                                <li><code>observed=True</code> — important for Categorical dtypes to skip unseen
+                                    categories.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 7: Merge / Concat ═══ -->
+                <h2 class="section-title" id="s-merge">Merging & Concatenation</h2>
+
+                <div class="func-card" id="merge">
+                    <div class="func-card-header">
+                        <div class="func-icon">🔗</div>
+                        <div class="func-info">
+                            <div class="func-name">pd.merge / pd.concat / df.join</div>
+                            <div class="func-tagline">Database-style joins and combining DataFrames — join types, key
+                                validation</div>
+                            <div class="func-tags"><span class="func-tag">merge</span><span
+                                    class="func-tag">concat</span><span class="func-tag">join</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Syntax</div>
+                            <div class="func-tab">Example</div>
+                            <div class="func-tab">Mistakes</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="sig-box">pd.<span class="fn">merge</span>(
+                                left, right,
+                                how=<span class="str">'inner'</span>, <span class="cmt">#
+                                    'left','right','outer','cross'</span>
+                                on=<span class="kw">None</span>, <span class="cmt"># shared key col(s)</span>
+                                left_on=<span class="kw">None</span>, right_on=<span class="kw">None</span>, <span
+                                    class="cmt"># different key names</span>
+                                validate=<span class="kw">None</span>, <span class="cmt"># '1:1','1:m','m:1' — catches
+                                    duplicates</span>
+                                indicator=<span class="kw">False</span> <span class="cmt"># adds '_merge' column
+                                    (left_only etc)</span>
+                                )
+                                pd.<span class="fn">concat</span>([df1, df2], axis=<span class="num">0</span>,
+                                ignore_index=<span class="kw">True</span>)</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="cmt"># Enrich features: join user demographics to transactions</span>
+df_full = pd.<span class="fn">merge</span>(transactions, users,
+    on=<span class="str">'user_id'</span>, how=<span class="str">'left'</span>,
+    validate=<span class="str">'m:1'</span>)     <span class="cmt"># ensure users are unique</span>
+
+<span class="cmt"># Indicator to detect unmatched rows</span>
+df_check = pd.<span class="fn">merge</span>(X, y_labels, on=<span class="str">'id'</span>,
+    how=<span class="str">'outer'</span>, indicator=<span class="kw">True</span>)
+unmatched = df_check[df_check[<span class="str">'_merge'</span>] != <span class="str">'both'</span>]
+
+<span class="cmt"># Stack monthly datasets vertically</span>
+monthly = [pd.<span class="fn">read_parquet</span>(<span class="str">f'data_{m}.parquet'</span>) <span class="kw">for</span> m <span class="kw">in</span> months]
+df_all = pd.<span class="fn">concat</span>(monthly, axis=<span class="num">0</span>, ignore_index=<span class="kw">True</span>)
+
+<span class="cmt"># Concatenate features horizontally (after separate preprocessing)</span>
+df_combined = pd.<span class="fn">concat</span>([num_feats, cat_feats], axis=<span class="num">1</span>)</code></pre>
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <ul class="warning-list">
+                                <li><strong>Row explosion on m:m merge:</strong> If both sides have duplicate keys,
+                                    merge creates a Cartesian product. Use <code>validate='m:1'</code> or
+                                    <code>'1:m'</code> to catch this early.</li>
+                                <li><strong>concat without reset_index:</strong> Index may have duplicates after
+                                    stacking. Use <code>ignore_index=True</code> or
+                                    <code>df.reset_index(drop=True)</code>.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 8: Window Functions ═══ -->
+                <h2 class="section-title" id="s-window">Window Functions</h2>
+
+                <div class="func-card" id="window">
+                    <div class="func-card-header">
+                        <div class="func-icon">📅</div>
+                        <div class="func-info">
+                            <div class="func-name">rolling / expanding / ewm / shift / diff / pct_change</div>
+                            <div class="func-tagline">Time-series feature engineering — lagged, rolling, and exponential
+                                window statistics</div>
+                            <div class="func-tags"><span class="func-tag">rolling</span><span class="func-tag">lag
+                                    features</span><span class="func-tag">time-series</span><span
+                                    class="func-tag">ewm</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Syntax</div>
+                            <div class="func-tab">Example</div>
+                            <div class="func-tab">Mistakes</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="sig-box">df[<span class="str">'col'</span>].<span class="fn">shift</span>(n)
+                                <span class="cmt"># lag by n periods</span>
+                                df[<span class="str">'col'</span>].<span class="fn">diff</span>(n) <span class="cmt">#
+                                    difference from n periods ago</span>
+                                df[<span class="str">'col'</span>].<span class="fn">pct_change</span>(n) <span
+                                    class="cmt"># % change from n periods ago</span>
+
+                                df[<span class="str">'col'</span>].<span class="fn">rolling</span>(
+                                window=<span class="num">7</span>, <span class="cmt"># window size</span>
+                                min_periods=<span class="num">1</span>, <span class="cmt"># allow partial window at
+                                    start</span>
+                                center=<span class="kw">False</span> <span class="cmt"># True = centered window (causes
+                                    leakage!)</span>
+                                ).<span class="fn">mean</span>() / .<span class="fn">std</span>() / .<span
+                                    class="fn">sum</span>()
+
+                                df[<span class="str">'col'</span>].<span class="fn">expanding</span>().<span
+                                    class="fn">mean</span>() <span class="cmt"># cumulative mean</span>
+                                df[<span class="str">'col'</span>].<span class="fn">ewm</span>(span=<span
+                                    class="num">10</span>).<span class="fn">mean</span>() <span class="cmt">#
+                                    exponential weighted mean</span></div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="cmt"># Sort by time first!</span>
+df.<span class="fn">sort_values</span>([<span class="str">'user_id'</span>, <span class="str">'date'</span>], inplace=<span class="kw">True</span>)
+
+<span class="cmt"># Lag features (yesterday's sales → feature for today)</span>
+df[<span class="str">'sales_lag1'</span>] = df.<span class="fn">groupby</span>(<span class="str">'user_id'</span>)[<span class="str">'sales'</span>].<span class="fn">shift</span>(<span class="num">1</span>)
+df[<span class="str">'sales_lag7'</span>] = df.<span class="fn">groupby</span>(<span class="str">'user_id'</span>)[<span class="str">'sales'</span>].<span class="fn">shift</span>(<span class="num">7</span>)
+
+<span class="cmt"># Rolling 7-day average (within group, no leakage)</span>
+df[<span class="str">'rolling_7d_mean'</span>] = (
+    df.<span class="fn">groupby</span>(<span class="str">'user_id'</span>)[<span class="str">'sales'</span>]
+    .<span class="fn">transform</span>(<span class="kw">lambda</span> x: x.<span class="fn">rolling</span>(<span class="num">7</span>, min_periods=<span class="num">1</span>).<span class="fn">mean</span>())
+)
+
+<span class="cmt"># Rate of change</span>
+df[<span class="str">'mom_growth'</span>] = df[<span class="str">'sales'</span>].<span class="fn">pct_change</span>(<span class="num">30</span>)  <span class="cmt"># 30-day growth
+
+# EWM for trend (more weight on recent)</span>
+df[<span class="str">'ewm_7'</span>] = df[<span class="str">'sales'</span>].<span class="fn">ewm</span>(span=<span class="num">7</span>, adjust=<span class="kw">False</span>).<span class="fn">mean</span>()</code></pre>
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <ul class="warning-list">
+                                <li><strong>center=True causes data leakage:</strong> Centered window uses future
+                                    values. For predictive ML, always use trailing window (<code>center=False</code>).
+                                </li>
+                                <li><strong>Rolling without groupby:</strong> If data has multiple entities (users),
+                                    rolling must be applied per-group. Else, the window contains data from different
+                                    users.</li>
+                                <li><strong>NaN at window head:</strong> <code>rolling(7)</code> produces NaN for first
+                                    6 rows. Use <code>min_periods=1</code> for partial windows, or impute/drop
+                                    afterward.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-footer">
+                    <span>Pandas Reference — ML Engineering Hub</span>
+                    <div class="footer-links">
+                        <a href="numpy.html">← NumPy</a>
+                        <a href="matplotlib.html">Matplotlib →</a>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <div class="toc-panel">
+            <div class="toc-heading">On This Page</div>
+            <a href="#s-loading" class="toc-link">Data Loading</a>
+            <a href="#read-csv" class="toc-link toc-h3">read_csv / parquet</a>
+            <a href="#s-inspection" class="toc-link">Inspection & EDA</a>
+            <a href="#inspection" class="toc-link toc-h3">head / info / describe</a>
+            <a href="#s-missing" class="toc-link">Missing Values</a>
+            <a href="#missing" class="toc-link toc-h3">isnull / fillna</a>
+            <a href="#s-indexing" class="toc-link">Indexing</a>
+            <a href="#indexing" class="toc-link toc-h3">loc / iloc / query</a>
+            <a href="#s-transform" class="toc-link">Transformation</a>
+            <a href="#apply-map" class="toc-link toc-h3">apply / map / cut</a>
+            <a href="#string-methods" class="toc-link toc-h3">str accessor</a>
+            <a href="#s-groupby" class="toc-link">GroupBy</a>
+            <a href="#groupby" class="toc-link toc-h3">groupby / agg / transform</a>
+            <a href="#s-merge" class="toc-link">Merging</a>
+            <a href="#merge" class="toc-link toc-h3">merge / concat</a>
+            <a href="#s-window" class="toc-link">Window Functions</a>
+            <a href="#window" class="toc-link toc-h3">rolling / shift / ewm</a>
+        </div>
+    </div>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Matplotlib Reference — ML Engineering Hub</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+    <script src="js/shared-layout.js"></script>
+    <div class="app-layout has-toc">
+        <main class="main-content">
+            <div class="content-inner">
+
+                <div class="page-header">
+                    <div class="page-breadcrumb"><a href="index.html">Home</a> › Matplotlib</div>
+                    <h1 class="page-title">Matplotlib</h1>
+                    <p class="page-subtitle">Figure & subplots, line/scatter/hist/bar/imshow/boxplot/violin/heatmap,
+                        twin axes, annotations, styles, and publication-ready export for ML visualizations.</p>
+                    <div class="page-meta">
+                        <span class="page-badge badge-matplotlib">📈 Matplotlib</span>
+                        <span class="page-badge badge-matplotlib">7 Sections · 20+ Plot Types</span>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 1: Figure & Axes ═══ -->
+                <h2 class="section-title" id="s-figure">Figure & Subplots</h2>
+
+                <div class="func-card expanded" id="fig-subplots">
+                    <div class="func-card-header">
+                        <div class="func-icon">🖼️</div>
+                        <div class="func-info">
+                            <div class="func-name">plt.figure / plt.subplots / fig.add_gridspec</div>
+                            <div class="func-tagline">Create figures, axes grids, and complex layouts — the foundation
+                                of every plot</div>
+                            <div class="func-tags"><span class="func-tag">figure</span><span
+                                    class="func-tag">subplots</span><span class="func-tag">gridspec</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Syntax</div>
+                            <div class="func-tab">Example</div>
+                            <div class="func-tab">Internals</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="sig-box"><span class="kw">import</span> matplotlib.pyplot <span
+                                    class="kw">as</span> plt
+                                <span class="kw">import</span> matplotlib.gridspec <span class="kw">as</span> gridspec
+
+                                fig, ax = plt.<span class="fn">subplots</span>(
+                                nrows=<span class="num">1</span>, ncols=<span class="num">1</span>,
+                                figsize=(<span class="num">10</span>, <span class="num">6</span>), <span class="cmt">#
+                                    width, height in inches</span>
+                                dpi=<span class="num">100</span>, <span class="cmt"># dots per inch (use 150+ for
+                                    reports)</span>
+                                sharex=<span class="kw">False</span>, sharey=<span class="kw">False</span>,
+                                constrained_layout=<span class="kw">True</span> <span class="cmt"># replaces
+                                    tight_layout (no overlaps)</span>
+                                )
+
+                                <span class="cmt"># GridSpec — unequal subplot sizes</span>
+                                fig = plt.<span class="fn">figure</span>(figsize=(<span class="num">12</span>, <span
+                                    class="num">8</span>))
+                                gs = gridspec.<span class="fn">GridSpec</span>(nrows=<span class="num">2</span>,
+                                ncols=<span class="num">2</span>,
+                                height_ratios=[<span class="num">2</span>, <span class="num">1</span>],
+                                hspace=<span class="num">0.4</span>, wspace=<span class="num">0.3</span>)
+                                ax_main = fig.<span class="fn">add_subplot</span>(gs[<span class="num">0</span>, :])
+                                <span class="cmt"># top row, spans all cols</span>
+                                ax_left = fig.<span class="fn">add_subplot</span>(gs[<span class="num">1</span>, <span
+                                    class="num">0</span>])
+                                ax_right = fig.<span class="fn">add_subplot</span>(gs[<span class="num">1</span>, <span
+                                    class="num">1</span>])
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="cmt"># ML dashboard: loss + accuracy + confusion matrix</span>
+fig, axes = plt.<span class="fn">subplots</span>(<span class="num">1</span>, <span class="num">3</span>, figsize=(<span class="num">15</span>, <span class="num">4</span>),
+                           constrained_layout=<span class="kw">True</span>)
+ax_loss, ax_acc, ax_cm = axes
+
+<span class="cmt"># Annotate figure with super-title</span>
+fig.<span class="fn">suptitle</span>(<span class="str">'Model Training Report'</span>, fontsize=<span class="num">16</span>, fontweight=<span class="str">'bold'</span>)
+
+<span class="cmt"># Close properly to free memory (in loops)</span>
+plt.<span class="fn">close</span>(fig)          <span class="cmt"># or plt.close('all')
+
+# Use object-oriented API (ax.*) NOT plt.* in multi-subplot code</span>
+ax.<span class="fn">set_xlabel</span>(<span class="str">'Epoch'</span>)
+ax.<span class="fn">set_ylabel</span>(<span class="str">'Loss'</span>)
+ax.<span class="fn">set_title</span>(<span class="str">'Training'</span>)
+ax.<span class="fn">legend</span>(loc=<span class="str">'upper right'</span>, framealpha=<span class="num">0.9</span>)</code></pre>
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <p class="body-text"><strong>Figure vs Axes (Artist hierarchy):</strong></p>
+                            <ul class="doc-list">
+                                <li><code>Figure</code> — top-level container (the whole canvas).</li>
+                                <li><code>Axes</code> — a single plot area within the figure. All drawing happens on
+                                    Axes.</li>
+                                <li><code>plt.*</code> (pyplot API) operates on the "current" axes — unsafe in loops and
+                                    notebooks. Always use the OO API (<code>ax.*</code>) for multi-subplot work.</li>
+                                <li><code>constrained_layout=True</code> automatically adjusts subplot params to prevent
+                                    overlapping. Prefer it over <code>fig.tight_layout()</code>.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 2: Line & Scatter ═══ -->
+                <h2 class="section-title" id="s-line-scatter">Line & Scatter Plots</h2>
+
+                <div class="func-card" id="line-scatter">
+                    <div class="func-card-header">
+                        <div class="func-icon">📉</div>
+                        <div class="func-info">
+                            <div class="func-name">ax.plot / ax.scatter</div>
+                            <div class="func-tagline">Training curves, decision boundaries, and feature relationships
+                            </div>
+                            <div class="func-tags"><span class="func-tag">plot</span><span
+                                    class="func-tag">scatter</span><span class="func-tag">training curve</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Syntax</div>
+                            <div class="func-tab">Example</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="sig-box">ax.<span class="fn">plot</span>(x, y,
+                                color=<span class="str">'#4f9ef7'</span>, linewidth=<span class="num">2</span>,
+                                linestyle=<span class="str">'-'</span>, <span class="cmt"># '--','-.',':',
+                                    'solid'</span>
+                                marker=<span class="str">'o'</span>, markersize=<span class="num">4</span>,
+                                label=<span class="str">'Train Loss'</span>, alpha=<span class="num">0.9</span>
+                                )
+
+                                ax.<span class="fn">scatter</span>(x, y,
+                                c=colors, <span class="cmt"># colour by class/value</span>
+                                cmap=<span class="str">'viridis'</span>,
+                                s=<span class="num">40</span>, <span class="cmt"># marker size</span>
+                                alpha=<span class="num">0.6</span>, edgecolors=<span class="str">'k'</span>,
+                                linewidths=<span class="num">0.5</span>
+                                )</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="cmt"># Training vs validation loss curve</span>
+fig, ax = plt.<span class="fn">subplots</span>(figsize=(<span class="num">8</span>, <span class="num">4</span>))
+epochs = np.<span class="fn">arange</span>(<span class="num">1</span>, <span class="fn">len</span>(history[<span class="str">'loss'</span>]) + <span class="num">1</span>)
+ax.<span class="fn">plot</span>(epochs, history[<span class="str">'loss'</span>],     label=<span class="str">'Train'</span>, color=<span class="str">'#4f9ef7'</span>, lw=<span class="num">2</span>)
+ax.<span class="fn">plot</span>(epochs, history[<span class="str">'val_loss'</span>], label=<span class="str">'Val'</span>,   color=<span class="str">'#f7734f'</span>, lw=<span class="num">2</span>,
+        linestyle=<span class="str">'--'</span>)
+ax.<span class="fn">fill_between</span>(epochs, history[<span class="str">'loss'</span>], history[<span class="str">'val_loss'</span>],
+                alpha=<span class="num">0.1</span>, color=<span class="str">'#f7734f'</span>)   <span class="cmt"># gap shading
+# Mark best epoch</span>
+best = np.<span class="fn">argmin</span>(history[<span class="str">'val_loss'</span>])
+ax.<span class="fn">axvline</span>(best + <span class="num">1</span>, color=<span class="str">'green'</span>, ls=<span class="str">'--'</span>, lw=<span class="num">1</span>, label=<span class="str">f'Best ({best+1})'</span>)
+ax.<span class="fn">legend</span>(); ax.<span class="fn">set_xlabel</span>(<span class="str">'Epoch'</span>); ax.<span class="fn">set_ylabel</span>(<span class="str">'Loss'</span>)
+plt.<span class="fn">savefig</span>(<span class="str">'loss_curve.png'</span>, dpi=<span class="num">150</span>, bbox_inches=<span class="str">'tight'</span>)
+
+<span class="cmt"># Scatter: 2D PCA coloured by class</span>
+fig, ax = plt.<span class="fn">subplots</span>(figsize=(<span class="num">7</span>, <span class="num">5</span>))
+<span class="kw">for</span> cls <span class="kw">in</span> np.<span class="fn">unique</span>(y):
+    mask = y == cls
+    ax.<span class="fn">scatter</span>(X_pca[mask, <span class="num">0</span>], X_pca[mask, <span class="num">1</span>],
+               label=<span class="str">f'Class {cls}'</span>, alpha=<span class="num">0.6</span>, s=<span class="num">30</span>)
+ax.<span class="fn">legend</span>(); ax.<span class="fn">set_xlabel</span>(<span class="str">'PC1'</span>); ax.<span class="fn">set_ylabel</span>(<span class="str">'PC2'</span>)</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 3: Distributions ═══ -->
+                <h2 class="section-title" id="s-distributions">Distribution Plots</h2>
+
+                <div class="func-card" id="hist-box">
+                    <div class="func-card-header">
+                        <div class="func-icon">📊</div>
+                        <div class="func-info">
+                            <div class="func-name">ax.hist / ax.boxplot / ax.violinplot</div>
+                            <div class="func-tagline">Inspect feature distributions, outliers, and class-conditional
+                                shapes</div>
+                            <div class="func-tags"><span class="func-tag">histogram</span><span
+                                    class="func-tag">boxplot</span><span class="func-tag">violin</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Syntax</div>
+                            <div class="func-tab">Example</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="sig-box">ax.<span class="fn">hist</span>(x,
+                                bins=<span class="num">30</span>, density=<span class="kw">False</span>, <span
+                                    class="cmt"># density=True → PDF (area=1)</span>
+                                histtype=<span class="str">'stepfilled'</span>, <span class="cmt">#
+                                    'bar','step','stepfilled'</span>
+                                alpha=<span class="num">0.7</span>, edgecolor=<span class="str">'k'</span>)
+
+                                ax.<span class="fn">boxplot</span>(data, <span class="cmt"># list of arrays or 2D
+                                    array</span>
+                                labels=[<span class="str">'A'</span>,<span class="str">'B'</span>],
+                                notch=<span class="kw">True</span>, <span class="cmt"># confidence interval notch</span>
+                                showfliers=<span class="kw">True</span>, <span class="cmt"># show outliers</span>
+                                patch_artist=<span class="kw">True</span>) <span class="cmt"># filled boxes
+
+                                    ax.violinplot(dataset,
+                                    showmedians=True, showextrema=True)</span></div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="cmt"># Overlapping histograms by class</span>
+fig, ax = plt.<span class="fn">subplots</span>(figsize=(<span class="num">8</span>, <span class="num">4</span>))
+<span class="kw">for</span> cls, color <span class="kw">in</span> <span class="fn">zip</span>([<span class="num">0</span>, <span class="num">1</span>], [<span class="str">'#4f9ef7'</span>, <span class="str">'#f7734f'</span>]):
+    ax.<span class="fn">hist</span>(X[y == cls, <span class="num">0</span>], bins=<span class="num">40</span>, density=<span class="kw">True</span>,
+            alpha=<span class="num">0.5</span>, color=color, label=<span class="str">f'Class {cls}'</span>)
+ax.<span class="fn">legend</span>(); ax.<span class="fn">set_xlabel</span>(<span class="str">'Feature 0'</span>)
+
+<span class="cmt"># Boxplot per feature (check spread and outliers)</span>
+fig, ax = plt.<span class="fn">subplots</span>(figsize=(<span class="num">10</span>, <span class="num">4</span>))
+bp = ax.<span class="fn">boxplot</span>([X[:, i] <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(X.<span class="fn">shape</span>[<span class="num">1</span>])],
+                patch_artist=<span class="kw">True</span>, showfliers=<span class="kw">True</span>)
+<span class="kw">for</span> patch <span class="kw">in</span> bp[<span class="str">'boxes'</span>]:
+    patch.<span class="fn">set_facecolor</span>(<span class="str">'#4f9ef750'</span>)
+ax.<span class="fn">set_xticklabels</span>(feature_names, rotation=<span class="num">45</span>)
+ax.<span class="fn">set_ylabel</span>(<span class="str">'Value'</span>)
+
+<span class="cmt"># Violin plot — distribution shape per class</span>
+fig, ax = plt.<span class="fn">subplots</span>(figsize=(<span class="num">8</span>, <span class="num">4</span>))
+vp = ax.<span class="fn">violinplot</span>([X[y==<span class="num">0</span>, <span class="num">0</span>], X[y==<span class="num">1</span>, <span class="num">0</span>]],
+                    showmedians=<span class="kw">True</span>, showextrema=<span class="kw">True</span>)
+<span class="kw">for</span> body <span class="kw">in</span> vp[<span class="str">'bodies'</span>]:
+    body.<span class="fn">set_alpha</span>(<span class="num">0.7</span>)
+ax.<span class="fn">set_xticks</span>([<span class="num">1</span>,<span class="num">2</span>]); ax.<span class="fn">set_xticklabels</span>([<span class="str">'Class 0'</span>, <span class="str">'Class 1'</span>])</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 4: Heatmaps & Images ═══ -->
+                <h2 class="section-title" id="s-heatmap">Heatmaps & Images</h2>
+
+                <div class="func-card" id="heatmap">
+                    <div class="func-card-header">
+                        <div class="func-icon">🌡️</div>
+                        <div class="func-info">
+                            <div class="func-name">ax.imshow — Confusion Matrix / Correlation Heatmap / Feature Maps
+                            </div>
+                            <div class="func-tagline">Visualize 2D matrices, images, and activation maps with colorbars
+                                and annotations</div>
+                            <div class="func-tags"><span class="func-tag">imshow</span><span
+                                    class="func-tag">colorbar</span><span class="func-tag">confusion matrix</span><span
+                                    class="func-tag">heatmap</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Syntax</div>
+                            <div class="func-tab">Confusion Matrix</div>
+                            <div class="func-tab">Correlation Heatmap</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="sig-box">im = ax.<span class="fn">imshow</span>(data,
+                                cmap=<span class="str">'Blues'</span>, <span class="cmt">#
+                                    'viridis','RdBu_r','coolwarm'</span>
+                                vmin=<span class="kw">None</span>, vmax=<span class="kw">None</span>, <span
+                                    class="cmt"># clip colorscale</span>
+                                aspect=<span class="str">'auto'</span>, <span class="cmt"># 'equal' for square
+                                    pixels</span>
+                                origin=<span class="str">'upper'</span>, <span class="cmt"># 'lower' for math
+                                    coords</span>
+                                interpolation=<span class="str">'nearest'</span> <span class="cmt"># no blur for
+                                    discrete matrices</span>
+                                )
+                                fig.<span class="fn">colorbar</span>(im, ax=ax, shrink=<span class="num">0.8</span>)
+                                <span class="cmt"># add colorbar</span></div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="kw">from</span> sklearn.metrics <span class="kw">import</span> confusion_matrix
+
+<span class="kw">def</span> <span class="fn">plot_confusion_matrix</span>(y_true, y_pred, labels=<span class="kw">None</span>):
+    cm = <span class="fn">confusion_matrix</span>(y_true, y_pred)
+    cm_norm = cm.<span class="fn">astype</span>(<span class="kw">float</span>) / cm.<span class="fn">sum</span>(axis=<span class="num">1</span>, keepdims=<span class="kw">True</span>)
+
+    fig, ax = plt.<span class="fn">subplots</span>(figsize=(<span class="num">6</span>, <span class="num">5</span>))
+    im = ax.<span class="fn">imshow</span>(cm_norm, cmap=<span class="str">'Blues'</span>,
+                   vmin=<span class="num">0</span>, vmax=<span class="num">1</span>, interpolation=<span class="str">'nearest'</span>)
+    fig.<span class="fn">colorbar</span>(im, ax=ax, shrink=<span class="num">0.8</span>)
+
+    <span class="cmt"># Annotate each cell</span>
+    thresh = cm_norm.<span class="fn">max</span>() / <span class="num">2</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(cm.<span class="fn">shape</span>[<span class="num">0</span>]):
+        <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(cm.<span class="fn">shape</span>[<span class="num">1</span>]):
+            ax.<span class="fn">text</span>(j, i, <span class="str">f'{cm[i,j]}\n({cm_norm[i,j]:.1%})'</span>,
+                   ha=<span class="str">'center'</span>, va=<span class="str">'center'</span>, fontsize=<span class="num">9</span>,
+                   color=<span class="str">'white'</span> <span class="kw">if</span> cm_norm[i,j] > thresh <span class="kw">else</span> <span class="str">'black'</span>)
+
+    n = cm.<span class="fn">shape</span>[<span class="num">0</span>]
+    ax.<span class="fn">set_xticks</span>(np.<span class="fn">arange</span>(n)); ax.<span class="fn">set_yticks</span>(np.<span class="fn">arange</span>(n))
+    <span class="kw">if</span> labels: ax.<span class="fn">set_xticklabels</span>(labels); ax.<span class="fn">set_yticklabels</span>(labels)
+    ax.<span class="fn">set_xlabel</span>(<span class="str">'Predicted'</span>); ax.<span class="fn">set_ylabel</span>(<span class="str">'True'</span>)
+    ax.<span class="fn">set_title</span>(<span class="str">'Confusion Matrix (Normalized)'</span>)
+    plt.<span class="fn">savefig</span>(<span class="str">'cm.png'</span>, dpi=<span class="num">150</span>, bbox_inches=<span class="str">'tight'</span>)
+    <span class="kw">return</span> fig</code></pre>
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="kw">def</span> <span class="fn">plot_correlation_heatmap</span>(df, threshold=<span class="num">0.0</span>):
+    corr = df.<span class="fn">corr</span>().<span class="fn">round</span>(<span class="num">2</span>)
+    <span class="cmt"># Mask upper triangle (optional)</span>
+    mask = np.<span class="fn">triu</span>(np.<span class="fn">ones_like</span>(corr, dtype=<span class="kw">bool</span>), k=<span class="num">1</span>)
+
+    fig, ax = plt.<span class="fn">subplots</span>(figsize=(<span class="fn">len</span>(df.<span class="fn">columns</span>) * <span class="num">0.8</span>,
+                                     <span class="fn">len</span>(df.<span class="fn">columns</span>) * <span class="num">0.7</span>))
+    im = ax.<span class="fn">imshow</span>(corr, cmap=<span class="str">'RdBu_r'</span>, vmin=-<span class="num">1</span>, vmax=<span class="num">1</span>)
+    fig.<span class="fn">colorbar</span>(im, ax=ax)
+
+    <span class="cmt"># Annotate cells</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(corr)):
+        <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(corr)<span class="kw">if not</span> mask[i,j] <span class="kw">else</span> <span class="num">0</span>):
+            val = corr.<span class="fn">iloc</span>[i, j]
+            <span class="kw">if</span> np.<span class="fn">abs</span>(val) >= threshold:
+                ax.<span class="fn">text</span>(j, i, <span class="str">f'{val}'</span>, ha=<span class="str">'center'</span>, va=<span class="str">'center'</span>,
+                       fontsize=<span class="num">8</span>,
+                       color=<span class="str">'white'</span> <span class="kw">if</span> np.<span class="fn">abs</span>(val) > <span class="num">0.5</span> <span class="kw">else</span> <span class="str">'black'</span>)
+
+    ax.<span class="fn">set_xticks</span>(np.<span class="fn">arange</span>(<span class="fn">len</span>(corr)))
+    ax.<span class="fn">set_yticks</span>(np.<span class="fn">arange</span>(<span class="fn">len</span>(corr)))
+    ax.<span class="fn">set_xticklabels</span>(corr.<span class="fn">columns</span>, rotation=<span class="num">45</span>, ha=<span class="str">'right'</span>)
+    ax.<span class="fn">set_yticklabels</span>(corr.<span class="fn">columns</span>)
+    ax.<span class="fn">set_title</span>(<span class="str">'Feature Correlation Matrix'</span>)
+    <span class="kw">return</span> fig</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 5: Bar & Feature Importance ═══ -->
+                <h2 class="section-title" id="s-bar">Bar Plots & Feature Importance</h2>
+
+                <div class="func-card" id="bar-importance">
+                    <div class="func-card-header">
+                        <div class="func-icon">📋</div>
+                        <div class="func-info">
+                            <div class="func-name">ax.bar / ax.barh / ax.errorbar</div>
+                            <div class="func-tagline">Feature importance, class counts, and metric comparisons with
+                                error bars</div>
+                            <div class="func-tags"><span class="func-tag">bar</span><span class="func-tag">feature
+                                    importance</span><span class="func-tag">error bars</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Example</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="cmt"># Feature importance plot (sorted)</span>
+importances = model.feature_importances_
+sorted_idx = np.<span class="fn">argsort</span>(importances)
+colors = [<span class="str">'#e74c3c'</span> <span class="kw">if</span> i >= np.<span class="fn">percentile</span>(importances, <span class="num">80</span>)
+          <span class="kw">else</span> <span class="str">'#4f9ef7'</span> <span class="kw">for</span> i <span class="kw">in</span> importances[sorted_idx]]
+
+fig, ax = plt.<span class="fn">subplots</span>(figsize=(<span class="num">8</span>, <span class="fn">max</span>(<span class="num">4</span>, <span class="fn">len</span>(importances)//2)))
+ax.<span class="fn">barh</span>(np.<span class="fn">array</span>(feature_names)[sorted_idx],
+        importances[sorted_idx], color=colors, edgecolor=<span class="str">'k'</span>, lw=<span class="num">0.3</span>)
+ax.<span class="fn">axvline</span>(<span class="num">0</span>, color=<span class="str">'k'</span>, lw=<span class="num">0.5</span>)
+ax.<span class="fn">set_xlabel</span>(<span class="str">'Importance'</span>)
+ax.<span class="fn">set_title</span>(<span class="str">'Feature Importances (top 20% highlighted)'</span>)
+
+<span class="cmt"># Grouped bar: model comparison with std error</span>
+models = [<span class="str">'LR'</span>, <span class="str">'RF'</span>, <span class="str">'GBM'</span>, <span class="str">'NN'</span>]
+means  = [<span class="num">0.82</span>, <span class="num">0.89</span>, <span class="num">0.91</span>, <span class="num">0.90</span>]
+stds   = [<span class="num">0.02</span>, <span class="num">0.01</span>, <span class="num">0.01</span>, <span class="num">0.015</span>]
+
+fig, ax = plt.<span class="fn">subplots</span>(figsize=(<span class="num">7</span>, <span class="num">4</span>))
+x = np.<span class="fn">arange</span>(<span class="fn">len</span>(models))
+bars = ax.<span class="fn">bar</span>(x, means, yerr=stds, capsize=<span class="num">5</span>,
+              color=<span class="str">'#4f9ef7'</span>, alpha=<span class="num">0.8</span>,
+              error_kw=<span class="fn">dict</span>(elinewidth=<span class="num">1.5</span>, ecolor=<span class="str">'k'</span>))
+ax.<span class="fn">set_xticks</span>(x); ax.<span class="fn">set_xticklabels</span>(models)
+ax.<span class="fn">set_ylim</span>(<span class="num">0.75</span>, <span class="num">0.95</span>); ax.<span class="fn">set_ylabel</span>(<span class="str">'ROC-AUC'</span>)
+ax.<span class="fn">set_title</span>(<span class="str">'Model Comparison (5-fold CV ± std)'</span>)
+ax.<span class="fn">bar_label</span>(bars, labels=[<span class="str">f'{m:.3f}'</span> <span class="kw">for</span> m <span class="kw">in</span> means], padding=<span class="num">3</span>)</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 6: Annotations & Twin Axes ═══ -->
+                <h2 class="section-title" id="s-annotate">Annotations & Twin Axes</h2>
+
+                <div class="func-card" id="annotate">
+                    <div class="func-card-header">
+                        <div class="func-icon">✏️</div>
+                        <div class="func-info">
+                            <div class="func-name">ax.annotate / ax.axhline / ax.axvline / ax.twinx</div>
+                            <div class="func-tagline">Add reference lines, text annotations, and dual y-axes for
+                                multi-metric plots</div>
+                            <div class="func-tags"><span class="func-tag">annotate</span><span
+                                    class="func-tag">twinx</span><span class="func-tag">reference lines</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Example</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="cmt"># Twin y-axis: loss and accuracy on same plot</span>
+fig, ax1 = plt.<span class="fn">subplots</span>(figsize=(<span class="num">9</span>, <span class="num">4</span>))
+ax2 = ax1.<span class="fn">twinx</span>()
+
+epochs = np.<span class="fn">arange</span>(<span class="num">1</span>, <span class="num">51</span>)
+ax1.<span class="fn">plot</span>(epochs, train_loss, <span class="str">'b-'</span>,  label=<span class="str">'Train Loss'</span>, lw=<span class="num">2</span>)
+ax1.<span class="fn">plot</span>(epochs, val_loss,   <span class="str">'b--'</span>, label=<span class="str">'Val Loss'</span>,   lw=<span class="num">2</span>)
+ax2.<span class="fn">plot</span>(epochs, train_acc,  <span class="str">'r-'</span>,  label=<span class="str">'Train Acc'</span>,  lw=<span class="num">2</span>)
+ax2.<span class="fn">plot</span>(epochs, val_acc,    <span class="str">'r--'</span>, label=<span class="str">'Val Acc'</span>,    lw=<span class="num">2</span>)
+
+ax1.<span class="fn">set_ylabel</span>(<span class="str">'Loss'</span>,     color=<span class="str">'blue'</span>)
+ax2.<span class="fn">set_ylabel</span>(<span class="str">'Accuracy'</span>, color=<span class="str">'red'</span>)
+ax1.<span class="fn">tick_params</span>(axis=<span class="str">'y'</span>, labelcolor=<span class="str">'blue'</span>)
+ax2.<span class="fn">tick_params</span>(axis=<span class="str">'y'</span>, labelcolor=<span class="str">'red'</span>)
+
+<span class="cmt"># Combined legend from both axes</span>
+lines1, labels1 = ax1.<span class="fn">get_legend_handles_labels</span>()
+lines2, labels2 = ax2.<span class="fn">get_legend_handles_labels</span>()
+ax1.<span class="fn">legend</span>(lines1 + lines2, labels1 + labels2, loc=<span class="str">'upper right'</span>)
+
+<span class="cmt"># Annotate specific point</span>
+best_ep = np.<span class="fn">argmin</span>(val_loss)
+ax1.<span class="fn">annotate</span>(<span class="str">f'Best val loss\n{val_loss[best_ep]:.4f}'</span>,
+             xy=(best_ep+<span class="num">1</span>, val_loss[best_ep]),
+             xytext=(best_ep+<span class="num">5</span>, val_loss[best_ep]+<span class="num">0.1</span>),
+             arrowprops=<span class="fn">dict</span>(arrowstyle=<span class="str">'->'</span>, color=<span class="str">'gray'</span>),
+             fontsize=<span class="num">9</span>, color=<span class="str">'gray'</span>)
+
+plt.<span class="fn">savefig</span>(<span class="str">'training_report.png'</span>, dpi=<span class="num">150</span>, bbox_inches=<span class="str">'tight'</span>)</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 7: Style & Export ═══ -->
+                <h2 class="section-title" id="s-style">Style, Themes & Export</h2>
+
+                <div class="func-card" id="style-export">
+                    <div class="func-card-header">
+                        <div class="func-icon">🎨</div>
+                        <div class="func-info">
+                            <div class="func-name">plt.style / rcParams / savefig</div>
+                            <div class="func-tagline">Apply consistent themes and export publication-quality figures
+                            </div>
+                            <div class="func-tags"><span class="func-tag">style</span><span
+                                    class="func-tag">rcParams</span><span class="func-tag">export</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Example</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="cmt"># Apply a clean style globally</span>
+plt.<span class="fn">style</span>.<span class="fn">use</span>(<span class="str">'seaborn-v0_8-whitegrid'</span>)   <span class="cmt"># or 'ggplot','dark_background'
+
+# Custom global defaults via rcParams</span>
+plt.rcParams.<span class="fn">update</span>({
+    <span class="str">'figure.facecolor'</span>: <span class="str">'white'</span>,
+    <span class="str">'font.family'</span>:      <span class="str">'DejaVu Sans'</span>,
+    <span class="str">'font.size'</span>:        <span class="num">11</span>,
+    <span class="str">'axes.titlesize'</span>:   <span class="num">13</span>,
+    <span class="str">'axes.labelsize'</span>:   <span class="num">11</span>,
+    <span class="str">'axes.spines.top'</span>:  <span class="kw">False</span>,
+    <span class="str">'axes.spines.right'</span>:<span class="kw">False</span>,
+    <span class="str">'figure.dpi'</span>:       <span class="num">100</span>,
+    <span class="str">'savefig.dpi'</span>:      <span class="num">150</span>,
+    <span class="str">'savefig.bbox'</span>:     <span class="str">'tight'</span>,
+})
+
+<span class="cmt"># Save as PNG (raster) or PDF/SVG (vector)</span>
+fig.<span class="fn">savefig</span>(<span class="str">'figure.png'</span>, dpi=<span class="num">150</span>, bbox_inches=<span class="str">'tight'</span>)
+fig.<span class="fn">savefig</span>(<span class="str">'figure.pdf'</span>, bbox_inches=<span class="str">'tight'</span>)   <span class="cmt"># for publications
+
+# Context manager: temporary style for one block</span>
+<span class="kw">with</span> plt.<span class="fn">style</span>.<span class="fn">context</span>(<span class="str">'dark_background'</span>):
+    fig, ax = plt.<span class="fn">subplots</span>()
+    ax.<span class="fn">plot</span>(x, y, color=<span class="str">'cyan'</span>)
+    plt.<span class="fn">savefig</span>(<span class="str">'dark_plot.png'</span>)
+<span class="cmt"># Style reverts here
+
+# Available styles</span>
+<span class="fn">print</span>(plt.<span class="fn">style</span>.<span class="fn">available</span>)</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-footer">
+                    <span>Matplotlib Reference — ML Engineering Hub</span>
+                    <div class="footer-links">
+                        <a href="pandas.html">← Pandas</a>
+                        <a href="sklearn-preprocessing.html">Sklearn Preprocessing →</a>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <div class="toc-panel">
+            <div class="toc-heading">On This Page</div>
+            <a href="#s-figure" class="toc-link">Figure & Subplots</a>
+            <a href="#fig-subplots" class="toc-link toc-h3">subplots / gridspec</a>
+            <a href="#s-line-scatter" class="toc-link">Line & Scatter</a>
+            <a href="#line-scatter" class="toc-link toc-h3">plot / scatter</a>
+            <a href="#s-distributions" class="toc-link">Distribution Plots</a>
+            <a href="#hist-box" class="toc-link toc-h3">hist / boxplot / violin</a>
+            <a href="#s-heatmap" class="toc-link">Heatmaps & Images</a>
+            <a href="#heatmap" class="toc-link toc-h3">imshow / colorbar</a>
+            <a href="#s-bar" class="toc-link">Bar Plots</a>
+            <a href="#bar-importance" class="toc-link toc-h3">bar / barh / errorbar</a>
+            <a href="#s-annotate" class="toc-link">Annotations</a>
+            <a href="#annotate" class="toc-link toc-h3">annotate / twinx</a>
+            <a href="#s-style" class="toc-link">Style & Export</a>
+            <a href="#style-export" class="toc-link toc-h3">style / rcParams / savefig</a>
+        </div>
+    </div>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

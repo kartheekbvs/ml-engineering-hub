@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sklearn Evaluation — ML Engineering Hub</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+    <script src="js/shared-layout.js"></script>
+    <div class="app-layout has-toc">
+        <main class="main-content">
+            <div class="content-inner">
+
+                <div class="page-header">
+                    <div class="page-breadcrumb"><a href="index.html">Home</a> › Scikit-learn › Evaluation</div>
+                    <h1 class="page-title">Sklearn — Evaluation</h1>
+                    <p class="page-subtitle">Classification and regression metrics, ROC/PR curves, calibration, learning
+                        curves, and model selection with proper train/test/val splits.</p>
+                    <div class="page-meta">
+                        <span class="page-badge badge-sklearn">🤖 Scikit-learn</span>
+                        <span class="page-badge badge-sklearn">5 Sections · 15+ Metrics</span>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 1: Classification Metrics ═══ -->
+                <h2 class="section-title" id="s-clf-metrics">Classification Metrics</h2>
+
+                <div class="func-card expanded" id="clf-metrics">
+                    <div class="func-card-header">
+                        <div class="func-icon">✅</div>
+                        <div class="func-info">
+                            <div class="func-name">accuracy / precision / recall / f1 / roc_auc / average_precision
+                            </div>
+                            <div class="func-tagline">Choose the right metric for your imbalance level and business cost
+                                structure</div>
+                            <div class="func-tags"><span class="func-tag">precision</span><span
+                                    class="func-tag">recall</span><span class="func-tag">ROC-AUC</span><span
+                                    class="func-tag">F1</span><span class="func-tag">imbalance</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Syntax</div>
+                            <div class="func-tab">Example</div>
+                            <div class="func-tab">Which Metric?</div>
+                            <div class="func-tab">Internals</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="sig-box"><span class="kw">from</span> sklearn.metrics <span
+                                    class="kw">import</span> (
+                                accuracy_score, precision_score, recall_score, f1_score,
+                                roc_auc_score, average_precision_score,
+                                classification_report, confusion_matrix,
+                                precision_recall_curve, roc_curve
+                                )
+
+                                <span class="fn">classification_report</span>(y_true, y_pred,
+                                zero_division=<span class="num">0</span>) <span class="cmt"># shows P/R/F1 per class
+
+                                    roc_auc_score(y_true, y_prob) # threshold-free
+                                    average_precision_score(y_true, y_prob) # area under PR curve</span>
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="kw">from</span> sklearn.metrics <span class="kw">import</span> (
+    classification_report, roc_auc_score,
+    average_precision_score, precision_recall_curve
+)
+
+y_prob = model.<span class="fn">predict_proba</span>(X_test)[:, <span class="num">1</span>]
+y_pred = model.<span class="fn">predict</span>(X_test)
+
+<span class="cmt"># Full report: P, R, F1 per class</span>
+<span class="fn">print</span>(<span class="fn">classification_report</span>(y_test, y_pred,
+      target_names=[<span class="str">'No Churn'</span>, <span class="str">'Churn'</span>], zero_division=<span class="num">0</span>))
+
+<span class="cmt"># Threshold-free metrics</span>
+auc   = <span class="fn">roc_auc_score</span>(y_test, y_prob)
+ap    = <span class="fn">average_precision_score</span>(y_test, y_prob)
+<span class="fn">print</span>(<span class="str">f'ROC-AUC: {auc:.4f}  |  Avg Precision: {ap:.4f}'</span>)
+
+<span class="cmt"># Find optimal threshold using PR curve</span>
+precisions, recalls, thresholds = <span class="fn">precision_recall_curve</span>(y_test, y_prob)
+f1_scores = <span class="num">2</span> * precisions * recalls / (precisions + recalls + <span class="num">1e-8</span>)
+best_thresh = thresholds[np.<span class="fn">argmax</span>(f1_scores[:-<span class="num">1</span>])]
+<span class="fn">print</span>(<span class="str">f'Best threshold: {best_thresh:.3f}'</span>)
+
+<span class="cmt"># Apply custom threshold</span>
+y_pred_custom = (y_prob >= best_thresh).<span class="fn">astype</span>(<span class="kw">int</span>)
+
+<span class="cmt"># Multi-class ROC-AUC</span>
+auc_mc = <span class="fn">roc_auc_score</span>(y_test_mc, y_prob_mc,
+    multi_class=<span class="str">'ovr'</span>, average=<span class="str">'macro'</span>)</code></pre>
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <table class="param-table">
+                                <thead>
+                                    <tr>
+                                        <th>Scenario</th>
+                                        <th>Use</th>
+                                        <th>Reason</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="param-name">Balanced classes</td>
+                                        <td>Accuracy, F1 (macro)</td>
+                                        <td>Equal weight per class</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="param-name">Imbalanced (5–20% positive)</td>
+                                        <td>ROC-AUC, F1 (weighted)</td>
+                                        <td>AUC stable under imbalance</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="param-name">Rare positives (&lt;5%)</td>
+                                        <td>Average Precision (AUCPR)</td>
+                                        <td>Focuses on positive class; AUC misleading</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="param-name">Asymmetric costs</td>
+                                        <td>Set custom threshold on PR curve</td>
+                                        <td>Business cost guides precision vs recall tradeoff</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="param-name">Ranking tasks</td>
+                                        <td>NDCG, MRR (custom)</td>
+                                        <td>Order matters, not binary labels</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="func-tab-content">
+                            <ul class="doc-list">
+                                <li><strong>ROC-AUC:</strong> Probability that a random positive ranks higher than a
+                                    random negative. Threshold-independent. Can be misleading with extreme class
+                                    imbalance (many TN inflate the curve).</li>
+                                <li><strong>Average Precision:</strong> Area under precision-recall curve. Focuses
+                                    entirely on the positive class — preferred for rare event detection (fraud, cancer).
+                                </li>
+                                <li><strong>F1:</strong> Harmonic mean of precision and recall. Penalizes extreme cases
+                                    (0 precision or 0 recall → F1=0). Use F1-macro for multi-class with balanced
+                                    interest across classes.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 2: Regression Metrics ═══ -->
+                <h2 class="section-title" id="s-reg-metrics">Regression Metrics</h2>
+
+                <div class="func-card" id="reg-metrics">
+                    <div class="func-card-header">
+                        <div class="func-icon">📐</div>
+                        <div class="func-info">
+                            <div class="func-name">MAE / MSE / RMSE / MAPE / R² / adjusted-R²</div>
+                            <div class="func-tagline">Choose the right error metric — scale sensitivity, outlier
+                                robustness, and interpretability</div>
+                            <div class="func-tags"><span class="func-tag">MAE</span><span
+                                    class="func-tag">RMSE</span><span class="func-tag">R²</span><span
+                                    class="func-tag">regression</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Syntax</div>
+                            <div class="func-tab">Example</div>
+                            <div class="func-tab">Which Metric?</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="sig-box"><span class="kw">from</span> sklearn.metrics <span
+                                    class="kw">import</span> (
+                                mean_absolute_error, mean_squared_error,
+                                mean_absolute_percentage_error, r2_score
+                                )
+
+                                <span class="fn">mean_absolute_error</span>(y_true, y_pred) <span class="cmt"># MAE:
+                                    same unit as y</span>
+                                <span class="fn">mean_squared_error</span>(y_true, y_pred) <span class="cmt"># MSE:
+                                    penalizes large errors</span>
+                                np.<span class="fn">sqrt</span>(<span class="fn">mean_squared_error</span>(y_true,
+                                y_pred)) <span class="cmt"># RMSE</span>
+                                <span class="fn">mean_absolute_percentage_error</span>(y_true, y_pred) <span
+                                    class="cmt"># MAPE: scale-free</span>
+                                <span class="fn">r2_score</span>(y_true, y_pred) <span class="cmt"># R²: proportion
+                                    explained</span>
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="kw">from</span> sklearn.metrics <span class="kw">import</span> mean_absolute_error, mean_squared_error, r2_score
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+y_pred = model.<span class="fn">predict</span>(X_test)
+
+mae  = <span class="fn">mean_absolute_error</span>(y_test, y_pred)
+rmse = np.<span class="fn">sqrt</span>(<span class="fn">mean_squared_error</span>(y_test, y_pred))
+r2   = <span class="fn">r2_score</span>(y_test, y_pred)
+
+<span class="cmt"># Adjusted R²: penalizes extra features</span>
+n, p = X_test.<span class="fn">shape</span>
+r2_adj = <span class="num">1</span> - (<span class="num">1</span> - r2) * (n - <span class="num">1</span>) / (n - p - <span class="num">1</span>)
+
+<span class="fn">print</span>(<span class="str">f'MAE:  {mae:.2f}'</span>)
+<span class="fn">print</span>(<span class="str">f'RMSE: {rmse:.2f}'</span>)
+<span class="fn">print</span>(<span class="str">f'R²:   {r2:.4f}  |  Adj-R²: {r2_adj:.4f}'</span>)
+
+<span class="cmt"># Residual analysis</span>
+residuals = y_test - y_pred
+<span class="fn">print</span>(<span class="str">f'Residual mean: {residuals.mean():.4f}'</span>)   <span class="cmt"># near 0 = unbiased</span>
+<span class="fn">print</span>(<span class="str">f'Residual std:  {residuals.std():.4f}'</span>)
+<span class="cmt"># Plot residuals vs predicted (check heteroscedasticity)</span>
+import matplotlib.pyplot <span class="kw">as</span> plt
+plt.<span class="fn">scatter</span>(y_pred, residuals, alpha=<span class="num">0.4</span>)
+plt.<span class="fn">axhline</span>(<span class="num">0</span>, color=<span class="str">'r'</span>, ls=<span class="str">'--'</span>)</code></pre>
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <table class="param-table">
+                                <thead>
+                                    <tr>
+                                        <th>Metric</th>
+                                        <th>Outlier Sensitivity</th>
+                                        <th>Interpretable</th>
+                                        <th>Use When</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="param-name">MAE</td>
+                                        <td>✅ Robust</td>
+                                        <td>✅ Same unit as y</td>
+                                        <td>Median prediction; symmetric cost</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="param-name">RMSE</td>
+                                        <td>❌ Sensitive</td>
+                                        <td>✅ Same unit as y</td>
+                                        <td>Large errors costly; Gaussian noise assumed</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="param-name">MAPE</td>
+                                        <td>❌ Sensitive</td>
+                                        <td>✅ % relative</td>
+                                        <td>Relative errors matter; never use with y≈0</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="param-name">R²</td>
+                                        <td>❌ Sensitive</td>
+                                        <td>✅ % variance</td>
+                                        <td>Baseline comparison; can be negative</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 3: ROC & PR Curves ═══ -->
+                <h2 class="section-title" id="s-curves">ROC & Precision-Recall Curves</h2>
+
+                <div class="func-card" id="roc-pr">
+                    <div class="func-card-header">
+                        <div class="func-icon">📈</div>
+                        <div class="func-info">
+                            <div class="func-name">roc_curve / precision_recall_curve — plotting and threshold selection
+                            </div>
+                            <div class="func-tagline">Visualize classifier performance across all thresholds and select
+                                operating points</div>
+                            <div class="func-tags"><span class="func-tag">ROC</span><span class="func-tag">PR
+                                    curve</span><span class="func-tag">threshold</span><span
+                                    class="func-tag">Youden</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Example</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="kw">from</span> sklearn.metrics <span class="kw">import</span> roc_curve, precision_recall_curve, auc
+
+fpr, tpr, thresholds_roc = <span class="fn">roc_curve</span>(y_test, y_prob)
+roc_auc = <span class="fn">auc</span>(fpr, tpr)
+
+precision, recall, thresholds_pr = <span class="fn">precision_recall_curve</span>(y_test, y_prob)
+pr_auc = <span class="fn">auc</span>(recall, precision)
+
+fig, (ax1, ax2) = plt.<span class="fn">subplots</span>(<span class="num">1</span>, <span class="num">2</span>, figsize=(<span class="num">12</span>, <span class="num">5</span>))
+
+<span class="cmt"># ROC Curve</span>
+ax1.<span class="fn">plot</span>(fpr, tpr, label=<span class="str">f'AUC={roc_auc:.4f}'</span>, lw=<span class="num">2</span>)
+ax1.<span class="fn">plot</span>([<span class="num">0</span>,<span class="num">1</span>], [<span class="num">0</span>,<span class="num">1</span>], <span class="str">'k--'</span>, lw=<span class="num">1</span>)
+<span class="cmt"># Youden's J — max(TPR - FPR)</span>
+J = tpr - fpr
+best_idx = np.<span class="fn">argmax</span>(J)
+ax1.<span class="fn">scatter</span>(fpr[best_idx], tpr[best_idx],
+            color=<span class="str">'red'</span>, s=<span class="num">80</span>, zorder=<span class="num">5</span>,
+            label=<span class="str">f'Best t={thresholds_roc[best_idx]:.3f}'</span>)
+ax1.<span class="fn">set_xlabel</span>(<span class="str">'FPR'</span>); ax1.<span class="fn">set_ylabel</span>(<span class="str">'TPR'</span>)
+ax1.<span class="fn">set_title</span>(<span class="str">'ROC Curve'</span>); ax1.<span class="fn">legend</span>()
+
+<span class="cmt"># PR Curve</span>
+ax2.<span class="fn">plot</span>(recall, precision, label=<span class="str">f'AP={pr_auc:.4f}'</span>, lw=<span class="num">2</span>)
+<span class="cmt"># Random classifier baseline (= positive rate)</span>
+baseline = y_test.<span class="fn">mean</span>()
+ax2.<span class="fn">axhline</span>(baseline, ls=<span class="str">'--'</span>, color=<span class="str">'gray'</span>,
+            label=<span class="str">f'Baseline ({baseline:.3f})'</span>)
+ax2.<span class="fn">set_xlabel</span>(<span class="str">'Recall'</span>); ax2.<span class="fn">set_ylabel</span>(<span class="str">'Precision'</span>)
+ax2.<span class="fn">set_title</span>(<span class="str">'Precision-Recall Curve'</span>); ax2.<span class="fn">legend</span>()
+plt.<span class="fn">tight_layout</span>()</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 4: Calibration ═══ -->
+                <h2 class="section-title" id="s-calibration">Probability Calibration</h2>
+
+                <div class="func-card" id="calibration">
+                    <div class="func-card-header">
+                        <div class="func-icon">🌡️</div>
+                        <div class="func-info">
+                            <div class="func-name">CalibratedClassifierCV / calibration_curve / brier_score_loss</div>
+                            <div class="func-tagline">When predicted probabilities need to match true frequencies —
+                                Platt/isotonic calibration</div>
+                            <div class="func-tags"><span class="func-tag">calibration</span><span class="func-tag">Platt
+                                    scaling</span><span class="func-tag">Brier score</span><span
+                                    class="func-tag">reliability diagram</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Example</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="kw">from</span> sklearn.calibration <span class="kw">import</span> CalibratedClassifierCV, calibration_curve
+<span class="kw">from</span> sklearn.metrics <span class="kw">import</span> brier_score_loss
+
+<span class="cmt"># BEFORE calibration</span>
+brier_raw = <span class="fn">brier_score_loss</span>(y_test, y_prob_raw)  <span class="cmt"># lower=better
+
+# Calibrate with Platt scaling (method='sigmoid') or Isotonic Regression</span>
+calibrated = <span class="fn">CalibratedClassifierCV</span>(
+    base_model, method=<span class="str">'isotonic'</span>, cv=<span class="num">5</span>
+)
+calibrated.<span class="fn">fit</span>(X_train, y_train)
+y_prob_cal = calibrated.<span class="fn">predict_proba</span>(X_test)[:, <span class="num">1</span>]
+brier_cal  = <span class="fn">brier_score_loss</span>(y_test, y_prob_cal)
+<span class="fn">print</span>(<span class="str">f'Brier before: {brier_raw:.4f}  |  after: {brier_cal:.4f}'</span>)
+
+<span class="cmt"># Reliability diagram</span>
+fig, ax = plt.<span class="fn">subplots</span>(figsize=(<span class="num">6</span>, <span class="num">5</span>))
+<span class="kw">for</span> probs, label <span class="kw">in</span> [(y_prob_raw, <span class="str">'Uncalibrated'</span>),
+                      (y_prob_cal, <span class="str">'Calibrated'</span>)]:
+    prob_true, prob_pred = <span class="fn">calibration_curve</span>(y_test, probs, n_bins=<span class="num">10</span>)
+    ax.<span class="fn">plot</span>(prob_pred, prob_true, marker=<span class="str">'o'</span>, label=label)
+ax.<span class="fn">plot</span>([<span class="num">0</span>,<span class="num">1</span>],[<span class="num">0</span>,<span class="num">1</span>], <span class="str">'k--'</span>, label=<span class="str">'Perfect'</span>)
+ax.<span class="fn">legend</span>(); ax.<span class="fn">set_xlabel</span>(<span class="str">'Mean predicted prob'</span>)
+ax.<span class="fn">set_ylabel</span>(<span class="str">'Fraction of positives'</span>)
+ax.<span class="fn">set_title</span>(<span class="str">'Reliability Diagram'</span>)</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 5: Learning Curves ═══ -->
+                <h2 class="section-title" id="s-learning-curves">Learning & Validation Curves</h2>
+
+                <div class="func-card" id="learning-curves">
+                    <div class="func-card-header">
+                        <div class="func-icon">📉</div>
+                        <div class="func-info">
+                            <div class="func-name">learning_curve / validation_curve</div>
+                            <div class="func-tagline">Diagnose bias vs variance — do you need more data or more
+                                regularization?</div>
+                            <div class="func-tags"><span class="func-tag">learning curve</span><span
+                                    class="func-tag">bias</span><span class="func-tag">variance</span><span
+                                    class="func-tag">diagnosis</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Example</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> learning_curve, validation_curve
+
+train_sizes, train_scores, val_scores = <span class="fn">learning_curve</span>(
+    model, X_train, y_train,
+    train_sizes=np.<span class="fn">linspace</span>(<span class="num">0.1</span>, <span class="num">1.0</span>, <span class="num">10</span>),
+    cv=<span class="num">5</span>, scoring=<span class="str">'roc_auc'</span>, n_jobs=-<span class="num">1</span>
+)
+
+fig, ax = plt.<span class="fn">subplots</span>(figsize=(<span class="num">8</span>, <span class="num">4</span>))
+ax.<span class="fn">plot</span>(train_sizes, train_scores.<span class="fn">mean</span>(axis=<span class="num">1</span>), label=<span class="str">'Train'</span>)
+ax.<span class="fn">fill_between</span>(train_sizes,
+    train_scores.<span class="fn">mean</span>(axis=<span class="num">1</span>) - train_scores.<span class="fn">std</span>(axis=<span class="num">1</span>),
+    train_scores.<span class="fn">mean</span>(axis=<span class="num">1</span>) + train_scores.<span class="fn">std</span>(axis=<span class="num">1</span>), alpha=<span class="num">0.1</span>)
+ax.<span class="fn">plot</span>(train_sizes, val_scores.<span class="fn">mean</span>(axis=<span class="num">1</span>), label=<span class="str">'Validation'</span>)
+ax.<span class="fn">fill_between</span>(train_sizes,
+    val_scores.<span class="fn">mean</span>(axis=<span class="num">1</span>) - val_scores.<span class="fn">std</span>(axis=<span class="num">1</span>),
+    val_scores.<span class="fn">mean</span>(axis=<span class="num">1</span>) + val_scores.<span class="fn">std</span>(axis=<span class="num">1</span>), alpha=<span class="num">0.1</span>)
+ax.<span class="fn">legend</span>(); ax.<span class="fn">set_xlabel</span>(<span class="str">'Training Size'</span>)
+ax.<span class="fn">set_ylabel</span>(<span class="str">'ROC-AUC'</span>); ax.<span class="fn">set_title</span>(<span class="str">'Learning Curve'</span>)
+<span class="cmt"># High train/low val gap → overfit → regularize or get more data
+# Both low → underfit → more complex model or more features</span>
+
+<span class="cmt"># Validation curve: effect of one hyperparameter</span>
+param_range = np.<span class="fn">logspace</span>(-<span class="num">4</span>, <span class="num">2</span>, <span class="num">10</span>)
+tr, vr = <span class="fn">validation_curve</span>(
+    model, X_train, y_train,
+    param_name=<span class="str">'C'</span>, param_range=param_range,
+    cv=<span class="num">5</span>, scoring=<span class="str">'roc_auc'</span>, n_jobs=-<span class="num">1</span>
+)
+ax2.<span class="fn">semilogx</span>(param_range, vr.<span class="fn">mean</span>(axis=<span class="num">1</span>))  <span class="cmt"># optimal C at peak</span></code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-footer">
+                    <span>Sklearn Evaluation — ML Engineering Hub</span>
+                    <div class="footer-links">
+                        <a href="sklearn-models.html">← Models</a>
+                        <a href="tensorflow.html">TensorFlow →</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div class="toc-panel">
+            <div class="toc-heading">On This Page</div>
+            <a href="#s-clf-metrics" class="toc-link">Classification Metrics</a>
+            <a href="#clf-metrics" class="toc-link toc-h3">F1 / AUC / AP</a>
+            <a href="#s-reg-metrics" class="toc-link">Regression Metrics</a>
+            <a href="#reg-metrics" class="toc-link toc-h3">MAE / RMSE / R²</a>
+            <a href="#s-curves" class="toc-link">ROC & PR Curves</a>
+            <a href="#roc-pr" class="toc-link toc-h3">roc_curve / pr_curve</a>
+            <a href="#s-calibration" class="toc-link">Probability Calibration</a>
+            <a href="#calibration" class="toc-link toc-h3">CalibratedClassifierCV</a>
+            <a href="#s-learning-curves" class="toc-link">Learning Curves</a>
+            <a href="#learning-curves" class="toc-link toc-h3">learning_curve</a>
+        </div>
+    </div>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

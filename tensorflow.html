@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TensorFlow / Keras — ML Engineering Hub</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+    <script src="js/shared-layout.js"></script>
+    <div class="app-layout has-toc">
+        <main class="main-content">
+            <div class="content-inner">
+
+                <div class="page-header">
+                    <div class="page-breadcrumb"><a href="index.html">Home</a> › TensorFlow / Keras</div>
+                    <h1 class="page-title">TensorFlow / Keras</h1>
+                    <p class="page-subtitle">Model building via Sequential & Functional API, Dense/Conv2D/LSTM/Embedding
+                        layers, tf.data pipelines, callbacks, custom training loops, and deployment.</p>
+                    <div class="page-meta">
+                        <span class="page-badge badge-tensorflow">🧠 TensorFlow</span>
+                        <span class="page-badge badge-tensorflow">Keras API</span>
+                        <span class="page-badge badge-tensorflow">8 Sections</span>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 1: Sequential vs Functional API ═══ -->
+                <h2 class="section-title" id="s-api">Building Models: Sequential vs Functional API</h2>
+
+                <div class="func-card expanded" id="model-api">
+                    <div class="func-card-header">
+                        <div class="func-icon">🏗️</div>
+                        <div class="func-info">
+                            <div class="func-name">Sequential / Model (Functional) / Model subclassing</div>
+                            <div class="func-tagline">Choose the right abstraction — from simple stacks to
+                                multi-input/output architectures</div>
+                            <div class="func-tags"><span class="func-tag">Sequential</span><span
+                                    class="func-tag">Functional</span><span class="func-tag">subclassing</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Sequential</div>
+                            <div class="func-tab">Functional</div>
+                            <div class="func-tab">Subclassing</div>
+                            <div class="func-tab">When to Use</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="kw">import</span> tensorflow <span class="kw">as</span> tf
+<span class="kw">from</span> tensorflow <span class="kw">import</span> keras
+
+<span class="cmt"># Sequential: linear stack, no branching</span>
+model = keras.<span class="fn">Sequential</span>([
+    keras.layers.<span class="fn">Input</span>(shape=(<span class="num">128</span>,)),
+    keras.layers.<span class="fn">Dense</span>(<span class="num">256</span>, activation=<span class="str">'relu'</span>),
+    keras.layers.<span class="fn">Dropout</span>(<span class="num">0.3</span>),
+    keras.layers.<span class="fn">BatchNormalization</span>(),
+    keras.layers.<span class="fn">Dense</span>(<span class="num">128</span>, activation=<span class="str">'relu'</span>),
+    keras.layers.<span class="fn">Dropout</span>(<span class="num">0.3</span>),
+    keras.layers.<span class="fn">Dense</span>(<span class="num">1</span>,   activation=<span class="str">'sigmoid'</span>)  <span class="cmt"># binary</span>
+], name=<span class="str">'binary_clf'</span>)
+
+model.<span class="fn">summary</span>()
+<span class="fn">print</span>(<span class="str">f'Total params: {model.count_params():,}'</span>)</code></pre>
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="cmt"># Functional API: branching, shared weights, multi-input/output</span>
+<span class="cmt"># Dual-input: tabular + text features</span>
+num_input  = keras.Input(shape=(<span class="num">30</span>,),   name=<span class="str">'numeric'</span>)
+text_input = keras.Input(shape=(<span class="num">100</span>,),  name=<span class="str">'text_ids'</span>)
+
+<span class="cmt"># Numeric branch</span>
+x1 = keras.layers.<span class="fn">Dense</span>(<span class="num">64</span>, activation=<span class="str">'relu'</span>)(num_input)
+x1 = keras.layers.<span class="fn">Dropout</span>(<span class="num">0.2</span>)(x1)
+
+<span class="cmt"># Text branch</span>
+x2 = keras.layers.<span class="fn">Embedding</span>(<span class="num">10000</span>, <span class="num">32</span>)(text_input)
+x2 = keras.layers.<span class="fn">GlobalAveragePooling1D</span>()(x2)
+x2 = keras.layers.<span class="fn">Dense</span>(<span class="num">64</span>, activation=<span class="str">'relu'</span>)(x2)
+
+<span class="cmt"># Merge branches</span>
+merged = keras.layers.<span class="fn">Concatenate</span>()([x1, x2])
+out    = keras.layers.<span class="fn">Dense</span>(<span class="num">1</span>, activation=<span class="str">'sigmoid'</span>)(merged)
+
+model = keras.<span class="fn">Model</span>(
+    inputs=[num_input, text_input],
+    outputs=out, name=<span class="str">'multi_input_clf'</span>
+)
+<span class="cmt"># Forward pass: pass dict or list</span>
+model.<span class="fn">predict</span>({<span class="str">'numeric'</span>: X_num, <span class="str">'text_ids'</span>: X_text})</code></pre>
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="cmt"># Model subclassing: maximum flexibility</span>
+<span class="kw">class</span> <span class="fn">MLPBlock</span>(keras.Model):
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, units=[<span class="num">256</span>, <span class="num">128</span>], dropout=<span class="num">0.3</span>):
+        <span class="fn">super</span>().<span class="fn">__init__</span>()
+        self.dense_layers   = [keras.layers.<span class="fn">Dense</span>(u, activation=<span class="str">'relu'</span>) <span class="kw">for</span> u <span class="kw">in</span> units]
+        self.dropout_layers = [keras.layers.<span class="fn">Dropout</span>(dropout) <span class="kw">for</span> _ <span class="kw">in</span> units]
+        self.bn_layers      = [keras.layers.<span class="fn">BatchNormalization</span>() <span class="kw">for</span> _ <span class="kw">in</span> units]
+        self.output_layer   = keras.layers.<span class="fn">Dense</span>(<span class="num">1</span>, activation=<span class="str">'sigmoid'</span>)
+
+    <span class="kw">def</span> <span class="fn">call</span>(self, x, training=<span class="kw">False</span>):
+        <span class="kw">for</span> dense, drop, bn <span class="kw">in</span> <span class="fn">zip</span>(self.dense_layers, self.dropout_layers, self.bn_layers):
+            x = <span class="fn">dense</span>(x)
+            x = <span class="fn">bn</span>(x, training=training)
+            x = <span class="fn">drop</span>(x, training=training)
+        <span class="kw">return</span> self.output_layer(x)
+
+model = <span class="fn">MLPBlock</span>(units=[<span class="num">256</span>, <span class="num">128</span>, <span class="num">64</span>])</code></pre>
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <table class="param-table">
+                                <thead>
+                                    <tr>
+                                        <th>API</th>
+                                        <th>Flexibility</th>
+                                        <th>Debugging</th>
+                                        <th>Best For</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="param-name">Sequential</td>
+                                        <td>⭐ Low</td>
+                                        <td>✅ Easy</td>
+                                        <td>Simple linear stacks, tutorials, prototyping</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="param-name">Functional</td>
+                                        <td>⭐⭐⭐ High</td>
+                                        <td>✅ Easy</td>
+                                        <td>Multi-input/output, residuals, shared weights</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="param-name">Subclassing</td>
+                                        <td>⭐⭐⭐⭐ Max</td>
+                                        <td>⚠️ Harder</td>
+                                        <td>Research models, dynamic graphs, custom ops</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 2: Layers ═══ -->
+                <h2 class="section-title" id="s-layers">Core Layers: Dense / Conv2D / LSTM / Embedding</h2>
+
+                <div class="func-card" id="conv2d">
+                    <div class="func-card-header">
+                        <div class="func-icon">🖼️</div>
+                        <div class="func-info">
+                            <div class="func-name">Conv2D / MaxPooling2D / GlobalAveragePooling2D</div>
+                            <div class="func-tagline">Spatial feature extraction for image classification and computer
+                                vision tasks</div>
+                            <div class="func-tags"><span class="func-tag">Conv2D</span><span
+                                    class="func-tag">pooling</span><span class="func-tag">image classification</span>
+                            </div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Syntax</div>
+                            <div class="func-tab">Example</div>
+                            <div class="func-tab">Internals</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="sig-box">keras.layers.<span class="fn">Conv2D</span>(
+                                filters=<span class="num">32</span>, <span class="cmt"># number of learnable
+                                    kernels</span>
+                                kernel_size=(<span class="num">3</span>, <span class="num">3</span>), <span
+                                    class="cmt"># (height, width) of filter</span>
+                                strides=(<span class="num">1</span>, <span class="num">1</span>),
+                                padding=<span class="str">'same'</span>, <span class="cmt"># 'valid'=no pad;
+                                    'same'=output=input size</span>
+                                activation=<span class="str">'relu'</span>,
+                                kernel_regularizer=keras.regularizers.<span class="fn">l2</span>(<span
+                                    class="num">1e-4</span>)
+                                )
+                                keras.layers.<span class="fn">MaxPooling2D</span>(pool_size=(<span class="num">2</span>,
+                                <span class="num">2</span>))
+                                keras.layers.<span class="fn">GlobalAveragePooling2D</span>() <span class="cmt">#
+                                    replaces Flatten+Dense for efficiency</span></div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="cmt"># CNN for 32x32 RGB image classification (CIFAR-10 style)</span>
+inputs = keras.<span class="fn">Input</span>(shape=(<span class="num">32</span>, <span class="num">32</span>, <span class="num">3</span>))
+
+<span class="cmt"># Block 1</span>
+x = keras.layers.<span class="fn">Conv2D</span>(<span class="num">32</span>, (<span class="num">3</span>,<span class="num">3</span>), padding=<span class="str">'same'</span>, activation=<span class="str">'relu'</span>)(inputs)
+x = keras.layers.<span class="fn">BatchNormalization</span>()(x)
+x = keras.layers.<span class="fn">Conv2D</span>(<span class="num">32</span>, (<span class="num">3</span>,<span class="num">3</span>), padding=<span class="str">'same'</span>, activation=<span class="str">'relu'</span>)(x)
+x = keras.layers.<span class="fn">MaxPooling2D</span>((<span class="num">2</span>,<span class="num">2</span>))(x)
+x = keras.layers.<span class="fn">Dropout</span>(<span class="num">0.25</span>)(x)
+
+<span class="cmt"># Block 2</span>
+x = keras.layers.<span class="fn">Conv2D</span>(<span class="num">64</span>, (<span class="num">3</span>,<span class="num">3</span>), padding=<span class="str">'same'</span>, activation=<span class="str">'relu'</span>)(x)
+x = keras.layers.<span class="fn">BatchNormalization</span>()(x)
+x = keras.layers.<span class="fn">Conv2D</span>(<span class="num">64</span>, (<span class="num">3</span>,<span class="num">3</span>), padding=<span class="str">'same'</span>, activation=<span class="str">'relu'</span>)(x)
+x = keras.layers.<span class="fn">GlobalAveragePooling2D</span>()(x)  <span class="cmt"># 64-dim vector
+x = keras.layers.Dropout(0.4)(x)
+outputs = keras.layers.Dense(10, activation='softmax')(x)</span>
+
+model = keras.<span class="fn">Model</span>(inputs, outputs, name=<span class="str">'cnn_cifar'</span>)
+
+model.<span class="fn">compile</span>(
+    optimizer=keras.optimizers.<span class="fn">Adam</span>(learning_rate=<span class="num">1e-3</span>),
+    loss=<span class="str">'sparse_categorical_crossentropy'</span>,
+    metrics=[<span class="str">'accuracy'</span>]
+)</code></pre>
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <ul class="doc-list">
+                                <li><strong>Output shape:</strong> With <code>same</code> padding: H_out =
+                                    ⌈H_in/stride⌉. With <code>valid</code>: H_out = ⌈(H_in - kernel + 1)/stride⌉.</li>
+                                <li><strong>GlobalAveragePooling2D vs Flatten:</strong> GAP reduces spatial dims to a
+                                    single mean per channel (no params). Flatten preserves all spatial info but creates
+                                    a large Dense layer.</li>
+                                <li><strong>Receptive field:</strong> Stack multiple 3×3 convolutions instead of one
+                                    large kernel. Two 3×3 convolutions have the same receptive field as one 5×5, but
+                                    half the parameters and more non-linearity.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="func-card" id="lstm">
+                    <div class="func-card-header">
+                        <div class="func-icon">🔄</div>
+                        <div class="func-info">
+                            <div class="func-name">LSTM / GRU / Bidirectional</div>
+                            <div class="func-tagline">Sequential modelling for text, time-series, and event data —
+                                return sequences and states</div>
+                            <div class="func-tags"><span class="func-tag">LSTM</span><span
+                                    class="func-tag">GRU</span><span class="func-tag">Bidirectional</span><span
+                                    class="func-tag">NLP</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Syntax</div>
+                            <div class="func-tab">Example</div>
+                            <div class="func-tab">Internals</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="sig-box">keras.layers.<span class="fn">LSTM</span>(
+                                units=<span class="num">64</span>, <span class="cmt"># hidden state dimension</span>
+                                return_sequences=<span class="kw">False</span>, <span class="cmt"># True for stacked
+                                    LSTM / seq2seq</span>
+                                return_state=<span class="kw">False</span>, <span class="cmt"># True to access h_t and
+                                    c_t</span>
+                                dropout=<span class="num">0.2</span>,
+                                recurrent_dropout=<span class="num">0.0</span> <span class="cmt"># dropout on recurrent
+                                    connections</span>
+                                )
+                                keras.layers.<span class="fn">Bidirectional</span>(
+                                keras.layers.<span class="fn">LSTM</span>(<span class="num">64</span>,
+                                return_sequences=<span class="kw">True</span>),
+                                merge_mode=<span class="str">'concat'</span> <span class="cmt"># or
+                                    'sum','mul','ave'</span>
+                                )</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="cmt"># Sentiment analysis: Embedding + BiLSTM + Dense</span>
+VOCAB_SIZE, EMB_DIM, MAX_LEN = <span class="num">20000</span>, <span class="num">64</span>, <span class="num">200</span>
+
+inputs = keras.<span class="fn">Input</span>(shape=(MAX_LEN,))
+x = keras.layers.<span class="fn">Embedding</span>(VOCAB_SIZE, EMB_DIM, mask_zero=<span class="kw">True</span>)(inputs)
+x = keras.layers.<span class="fn">Bidirectional</span>(
+        keras.layers.<span class="fn">LSTM</span>(<span class="num">64</span>, return_sequences=<span class="kw">True</span>))(x)
+x = keras.layers.<span class="fn">Bidirectional</span>(
+        keras.layers.<span class="fn">LSTM</span>(<span class="num">32</span>))(x)   <span class="cmt"># last layer: return_sequences=False</span>
+x = keras.layers.<span class="fn">Dense</span>(<span class="num">32</span>, activation=<span class="str">'relu'</span>)(x)
+x = keras.layers.<span class="fn">Dropout</span>(<span class="num">0.4</span>)(x)
+outputs = keras.layers.<span class="fn">Dense</span>(<span class="num">1</span>, activation=<span class="str">'sigmoid'</span>)(x)
+
+model = keras.<span class="fn">Model</span>(inputs, outputs)
+model.<span class="fn">compile</span>(optimizer=<span class="str">'adam'</span>,
+              loss=<span class="str">'binary_crossentropy'</span>,
+              metrics=[<span class="str">'accuracy'</span>, keras.metrics.<span class="fn">AUC</span>(name=<span class="str">'auc'</span>)])
+
+<span class="cmt"># Time-series: multi-step prediction</span>
+ts_input = keras.<span class="fn">Input</span>(shape=(<span class="num">30</span>, <span class="num">5</span>))  <span class="cmt"># 30 timesteps, 5 features</span>
+ts_out   = keras.layers.<span class="fn">LSTM</span>(<span class="num">64</span>, return_sequences=<span class="kw">False</span>)(ts_input)
+ts_out   = keras.layers.<span class="fn">Dense</span>(<span class="num">7</span>)(ts_out)  <span class="cmt"># predict next 7 steps</span></code></pre>
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <ul class="doc-list">
+                                <li><strong>LSTM vs GRU:</strong> GRU has fewer parameters (2 gates vs 3 in LSTM) and is
+                                    faster. Performance is often comparable. Use GRU as default; LSTM when long-range
+                                    dependencies matter.</li>
+                                <li><strong>return_sequences=True:</strong> Returns output at every timestep — required
+                                    for stacked LSTMs or attention. <code>False</code> returns only the final timestep
+                                    (for classification).</li>
+                                <li><strong>mask_zero=True:</strong> In Embedding, tells downstream layers to ignore
+                                    padded 0s. Critical for variable-length sequences.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 3: tf.data Pipeline ═══ -->
+                <h2 class="section-title" id="s-tfdata">tf.data Pipeline</h2>
+
+                <div class="func-card" id="tfdata">
+                    <div class="func-card-header">
+                        <div class="func-icon">⚡</div>
+                        <div class="func-info">
+                            <div class="func-name">tf.data.Dataset — from_tensor_slices / map / batch / prefetch / cache
+                            </div>
+                            <div class="func-tagline">High-performance data loading and augmentation pipeline —
+                                eliminate GPU idle time</div>
+                            <div class="func-tags"><span class="func-tag">tf.data</span><span
+                                    class="func-tag">prefetch</span><span class="func-tag">performance</span><span
+                                    class="func-tag">augmentation</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Syntax</div>
+                            <div class="func-tab">Example</div>
+                            <div class="func-tab">Performance</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="sig-box">dataset = tf.data.Dataset.<span
+                                    class="fn">from_tensor_slices</span>((X, y))
+                                .<span class="fn">shuffle</span>(buffer_size, seed=<span class="num">42</span>)
+                                .<span class="fn">map</span>(preprocess_fn, num_parallel_calls=tf.data.AUTOTUNE)
+                                .<span class="fn">batch</span>(batch_size, drop_remainder=<span class="kw">False</span>)
+                                .<span class="fn">prefetch</span>(tf.data.AUTOTUNE) <span class="cmt"># overlap CPU prep
+                                    + GPU train
+                                    .cache() # cache after expensive map</span></div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="cmt"># Full training pipeline with augmentation</span>
+AUTOTUNE = tf.data.AUTOTUNE
+
+<span class="kw">def</span> <span class="fn">augment_image</span>(image, label):
+    image = tf.image.<span class="fn">random_flip_left_right</span>(image)
+    image = tf.image.<span class="fn">random_brightness</span>(image, max_delta=<span class="num">0.1</span>)
+    image = tf.image.<span class="fn">random_contrast</span>(image, lower=<span class="num">0.9</span>, upper=<span class="num">1.1</span>)
+    image = tf.<span class="fn">clip_by_value</span>(image, <span class="num">0.0</span>, <span class="num">1.0</span>)
+    <span class="kw">return</span> image, label
+
+<span class="kw">def</span> <span class="fn">make_dataset</span>(X, y, batch_size=<span class="num">32</span>, training=<span class="kw">False</span>):
+    ds = tf.data.Dataset.<span class="fn">from_tensor_slices</span>((X, y))
+    <span class="kw">if</span> training:
+        ds = ds.<span class="fn">shuffle</span>(<span class="fn">len</span>(X), seed=<span class="num">42</span>)
+        ds = ds.<span class="fn">map</span>(augment_image, num_parallel_calls=AUTOTUNE)
+    ds = (ds
+          .<span class="fn">batch</span>(batch_size)
+          .<span class="fn">cache</span>()          <span class="cmt"># after batch, cache in memory</span>
+          .<span class="fn">prefetch</span>(AUTOTUNE))
+    <span class="kw">return</span> ds
+
+train_ds = <span class="fn">make_dataset</span>(X_train, y_train, training=<span class="kw">True</span>)
+val_ds   = <span class="fn">make_dataset</span>(X_val,   y_val,   training=<span class="kw">False</span>)
+
+<span class="cmt"># Load from files (TFRecord)</span>
+raw_ds = tf.data.TFRecordDataset(<span class="fn">filenames</span>)
+ds = raw_ds.<span class="fn">map</span>(parse_fn, num_parallel_calls=AUTOTUNE)
+
+model.<span class="fn">fit</span>(train_ds, validation_data=val_ds, epochs=<span class="num">30</span>)</code></pre>
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="perf-grid">
+                                <div class="perf-item">
+                                    <div class="perf-item-label">AUTOTUNE</div>
+                                    <div class="perf-item-value">Let TF automatically tune parallelism. Always use
+                                        <code>num_parallel_calls=tf.data.AUTOTUNE</code> in <code>map()</code> and
+                                        <code>prefetch(tf.data.AUTOTUNE)</code>.</div>
+                                </div>
+                                <div class="perf-item">
+                                    <div class="perf-item-label">cache() placement</div>
+                                    <div class="perf-item-value">Place <code>cache()</code> after decode/resize but
+                                        before augmentation (augmentation should be random each epoch). If data fits in
+                                        RAM, cache after map.</div>
+                                </div>
+                                <div class="perf-item">
+                                    <div class="perf-item-label">shuffle buffer</div>
+                                    <div class="perf-item-value">For proper shuffling, <code>buffer_size</code> should
+                                        equal dataset size. Smaller buffers = biased ordering. For large datasets, use
+                                        the full size or a large fraction.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 4: Compile & Callbacks ═══ -->
+                <h2 class="section-title" id="s-compile">Compile, Training & Callbacks</h2>
+
+                <div class="func-card" id="callbacks">
+                    <div class="func-card-header">
+                        <div class="func-icon">📞</div>
+                        <div class="func-info">
+                            <div class="func-name">model.compile / model.fit / EarlyStopping / ReduceLROnPlateau /
+                                ModelCheckpoint</div>
+                            <div class="func-tagline">Configure training, prevent overfitting with patience, and save
+                                best weights automatically</div>
+                            <div class="func-tags"><span class="func-tag">callbacks</span><span
+                                    class="func-tag">EarlyStopping</span><span class="func-tag">learning rate
+                                    schedule</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Syntax</div>
+                            <div class="func-tab">Example</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="sig-box">model.<span class="fn">compile</span>(
+                                optimizer=keras.optimizers.<span class="fn">Adam</span>(learning_rate=<span
+                                    class="num">1e-3</span>),
+                                loss=<span class="str">'binary_crossentropy'</span>,
+                                metrics=[<span class="str">'accuracy'</span>, keras.metrics.<span
+                                    class="fn">AUC</span>()]
+                                )
+
+                                <span class="cmt"># Core callbacks</span>
+                                keras.callbacks.<span class="fn">EarlyStopping</span>(
+                                monitor=<span class="str">'val_loss'</span>, patience=<span class="num">10</span>,
+                                restore_best_weights=<span class="kw">True</span>, min_delta=<span
+                                    class="num">1e-4</span>
+                                )
+                                keras.callbacks.<span class="fn">ReduceLROnPlateau</span>(
+                                monitor=<span class="str">'val_loss'</span>, factor=<span class="num">0.5</span>,
+                                patience=<span class="num">5</span>,
+                                min_lr=<span class="num">1e-6</span>, verbose=<span class="num">1</span>
+                                )
+                                keras.callbacks.<span class="fn">ModelCheckpoint</span>(
+                                filepath=<span class="str">'best_model.keras'</span>,
+                                monitor=<span class="str">'val_auc'</span>, mode=<span class="str">'max'</span>,
+                                save_best_only=<span class="kw">True</span>
+                                )
+                            </div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code>callbacks = [
+    keras.callbacks.<span class="fn">EarlyStopping</span>(
+        monitor=<span class="str">'val_auc'</span>, mode=<span class="str">'max'</span>,
+        patience=<span class="num">15</span>, restore_best_weights=<span class="kw">True</span>
+    ),
+    keras.callbacks.<span class="fn">ReduceLROnPlateau</span>(
+        monitor=<span class="str">'val_loss'</span>, factor=<span class="num">0.5</span>, patience=<span class="num">7</span>, min_lr=<span class="num">1e-7</span>
+    ),
+    keras.callbacks.<span class="fn">ModelCheckpoint</span>(
+        <span class="str">'checkpoints/best.keras'</span>, save_best_only=<span class="kw">True</span>,
+        monitor=<span class="str">'val_auc'</span>, mode=<span class="str">'max'</span>
+    ),
+    keras.callbacks.<span class="fn">TensorBoard</span>(log_dir=<span class="str">'logs/'</span>, histogram_freq=<span class="num">1</span>)
+]
+
+history = model.<span class="fn">fit</span>(
+    train_ds,
+    validation_data=val_ds,
+    epochs=<span class="num">200</span>,             <span class="cmt"># EarlyStopping will stop early</span>
+    callbacks=callbacks,
+    class_weight={<span class="num">0</span>: <span class="num">1.0</span>, <span class="num">1</span>: <span class="num">5.0</span>},  <span class="cmt"># imbalanced: penalize false negatives</span>
+    verbose=<span class="num">1</span>
+)
+
+<span class="cmt"># Load best saved model</span>
+best_model = keras.models.<span class="fn">load_model</span>(<span class="str">'checkpoints/best.keras'</span>)
+y_prob = best_model.<span class="fn">predict</span>(X_test, batch_size=<span class="num">256</span>)[:, <span class="num">0</span>]</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 5: Custom Training Loop ═══ -->
+                <h2 class="section-title" id="s-custom-train">Custom Training Loop</h2>
+
+                <div class="func-card" id="custom-loop">
+                    <div class="func-card-header">
+                        <div class="func-icon">🔧</div>
+                        <div class="func-info">
+                            <div class="func-name">GradientTape — Custom Training Loop</div>
+                            <div class="func-tagline">Full control over forward pass, gradient computation, and metric
+                                updates — for research</div>
+                            <div class="func-tags"><span class="func-tag">GradientTape</span><span
+                                    class="func-tag">custom training</span><span class="func-tag">research</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Example</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code>optimizer = keras.optimizers.<span class="fn">Adam</span>(<span class="num">1e-3</span>)
+loss_fn   = keras.losses.<span class="fn">BinaryCrossentropy</span>()
+
+train_loss  = keras.metrics.<span class="fn">Mean</span>(name=<span class="str">'train_loss'</span>)
+train_auc   = keras.metrics.<span class="fn">AUC</span>(name=<span class="str">'train_auc'</span>)
+
+@tf.<span class="fn">function</span>                            <span class="cmt"># compile to graph for speed</span>
+<span class="kw">def</span> <span class="fn">train_step</span>(X_batch, y_batch):
+    <span class="kw">with</span> tf.<span class="fn">GradientTape</span>() <span class="kw">as</span> tape:
+        y_pred = <span class="fn">model</span>(X_batch, training=<span class="kw">True</span>)
+        loss   = <span class="fn">loss_fn</span>(y_batch, y_pred)
+        loss  += <span class="fn">sum</span>(model.losses)           <span class="cmt"># L2 reg losses</span>
+
+    grads = tape.<span class="fn">gradient</span>(loss, model.trainable_variables)
+    <span class="cmt"># Gradient clipping (prevents exploding gradients in RNNs)</span>
+    grads, _ = tf.clip_by_global_norm(grads, clip_norm=<span class="num">1.0</span>)
+    optimizer.<span class="fn">apply_gradients</span>(<span class="fn">zip</span>(grads, model.trainable_variables))
+
+    train_loss.<span class="fn">update_state</span>(loss)
+    train_auc.<span class="fn">update_state</span>(y_batch, y_pred)
+
+<span class="kw">for</span> epoch <span class="kw">in</span> <span class="fn">range</span>(NUM_EPOCHS):
+    train_loss.<span class="fn">reset_state</span>(); train_auc.<span class="fn">reset_state</span>()
+    <span class="kw">for</span> X_batch, y_batch <span class="kw">in</span> train_ds:
+        <span class="fn">train_step</span>(X_batch, y_batch)
+    <span class="fn">print</span>(<span class="str">f'Epoch {epoch+1}: loss={train_loss.result():.4f}, '
+          f'AUC={train_auc.result():.4f}'</span>)</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SECTION 6: Transfer Learning ═══ -->
+                <h2 class="section-title" id="s-transfer">Transfer Learning & Fine-tuning</h2>
+
+                <div class="func-card" id="transfer">
+                    <div class="func-card-header">
+                        <div class="func-icon">🔄</div>
+                        <div class="func-info">
+                            <div class="func-name">keras.applications — Transfer Learning Pattern</div>
+                            <div class="func-tagline">Freeze pretrained weights, add classification head, unfreeze for
+                                fine-tuning</div>
+                            <div class="func-tags"><span class="func-tag">transfer learning</span><span
+                                    class="func-tag">fine-tuning</span><span class="func-tag">MobileNet</span><span
+                                    class="func-tag">freeze</span></div>
+                        </div>
+                        <div class="func-toggle">▾</div>
+                    </div>
+                    <div class="func-body">
+                        <div class="func-tabs">
+                            <div class="func-tab">Example</div>
+                        </div>
+                        <div class="func-tab-content">
+                            <div class="code-wrap">
+                                <div class="code-header"><span class="code-lang">python</span><button
+                                        class="copy-btn"><span>⎘</span> Copy</button></div>
+                                <pre><code><span class="cmt"># Step 1: Load pretrained base without top</span>
+base_model = keras.applications.<span class="fn">MobileNetV2</span>(
+    input_shape=(<span class="num">224</span>, <span class="num">224</span>, <span class="num">3</span>),
+    include_top=<span class="kw">False</span>,         <span class="cmt"># drop classifier</span>
+    weights=<span class="str">'imagenet'</span>
+)
+base_model.trainable = <span class="kw">False</span>    <span class="cmt"># freeze base weights
+
+# Step 2: Add custom classification head</span>
+inputs  = keras.<span class="fn">Input</span>(shape=(<span class="num">224</span>, <span class="num">224</span>, <span class="num">3</span>))
+x = keras.applications.mobilenet_v2.<span class="fn">preprocess_input</span>(inputs)
+x = <span class="fn">base_model</span>(x, training=<span class="kw">False</span>)     <span class="cmt"># BN in eval mode</span>
+x = keras.layers.<span class="fn">GlobalAveragePooling2D</span>()(x)
+x = keras.layers.<span class="fn">Dropout</span>(<span class="num">0.2</span>)(x)
+outputs = keras.layers.<span class="fn">Dense</span>(num_classes, activation=<span class="str">'softmax'</span>)(x)
+model = keras.<span class="fn">Model</span>(inputs, outputs)
+
+<span class="cmt"># Step 3: Train head only (fast)</span>
+model.<span class="fn">compile</span>(<span class="str">'adam'</span>, <span class="str">'sparse_categorical_crossentropy'</span>, [<span class="str">'accuracy'</span>])
+model.<span class="fn">fit</span>(train_ds, epochs=<span class="num">10</span>, validation_data=val_ds)
+
+<span class="cmt"># Step 4: Unfreeze top layers for fine-tuning</span>
+base_model.trainable = <span class="kw">True</span>
+<span class="cmt"># Only fine-tune top 30 layers</span>
+<span class="kw">for</span> layer <span class="kw">in</span> base_model.layers[:-<span class="num">30</span>]:
+    layer.trainable = <span class="kw">False</span>
+
+<span class="cmt"># Use lower LR for fine-tuning</span>
+model.<span class="fn">compile</span>(optimizer=keras.optimizers.<span class="fn">Adam</span>(<span class="num">1e-5</span>),
+              loss=<span class="str">'sparse_categorical_crossentropy'</span>,
+              metrics=[<span class="str">'accuracy'</span>])
+model.<span class="fn">fit</span>(train_ds, epochs=<span class="num">20</span>, validation_data=val_ds)</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-footer">
+                    <span>TensorFlow / Keras — ML Engineering Hub</span>
+                    <div class="footer-links">
+                        <a href="sklearn-evaluation.html">← Sklearn Evaluation</a>
+                        <a href="index.html">Home ↩</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div class="toc-panel">
+            <div class="toc-heading">On This Page</div>
+            <a href="#s-api" class="toc-link">Building Models</a>
+            <a href="#model-api" class="toc-link toc-h3">Sequential / Functional</a>
+            <a href="#s-layers" class="toc-link">Core Layers</a>
+            <a href="#conv2d" class="toc-link toc-h3">Conv2D / Pooling</a>
+            <a href="#lstm" class="toc-link toc-h3">LSTM / GRU / BiLSTM</a>
+            <a href="#s-tfdata" class="toc-link">tf.data Pipeline</a>
+            <a href="#tfdata" class="toc-link toc-h3">map / batch / prefetch</a>
+            <a href="#s-compile" class="toc-link">Compile & Callbacks</a>
+            <a href="#callbacks" class="toc-link toc-h3">EarlyStopping / LR</a>
+            <a href="#s-custom-train" class="toc-link">Custom Training Loop</a>
+            <a href="#custom-loop" class="toc-link toc-h3">GradientTape</a>
+            <a href="#s-transfer" class="toc-link">Transfer Learning</a>
+            <a href="#transfer" class="toc-link toc-h3">MobileNetV2 / fine-tune</a>
+        </div>
+    </div>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

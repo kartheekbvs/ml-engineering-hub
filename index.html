@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description"
+        content="ML Engineering Reference Hub — Production-grade Machine Learning coding documentation covering NumPy, Pandas, Matplotlib, Scikit-learn, TensorFlow, and more." />
+    <title>ML Engineering Reference Hub</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+
+    <!-- ── Progress Bar ── -->
+    <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+    </div>
+
+    <!-- ── Top Nav ── -->
+    <nav class="top-nav">
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
+        <a href="index.html" class="nav-brand">
+            <div class="nav-logo">⚡</div>
+            <span class="nav-title">ML Engineering Hub</span>
+        </a>
+        <div class="nav-search-wrap">
+            <span class="search-icon">🔍</span>
+            <input class="nav-search" id="main-search" type="text" placeholder="Search functions... (Ctrl+K)"
+                autocomplete="off" />
+            <div class="search-results" id="search-results"></div>
+        </div>
+        <div class="nav-actions">
+            <button class="btn-icon" id="theme-toggle" title="Toggle theme">☀️</button>
+        </div>
+    </nav>
+
+    <!-- ── Sidebar Overlay ── -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- ── Layout ── -->
+    <div class="app-layout no-sidebar">
+
+        <!-- ── Main Content ── -->
+        <main class="main-content" style="margin-left:0;max-width:100%;padding:0;">
+
+            <!-- HERO -->
+            <section class="hero">
+                <div class="hero-inner">
+                    <div class="hero-chip fade-up fade-up-1">⚡ Production-Grade ML Reference</div>
+                    <h1 class="hero-title fade-up fade-up-2">
+                        ML Engineering<br /><span>Reference Hub</span>
+                    </h1>
+                    <p class="hero-desc fade-up fade-up-3">
+                        The definitive coding reference for Machine Learning engineers.
+                        Deep-dive documentation covering syntax, parameters, internals,
+                        edge cases, and performance—not theory.
+                    </p>
+                    <div class="hero-actions fade-up fade-up-3">
+                        <a href="sklearn-preprocessing.html" class="btn-primary">🚀 Start with Scikit-learn</a>
+                        <a href="pipelines.html" class="btn-secondary">🔧 View ML Pipeline</a>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="hero-stat">
+                            <div class="stat-value">7</div>
+                            <div class="stat-label">Libraries Covered</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="stat-value">60+</div>
+                            <div class="stat-label">Functions Documented</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="stat-value">100+</div>
+                            <div class="stat-label">Code Examples</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Basic Theory</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- LIBRARY GRID -->
+            <div class="lib-grid">
+                <!-- NumPy -->
+                <a href="numpy.html" class="lib-card" style="--lib-color: linear-gradient(90deg, #4ea3ff, #60a5fa);">
+                    <span class="lib-card-icon">🔢</span>
+                    <div class="lib-card-title">NumPy</div>
+                    <div class="lib-card-desc">Complete ML-relevant NumPy API — arrays, broadcasting, linear algebra,
+                        random sampling, and memory layout.</div>
+                    <div class="lib-topics">
+                        <span class="lib-topic">ndarray</span>
+                        <span class="lib-topic">linalg</span>
+                        <span class="lib-topic">random</span>
+                        <span class="lib-topic">broadcasting</span>
+                        <span class="lib-topic">vectorization</span>
+                    </div>
+                    <div class="lib-card-meta">
+                        <span>20+ functions</span>
+                        <span style="color:var(--accent-light)">Explore →</span>
+                    </div>
+                </a>
+
+                <!-- Pandas -->
+                <a href="pandas.html" class="lib-card" style="--lib-color: linear-gradient(90deg, #34d399, #10b981);">
+                    <span class="lib-card-icon">🐼</span>
+                    <div class="lib-card-title">Pandas</div>
+                    <div class="lib-card-desc">ML-focused Pandas — data loading, cleaning, merging, grouping, indexing,
+                        view vs copy pitfalls, and performance.</div>
+                    <div class="lib-topics">
+                        <span class="lib-topic">DataFrame</span>
+                        <span class="lib-topic">Series</span>
+                        <span class="lib-topic">groupby</span>
+                        <span class="lib-topic">merge</span>
+                        <span class="lib-topic">loc/iloc</span>
+                    </div>
+                    <div class="lib-card-meta">
+                        <span>18+ functions</span>
+                        <span style="color:var(--accent-light)">Explore →</span>
+                    </div>
+                </a>
+
+                <!-- Matplotlib -->
+                <a href="matplotlib.html" class="lib-card"
+                    style="--lib-color: linear-gradient(90deg, #fb923c, #f97316);">
+                    <span class="lib-card-icon">📈</span>
+                    <div class="lib-card-title">Matplotlib</div>
+                    <div class="lib-card-desc">Full Matplotlib documentation with advanced customization, subplots,
+                        styles, and ML visualization patterns.</div>
+                    <div class="lib-topics">
+                        <span class="lib-topic">pyplot</span>
+                        <span class="lib-topic">scatter</span>
+                        <span class="lib-topic">subplots</span>
+                        <span class="lib-topic">hist</span>
+                        <span class="lib-topic">imshow</span>
+                    </div>
+                    <div class="lib-card-meta">
+                        <span>11+ functions</span>
+                        <span style="color:var(--accent-light)">Explore →</span>
+                    </div>
+                </a>
+
+                <!-- Scikit-learn Preprocessing -->
+                <a href="sklearn-preprocessing.html" class="lib-card"
+                    style="--lib-color: linear-gradient(90deg, #a78bfa, #8b5cf6);">
+                    <span class="lib-card-icon">⚙️</span>
+                    <div class="lib-card-title">Sklearn — Preprocessing</div>
+                    <div class="lib-card-desc">train_test_split, Scalers, Encoders, Imputers, ColumnTransformer,
+                        Pipeline — with internals and edge cases.</div>
+                    <div class="lib-topics">
+                        <span class="lib-topic">StandardScaler</span>
+                        <span class="lib-topic">Imputer</span>
+                        <span class="lib-topic">Pipeline</span>
+                        <span class="lib-topic">Encoders</span>
+                    </div>
+                    <div class="lib-card-meta">
+                        <span>11 functions</span>
+                        <span style="color:var(--accent-light)">Explore →</span>
+                    </div>
+                </a>
+
+                <!-- Scikit-learn Models -->
+                <a href="sklearn-models.html" class="lib-card"
+                    style="--lib-color: linear-gradient(90deg, #c4b5fd, #a78bfa);">
+                    <span class="lib-card-icon">🤖</span>
+                    <div class="lib-card-title">Sklearn — Models</div>
+                    <div class="lib-card-desc">LinearRegression, LogisticRegression, Trees, Forests, GradientBoosting,
+                        SVM, KNN, KMeans, DBSCAN — parameters & internals.</div>
+                    <div class="lib-topics">
+                        <span class="lib-topic">LinearReg</span>
+                        <span class="lib-topic">RandomForest</span>
+                        <span class="lib-topic">SVC</span>
+                        <span class="lib-topic">KMeans</span>
+                    </div>
+                    <div class="lib-card-meta">
+                        <span>14 models</span>
+                        <span style="color:var(--accent-light)">Explore →</span>
+                    </div>
+                </a>
+
+                <!-- Scikit-learn Evaluation -->
+                <a href="sklearn-evaluation.html" class="lib-card"
+                    style="--lib-color: linear-gradient(90deg, #818cf8, #6366f1);">
+                    <span class="lib-card-icon">📊</span>
+                    <div class="lib-card-title">Sklearn — Evaluation</div>
+                    <div class="lib-card-desc">accuracy, precision, recall, F1, confusion matrix, ROC-AUC,
+                        cross-validation, GridSearchCV, RandomizedSearchCV.</div>
+                    <div class="lib-topics">
+                        <span class="lib-topic">GridSearchCV</span>
+                        <span class="lib-topic">cross_val</span>
+                        <span class="lib-topic">ROC-AUC</span>
+                        <span class="lib-topic">F1</span>
+                    </div>
+                    <div class="lib-card-meta">
+                        <span>10 metrics</span>
+                        <span style="color:var(--accent-light)">Explore →</span>
+                    </div>
+                </a>
+
+                <!-- TensorFlow -->
+                <a href="tensorflow.html" class="lib-card"
+                    style="--lib-color: linear-gradient(90deg, #fb923c, #f97316);">
+                    <span class="lib-card-icon">🧠</span>
+                    <div class="lib-card-title">TensorFlow / Keras</div>
+                    <div class="lib-card-desc">Sequential, compile, fit, evaluate, predict, callbacks, tf.data API,
+                        custom training loops — advanced coding focus.</div>
+                    <div class="lib-topics">
+                        <span class="lib-topic">Sequential</span>
+                        <span class="lib-topic">compile/fit</span>
+                        <span class="lib-topic">callbacks</span>
+                        <span class="lib-topic">tf.data</span>
+                    </div>
+                    <div class="lib-card-meta">
+                        <span>12+ APIs</span>
+                        <span style="color:var(--accent-light)">Explore →</span>
+                    </div>
+                </a>
+
+                <!-- Pipelines -->
+                <a href="pipelines.html" class="lib-card"
+                    style="--lib-color: linear-gradient(90deg, #22d3ee, #06b6d4);">
+                    <span class="lib-card-icon">🔗</span>
+                    <div class="lib-card-title">ML Pipelines</div>
+                    <div class="lib-card-desc">Production-ready end-to-end ML pipelines combining Pandas → Preprocessing
+                        → Splitting → Scaling → Model → Evaluation.</div>
+                    <div class="lib-topics">
+                        <span class="lib-topic">Pipeline</span>
+                        <span class="lib-topic">ColumnTransformer</span>
+                        <span class="lib-topic">Data Leakage</span>
+                    </div>
+                    <div class="lib-card-meta">
+                        <span>5 patterns</span>
+                        <span style="color:var(--accent-light)">Explore →</span>
+                    </div>
+                </a>
+
+                <!-- Advanced -->
+                <a href="advanced.html" class="lib-card" style="--lib-color: linear-gradient(90deg, #ef4444, #dc2626);">
+                    <span class="lib-card-icon">🔬</span>
+                    <div class="lib-card-title">Advanced Topics</div>
+                    <div class="lib-card-desc">Random state theory, overfitting/underfitting debugging, feature
+                        importance, saving models, deployment basics.</div>
+                    <div class="lib-topics">
+                        <span class="lib-topic">joblib</span>
+                        <span class="lib-topic">pickle</span>
+                        <span class="lib-topic">overfitting</span>
+                        <span class="lib-topic">deployment</span>
+                    </div>
+                    <div class="lib-card-meta">
+                        <span>8 topics</span>
+                        <span style="color:var(--accent-light)">Explore →</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- "What this covers" section -->
+            <div class="landing-section">
+                <div class="landing-section-title">📘 What This Reference Covers</div>
+                <div class="landing-section-sub">Every function follows a strict 7-section documentation format</div>
+
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;">
+                    <div class="func-card" style="margin-bottom:0;">
+                        <div class="func-card-header" style="cursor:default;">
+                            <div class="func-icon" style="background:rgba(99,102,241,0.15);">1️⃣</div>
+                            <div class="func-info">
+                                <div class="func-name" style="font-size:14px;">Function Signature</div>
+                                <div class="func-tagline">Full syntax with all parameters</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="func-card" style="margin-bottom:0;">
+                        <div class="func-card-header" style="cursor:default;">
+                            <div class="func-icon" style="background:rgba(6,182,212,0.15);">2️⃣</div>
+                            <div class="func-info">
+                                <div class="func-name" style="font-size:14px;">Parameter Table</div>
+                                <div class="func-tagline">Type, default, edge cases for each param</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="func-card" style="margin-bottom:0;">
+                        <div class="func-card-header" style="cursor:default;">
+                            <div class="func-icon" style="background:rgba(16,185,129,0.15);">3️⃣</div>
+                            <div class="func-info">
+                                <div class="func-name" style="font-size:14px;">Internal Working</div>
+                                <div class="func-tagline">How it works under the hood</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="func-card" style="margin-bottom:0;">
+                        <div class="func-card-header" style="cursor:default;">
+                            <div class="func-icon" style="background:rgba(245,158,11,0.15);">4️⃣</div>
+                            <div class="func-info">
+                                <div class="func-name" style="font-size:14px;">Practical Examples</div>
+                                <div class="func-tagline">Real dataset code you can copy-paste</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="func-card" style="margin-bottom:0;">
+                        <div class="func-card-header" style="cursor:default;">
+                            <div class="func-icon" style="background:rgba(239,68,68,0.15);">5️⃣</div>
+                            <div class="func-info">
+                                <div class="func-name" style="font-size:14px;">Common Mistakes</div>
+                                <div class="func-tagline">Pitfalls and bugs to avoid</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="func-card" style="margin-bottom:0;">
+                        <div class="func-card-header" style="cursor:default;">
+                            <div class="func-icon" style="background:rgba(167,139,250,0.15);">6️⃣</div>
+                            <div class="func-info">
+                                <div class="func-name" style="font-size:14px;">Performance Notes</div>
+                                <div class="func-tagline">Memory, speed, large dataset behavior</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="landing-section">
+                <div class="doc-footer">
+                    <div>⚡ ML Engineering Reference Hub — Built for ML Engineers</div>
+                    <div class="footer-links">
+                        <a href="index.html">Home</a>
+                        <a href="sklearn-preprocessing.html">Scikit-learn</a>
+                        <a href="tensorflow.html">TensorFlow</a>
+                        <a href="pipelines.html">Pipelines</a>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>
