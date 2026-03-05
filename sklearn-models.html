@@ -338,7 +338,8 @@ pi.<span class="fn">sort_values</span>().<span class="fn">plot</span>(kind=<span
                                     <div class="perf-item-label">MDI vs Permutation</div>
                                     <div class="perf-item-value">MDI (built-in importance) overestimates
                                         high-cardinality and numeric features. For unbiased importance, use
-                                        <code>permutation_importance</code> on the test set.</div>
+                                        <code>permutation_importance</code> on the test set.
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -508,7 +509,8 @@ gs.<span class="fn">fit</span>(X_train, y_train)
                                     before SVM.</li>
                                 <li><strong>RBF kernel bandwidth (gamma):</strong> Too small = underfitting (wide
                                     Gaussian); too large = overfitting (narrow Gaussian). Start with
-                                    <code>gamma='scale'</code>.</li>
+                                    <code>gamma='scale'</code>.
+                                </li>
                                 <li><strong>probability=True cost:</strong> Enables <code>predict_proba</code> by
                                     fitting Platt scaling (extra 5-fold CV). Adds significant training time.</li>
                                 <li><strong>Scalability:</strong> SVC is O(n²–n³). Use LinearSVC or SGDClassifier for n
@@ -790,7 +792,7 @@ hrsv.<span class="fn">fit</span>(X_train, y_train)
                                     <tr>
                                         <td class="param-name">HalvingRandomSearch</td>
                                         <td>Very large</td>
-                                        <td>⚡ Fastest</td>
+                                        <td>Fastest</td>
                                         <td>Large datasets; many hyperparams</td>
                                     </tr>
                                     <tr>

@@ -196,7 +196,8 @@ model = <span class="fn">MLPBlock</span>(units=[<span class="num">256</span>, <s
                                 keras.layers.<span class="fn">MaxPooling2D</span>(pool_size=(<span class="num">2</span>,
                                 <span class="num">2</span>))
                                 keras.layers.<span class="fn">GlobalAveragePooling2D</span>() <span class="cmt">#
-                                    replaces Flatten+Dense for efficiency</span></div>
+                                    replaces Flatten+Dense for efficiency</span>
+                            </div>
                         </div>
                         <div class="func-tab-content">
                             <div class="code-wrap">
@@ -329,7 +330,7 @@ ts_out   = keras.layers.<span class="fn">Dense</span>(<span class="num">7</span>
 
                 <div class="func-card" id="tfdata">
                     <div class="func-card-header">
-                        <div class="func-icon">⚡</div>
+                        <div class="func-icon"></div>
                         <div class="func-info">
                             <div class="func-name">tf.data.Dataset — from_tensor_slices / map / batch / prefetch / cache
                             </div>
@@ -398,7 +399,8 @@ model.<span class="fn">fit</span>(train_ds, validation_data=val_ds, epochs=<span
                                     <div class="perf-item-label">AUTOTUNE</div>
                                     <div class="perf-item-value">Let TF automatically tune parallelism. Always use
                                         <code>num_parallel_calls=tf.data.AUTOTUNE</code> in <code>map()</code> and
-                                        <code>prefetch(tf.data.AUTOTUNE)</code>.</div>
+                                        <code>prefetch(tf.data.AUTOTUNE)</code>.
+                                    </div>
                                 </div>
                                 <div class="perf-item">
                                     <div class="perf-item-label">cache() placement</div>
