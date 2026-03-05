@@ -67,7 +67,8 @@
                                 pd.<span class="fn">read_parquet</span>(path, columns=<span class="kw">None</span>)
                                 <span class="cmt"># preferred binary format</span>
                                 pd.<span class="fn">read_sql</span>(query, con) <span class="cmt"># SQLAlchemy
-                                    connection</span></div>
+                                    connection</span>
+                            </div>
                         </div>
                         <div class="func-tab-content">
                             <div class="code-wrap">
@@ -106,7 +107,8 @@ df.<span class="fn">to_parquet</span>(<span class="str">'data.parquet'</span>, i
                                     <div class="perf-item-label">dtype=str</div>
                                     <div class="perf-item-value">Force string dtype to avoid mixed-type inference:
                                         <code>dtype={'id': str}</code>. Prevents silent int→float conversion on IDs with
-                                        NaN.</div>
+                                        NaN.
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -274,7 +276,8 @@ df[<span class="str">'price'</span>] = df[<span class="str">'price'</span>].<spa
                                 df.<span class="fn">query</span>(<span class="str">'col > 5 and label == 1'</span>)
                                 <span class="cmt"># string expression</span>
                                 df.<span class="fn">eval</span>(<span class="str">'new_col = col1 + col2'</span>,
-                                inplace=<span class="kw">True</span>)</div>
+                                inplace=<span class="kw">True</span>)
+                            </div>
                         </div>
                         <div class="func-tab-content">
                             <p class="body-text"><strong>View vs Copy rulebook:</strong></p>
@@ -322,7 +325,8 @@ df.<span class="fn">at</span>[idx, <span class="str">'label'</span>] = <span cla
                                 </li>
                                 <li><strong>loc vs iloc with reset_index:</strong> After <code>reset_index()</code>,
                                     integer index labels equal positions — but <code>loc[5]</code> and
-                                    <code>iloc[5]</code> may differ if index has gaps.</li>
+                                    <code>iloc[5]</code> may differ if index has gaps.
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -624,10 +628,12 @@ df_combined = pd.<span class="fn">concat</span>([num_feats, cat_feats], axis=<sp
                             <ul class="warning-list">
                                 <li><strong>Row explosion on m:m merge:</strong> If both sides have duplicate keys,
                                     merge creates a Cartesian product. Use <code>validate='m:1'</code> or
-                                    <code>'1:m'</code> to catch this early.</li>
+                                    <code>'1:m'</code> to catch this early.
+                                </li>
                                 <li><strong>concat without reset_index:</strong> Index may have duplicates after
                                     stacking. Use <code>ignore_index=True</code> or
-                                    <code>df.reset_index(drop=True)</code>.</li>
+                                    <code>df.reset_index(drop=True)</code>.
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -676,7 +682,8 @@ df_combined = pd.<span class="fn">concat</span>([num_feats, cat_feats], axis=<sp
                                     class="fn">mean</span>() <span class="cmt"># cumulative mean</span>
                                 df[<span class="str">'col'</span>].<span class="fn">ewm</span>(span=<span
                                     class="num">10</span>).<span class="fn">mean</span>() <span class="cmt">#
-                                    exponential weighted mean</span></div>
+                                    exponential weighted mean</span>
+                            </div>
                         </div>
                         <div class="func-tab-content">
                             <div class="code-wrap">
@@ -751,6 +758,7 @@ df[<span class="str">'ewm_7'</span>] = df[<span class="str">'sales'</span>].<spa
         </div>
     </div>
     <script src="js/main.js"></script>
+    <script src="js/ai-chat.js"></script>
 </body>
 
 </html>
