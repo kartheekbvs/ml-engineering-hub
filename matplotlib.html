@@ -276,7 +276,7 @@ ax.<span class="fn">set_xticks</span>([<span class="num">1</span>,<span class="n
                         </div>
                         <div class="func-tab-content">
                             <div class="sig-box">im = ax.<span class="fn">imshow</span>(data,
-                                cmap=<span class="str">'Blues'</span>, <span class="cmt">#
+                                cmap=<span class="str">'Greens'</span>, <span class="cmt">#
                                     'viridis','RdBu_r','coolwarm'</span>
                                 vmin=<span class="kw">None</span>, vmax=<span class="kw">None</span>, <span
                                     class="cmt"># clip colorscale</span>
@@ -288,7 +288,8 @@ ax.<span class="fn">set_xticks</span>([<span class="num">1</span>,<span class="n
                                     discrete matrices</span>
                                 )
                                 fig.<span class="fn">colorbar</span>(im, ax=ax, shrink=<span class="num">0.8</span>)
-                                <span class="cmt"># add colorbar</span></div>
+                                <span class="cmt"># add colorbar</span>
+                            </div>
                         </div>
                         <div class="func-tab-content">
                             <div class="code-wrap">
@@ -301,7 +302,7 @@ ax.<span class="fn">set_xticks</span>([<span class="num">1</span>,<span class="n
     cm_norm = cm.<span class="fn">astype</span>(<span class="kw">float</span>) / cm.<span class="fn">sum</span>(axis=<span class="num">1</span>, keepdims=<span class="kw">True</span>)
 
     fig, ax = plt.<span class="fn">subplots</span>(figsize=(<span class="num">6</span>, <span class="num">5</span>))
-    im = ax.<span class="fn">imshow</span>(cm_norm, cmap=<span class="str">'Blues'</span>,
+    im = ax.<span class="fn">imshow</span>(cm_norm, cmap=<span class="str">'Greens'</span>,
                    vmin=<span class="num">0</span>, vmax=<span class="num">1</span>, interpolation=<span class="str">'nearest'</span>)
     fig.<span class="fn">colorbar</span>(im, ax=ax, shrink=<span class="num">0.8</span>)
 
@@ -446,9 +447,9 @@ ax1.<span class="fn">plot</span>(epochs, val_loss,   <span class="str">'b--'</sp
 ax2.<span class="fn">plot</span>(epochs, train_acc,  <span class="str">'r-'</span>,  label=<span class="str">'Train Acc'</span>,  lw=<span class="num">2</span>)
 ax2.<span class="fn">plot</span>(epochs, val_acc,    <span class="str">'r--'</span>, label=<span class="str">'Val Acc'</span>,    lw=<span class="num">2</span>)
 
-ax1.<span class="fn">set_ylabel</span>(<span class="str">'Loss'</span>,     color=<span class="str">'blue'</span>)
+ax1.<span class="fn">set_ylabel</span>(<span class="str">'Loss'</span>,     color=<span class="str">'green'</span>)
 ax2.<span class="fn">set_ylabel</span>(<span class="str">'Accuracy'</span>, color=<span class="str">'red'</span>)
-ax1.<span class="fn">tick_params</span>(axis=<span class="str">'y'</span>, labelcolor=<span class="str">'blue'</span>)
+ax1.<span class="fn">tick_params</span>(axis=<span class="str">'y'</span>, labelcolor=<span class="str">'green'</span>)
 ax2.<span class="fn">tick_params</span>(axis=<span class="str">'y'</span>, labelcolor=<span class="str">'red'</span>)
 
 <span class="cmt"># Combined legend from both axes</span>
