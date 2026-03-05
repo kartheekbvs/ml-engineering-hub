@@ -107,5 +107,9 @@ window.initAIChat = () => {
     }
 };
 
-// Auto-run on DOMContentLoaded as a fallback
-document.addEventListener('DOMContentLoaded', window.initAIChat);
+// Initial run
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', window.initAIChat);
+} else {
+    window.initAIChat();
+}
