@@ -1,11 +1,10 @@
 // shared-layout.js — injects sidebar + nav into every doc page
 (function () {
-    const SIDEBAR_HTML = `
+  const SIDEBAR_HTML = `
 <nav class="top-nav">
   <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
   <a href="index.html" class="nav-brand">
-    <div class="nav-logo">⚡</div>
-    <span class="nav-title">ML Engineering Hub</span>
+    <span class="nav-title">TWSS</span>
   </a>
   <div class="nav-search-wrap">
     <span class="search-icon">🔍</span>
@@ -44,8 +43,25 @@
     <a href="pipelines.html" class="sidebar-link">🔗 ML Pipelines</a>
     <a href="advanced.html" class="sidebar-link">🔬 Advanced Topics</a>
   </div>
-</aside>`;
+</aside>
+<div id="ai-chat-widget">
+    <button id="ai-chat-toggle" class="glow-effect" aria-label="Toggle AI Assistant">✨</button>
+    <div id="ai-chat-window" class="glass-panel hidden">
+        <div class="ai-chat-header">
+            <h3>TWSS AI Assistant</h3>
+            <button id="ai-chat-close">✖</button>
+        </div>
+        <div id="ai-chat-messages">
+            <div class="message ai-message">Hello! I'm your TWSS AI Assistant. How can I help you?</div>
+        </div>
+        <div class="ai-chat-input-area">
+            <input type="text" id="ai-chat-input" placeholder="Ask anything..." autocomplete="off">
+            <button id="ai-chat-send">Send</button>
+        </div>
+    </div>
+</div>
+`;
 
-    // Insert before body content
-    document.body.insertAdjacentHTML('afterbegin', SIDEBAR_HTML);
+  // Insert before body content
+  document.body.insertAdjacentHTML('afterbegin', SIDEBAR_HTML);
 })();

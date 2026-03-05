@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Remove Loading State and Type Response
             document.getElementById(loadingId).remove();
-            typeWriterEffect('ai', formatMarkdown(aiReply));
+            appendMessage('ai', formatMarkdown(aiReply));
 
         } catch (error) {
             console.error("AI Error:", error);
