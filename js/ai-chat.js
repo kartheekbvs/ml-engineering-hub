@@ -1,5 +1,5 @@
-const invokeUrl = "https://integrate.api.nvidia.com/v1/chat/completions";
-const apiKey = "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";
+const invokeUrl = "/api/chat";
+// Re-routed to the Cloudflare Functions backend proxy (functions/api/chat.js)
 
 document.addEventListener('DOMContentLoaded', () => {
     const chatToggle = document.getElementById('ai-chat-toggle');
@@ -38,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(invokeUrl, {
                 method: "POST",
                 headers: {
-                    "Authorization": `Bearer ${apiKey}`,
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
