@@ -64,4 +64,9 @@
 
   // Insert before body content
   document.body.insertAdjacentHTML('afterbegin', SIDEBAR_HTML);
+
+  // Initialize AI Chat logic if the script is loaded
+  if (window.initAIChat) {
+    window.initAIChat();
+  }
 })();

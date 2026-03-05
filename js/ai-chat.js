@@ -1,8 +1,10 @@
 const invokeUrl = "/api/chat";
 // Re-routed to the Cloudflare Functions backend proxy (functions/api/chat.js)
 
-document.addEventListener('DOMContentLoaded', () => {
+window.initAIChat = () => {
     const chatToggle = document.getElementById('ai-chat-toggle');
+    if (!chatToggle) return; // Guard
+
     const chatWindow = document.getElementById('ai-chat-window');
     const chatClose = document.getElementById('ai-chat-close');
     const chatInput = document.getElementById('ai-chat-input');
@@ -102,5 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/\*(.*?)\*/g, '<em>$1</em>')
             .replace(/`(.*?)`/g, '<code class="inline-code">$1</code>')
             .replace(/\n\n/g, '<br><br>');
-    }
-});
+    };
+
+    // Auto-run on DOMContentLoaded as a fallback
+    document.addEventListener('DOMContentLoaded', window.initAIChat);
