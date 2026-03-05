@@ -104,7 +104,8 @@ window.initAIChat = () => {
             .replace(/\*(.*?)\*/g, '<em>$1</em>')
             .replace(/`(.*?)`/g, '<code class="inline-code">$1</code>')
             .replace(/\n\n/g, '<br><br>');
-    };
+    }
+};
 
-    // Auto-run on DOMContentLoaded as a fallback
-    document.addEventListener('DOMContentLoaded', window.initAIChat);
+// Auto-run on DOMContentLoaded as a fallback
+document.addEventListener('DOMContentLoaded', window.initAIChat);
