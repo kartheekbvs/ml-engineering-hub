@@ -11,32 +11,7 @@
 </head>
 
 <body>
-
-    <!-- ── Progress Bar ── -->
-    <div class="progress-bar">
-        <div class="progress-fill" id="progress-fill"></div>
-    </div>
-
-    <!-- ── Top Nav ── -->
-    <nav class="top-nav">
-        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
-        <a href="index.html" class="nav-brand">
-            <div class="nav-logo">⚡</div>
-            <span class="nav-title">TWSS</span>
-        </a>
-        <div class="nav-search-wrap">
-            <span class="search-icon">🔍</span>
-            <input class="nav-search" id="main-search" type="text" placeholder="Search functions... (Ctrl+K)"
-                autocomplete="off" />
-            <div class="search-results" id="search-results"></div>
-        </div>
-        <div class="nav-actions">
-            <button class="btn-icon" id="theme-toggle" title="Toggle theme">☀️</button>
-        </div>
-    </nav>
-
-    <!-- ── Sidebar Overlay ── -->
-    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <script src="js/shared-layout.js"></script>
 
     <!-- ── Layout ── -->
     <div class="app-layout no-sidebar">
@@ -47,7 +22,7 @@
             <!-- HERO -->
             <section class="hero">
                 <div class="hero-inner">
-                    <div class="hero-chip fade-up fade-up-1">⚡ Production-Grade ML Reference</div>
+                    <div class="hero-chip fade-up fade-up-1">Production-Grade ML Reference</div>
                     <h1 class="hero-title fade-up fade-up-2">
                         ML Engineering<br /><span>Reference Hub</span>
                     </h1>
@@ -354,7 +329,7 @@
             <!-- Footer -->
             <div class="landing-section">
                 <div class="doc-footer">
-                    <div>⚡ TWSS — Built for ML Engineers</div>
+                    <div>TWSS — Built for ML Engineers</div>
                     <div class="footer-links">
                         <a href="index.html">Home</a>
                         <a href="sklearn-preprocessing.html">Scikit-learn</a>

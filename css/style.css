@@ -19,10 +19,10 @@
 
     /* Neutral - Transparent Dark (Infracorp Style) */
     --bg: #030405;
-    --bg-glass: rgba(10, 11, 15, 0.4);
-    --bg-card: rgba(255, 255, 255, 0.03);
-    --bg-card-hover: rgba(255, 255, 255, 0.06);
-    --bg-nav: rgba(3, 4, 5, 0.6);
+    --bg-glass: rgba(10, 11, 15, 0.45);
+    --bg-card: rgba(255, 255, 255, 0.02);
+    --bg-card-hover: rgba(255, 255, 255, 0.05);
+    --bg-nav: rgba(3, 4, 5, 0.75);
     --bg-sidebar: rgba(3, 4, 5, 0.7);
     --bg-code: #000000;
     --bg-inline: rgba(16, 185, 129, 0.1);
