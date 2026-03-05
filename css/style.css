@@ -332,13 +332,22 @@ body::before {
 
 /* Sidebar Toggle */
 .sidebar-toggle {
-    display: none;
+    display: flex;
     background: none;
     border: none;
     color: var(--text);
-    font-size: 20px;
+    font-size: 24px;
     cursor: pointer;
-    padding: 4px;
+    padding: 8px;
+    border-radius: 8px;
+    transition: var(--trans);
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar-toggle:hover {
+    background: var(--primary-glow);
+    color: var(--primary-light);
 }
 
 /* App Layout */
@@ -357,11 +366,18 @@ body::before {
     height: calc(100vh - var(--nav-h));
     background: var(--bg-sidebar);
     border-right: 1px solid var(--border);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     overflow-y: auto;
     overflow-x: hidden;
-    z-index: 900;
+    z-index: 1200;
     padding: 16px 0;
-    transition: transform var(--trans-slow);
+    transform: translateX(-100%);
+    transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.sidebar.open {
+    transform: translateX(0);
 }
 
 .sidebar-section {
@@ -425,10 +441,11 @@ body::before {
 /* Main Content */
 .main-content {
     flex: 1;
-    margin-left: var(--sidebar-w);
+    margin-left: 0;
     min-width: 0;
     padding: 40px 48px;
-    max-width: calc(100% - var(--sidebar-w));
+    max-width: 100%;
+    transition: margin-left 0.4s cubic-bezier(0.19, 1, 0.22, 1);
 }
 
 .content-inner {

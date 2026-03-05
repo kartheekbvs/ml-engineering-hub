@@ -47,12 +47,16 @@ function initCopyButtons() {
 }
 
 // ── Sidebar Toggle ─────────────────────────────────────
-function initSidebar() {
+window.initSidebar = () => {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebar-overlay');
     const toggle = document.getElementById('sidebar-toggle');
 
     if (!sidebar || !overlay || !toggle) return;
+
+    // Prevent double listeners
+    if (toggle.dataset.initialized) return;
+    toggle.dataset.initialized = 'true';
 
     toggle.addEventListener('click', () => {
         sidebar.classList.toggle('open');
@@ -62,7 +66,7 @@ function initSidebar() {
         sidebar.classList.remove('open');
         overlay.classList.remove('active');
     });
-}
+};
 
 // ── Active Sidebar Link ────────────────────────────────
 function initActiveLink() {
@@ -297,7 +301,7 @@ function initAnimations() {
 document.addEventListener('DOMContentLoaded', () => {
     Theme.init();
     initCopyButtons();
-    initSidebar();
+    window.initSidebar();
     initActiveLink();
     initFuncCards();
     initFuncTabs();

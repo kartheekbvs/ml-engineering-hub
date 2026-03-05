@@ -66,7 +66,6 @@
   document.body.insertAdjacentHTML('afterbegin', SIDEBAR_HTML);
 
   // Initialize AI Chat logic if the script is loaded
-  if (window.initAIChat) {
-    window.initAIChat();
-  }
+  if (window.initAIChat) window.initAIChat();
+  if (window.initSidebar) window.initSidebar();
 })();
