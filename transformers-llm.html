@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Large Language Models (BERT &amp; GPT) — TWSS</title>
+<link href="css/style.css" rel="stylesheet"/>
+</head>
+<body>
+<script src="js/shared-layout.js"></script>
+<div class="app-layout has-toc">
+<main class="main-content">
+<div class="content-inner">
+<div class="page-header">
+<div class="page-breadcrumb"><a href="roadmap.html">Roadmap</a> › Deep Learning</div>
+<h1 class="page-title">Large Language Models (LLMs)</h1>
+<p class="page-subtitle">Master Encoder vs Decoder paradigms, Masked Language Modeling, and RLHF.
+                    </p>
+</div>
+<div class="edu-concept" id="llm-core">
+<div class="edu-concept-title">Pre-Trained Foundation Models</div>
+<div class="edu-section edu-section-intro">
+<div class="edu-section-title">1. Concept Introduction</div>
+<p>The original 2017 Transformer had two halves: An <strong>Encoder</strong> (To understand the
+                            input text) and a <strong>Decoder</strong> (To generate the translated output text).</p>
+<p>The revolution of the 2020s happened when Google and OpenAI realized they didn't need both
+                            halves. By ripping the architecture in half and training massive, billions-parameter
+                            clusters purely on the "Predict the next word" task using the entirety of the open internet,
+                            they created Foundation Models. <strong>BERT</strong> (Google) is an isolated Encoder.
+                            <strong>GPT</strong> (OpenAI) is an isolated Decoder.</p>
+</div>
+<div class="edu-section edu-section-intuition">
+<div class="edu-section-title">2. Concept Intuition</div>
+<p><strong>BERT (The Detective - Encoder Only):</strong></p>
+<p>BERT reads an entire sentence simultaneously, left-to-right AND right-to-left. "The child ate
+                            the [BLANK] with a fork." Because BERT sees the word "fork" at the end of the sentence, it
+                            perfectly deduces the blank must be "spaghetti". It is extraordinary for understanding
+                            context, searching documents, or classifying text.</p>
+<p><strong>GPT (The Author - Decoder Only):</strong></p>
+<p>GPT is strictly mathematically forbidden from looking at future words. It generates text
+                            sequentially. "The child ate the". GPT has to predict the next word without seeing the end
+                            of the sentence. It generates "apple". Then it feeds "The child ate the apple" back into
+                            itself, and guesses the next word. It is an Autoregressive engine, terrible at searching,
+                            but flawlessly eloquent at writing.</p>
+</div>
+<div class="edu-section edu-section-syntax">
+<div class="edu-section-title">3. Python Syntax (HuggingFace Transformers)</div>
+<div class="sig-box">
+                            from transformers import AutoModelForCausalLM, AutoTokenizer
+
+                            # 1. Download the massive Pre-Trained Weights from HuggingFace
+                            model_id = "gpt2" # (Or Llama-3, Mistral, etc.)
+                            tokenizer = AutoTokenizer.from_pretrained(model_id)
+                            model = AutoModelForCausalLM.from_pretrained(model_id)
+
+                            # 2. Tokenize Input Strings into Integer Tensors
+                            inputs = tokenizer("The capital of France is", return_tensors="pt")
+
+                            # 3. Model Generation (The Autoregressive Loop)
+                            outputs = model.generate(inputs.input_ids, max_length=10)
+
+                            # 4. Decode the Integers back to English Strings
+                            print(tokenizer.decode(outputs[0], skip_special_tokens=True))
+                        </div>
+</div>
+<div class="edu-section edu-section-code">
+<div class="edu-section-title">4. Python Code Example (Text Generation)</div>
+<div class="code-wrap">
+<div class="code-header"><span class="code-lang">python</span></div>
+<pre><code>from transformers import pipeline
+
+# Scenario: We want to use a massive LLM with exactly 2 lines of code.
+# The `pipeline` object obscures all the extreme matrix multiplication 
+# and Pytorch/TensorFlow syntax automatically.
+
+# Load a Text-Generation LM (like GPT/Llama)
+# 'device=0' forces the workload onto your primary NVIDIA GPU.
+generator = pipeline("text-generation", model="gpt2", device=0)
+
+# Provide the prompt. 
+# We configure Temperature. Lower = More rigid, Higher = More creative.
+result = generator("Artificial Intelligence will eventually", 
+                   max_length=50, 
+                   temperature=0.7, 
+                   num_return_sequences=1)
+
+print(result[0]['generated_text'])
+# Output: "Artificial Intelligence will eventually become the underlying 
+# infrastructure of human society, operating seamlessly in the background..."
+</code></pre>
+</div>
+</div>
+<div class="edu-section edu-section-line-by-line">
+<div class="edu-section-title">5. Line-by-Line Explanation</div>
+<table>
+<tr>
+<th>Code Line</th>
+<th>Explanation</th>
+</tr>
+<tr>
+<td><code>model="gpt2"</code></td>
+<td>HuggingFace reaches out to the cloud and downloads hundreds of Megabytes (or
+                                    Gigabytes) of pre-trained floating-point weights exactly as OpenAI finished
+                                    computing them in 2019. It injects them instantly into your local RAM.</td>
+</tr>
+<tr>
+<td><code>max_length=50</code></td>
+<td>The model calculates the probability of exactly 50,257 different English words. It
+                                    picks the highest probability word, appends it, and loops. It does this exact heavy
+                                    computation exactly 50 consecutive times.</td>
+</tr>
+<tr>
+<td><code>temperature=0.7</code></td>
+<td>If the math says `[Apple: 80%, Orange: 20%]`, a temperature of `0.0` means the AI
+                                    will pick "Apple" 100% of the time. This makes the text robotic. A temperature of
+                                    `0.7` slightly flattens the math curve, occasionally allowing the 20% "Orange" to
+                                    slip through, giving the AI human-like "creativity" and variance.</td>
+</tr>
+</table>
+</div>
+<div class="edu-section edu-section-internals">
+<div class="edu-section-title">6. Internal Mechanism (Causal Masking in GPT)</div>
+<p>How do we mathematically force GPT to NOT look at future words during its training?</p>
+<p>If we provide the training sentence "The cat sat on the mat", GPT computes the $O(N^2)$
+                            Self-Attention matrix (a 6x6 grid). Before it calculates the output, the network physically
+                            injects <strong>Negative Infinity (`-inf`)</strong> into the top-right triangle of the
+                            matrix. </p>
+<p>When the Softmax function sees `-inf`, it mathematically converts it to exactly `0.0`. So,
+                            when the word "cat" is doing its math, the values for "sat", "on", "the", and "mat" are
+                            multiplied by `0.0`. They are physically blinded. "cat" can only absorb context from "The"
+                            and itself. This strictly enforces the unidirectional arrow of time.</p>
+</div>
+<div class="edu-section edu-section-shapes">
+<div class="edu-section-title">7. Masked Language Modeling (BERT)</div>
+<p>Unlike GPT, BERT is an Encoder. It does <em>not</em> use the `-inf` Causal Mask. It looks
+                            randomly at everything.</p>
+<p>Google trained BERT by downloading the entire Wikipedia database. They took sentences and
+                            randomly swapped 15% of the words with a literal <code>[MASK]</code> token. "The man was
+                            bitten by a <code>[MASK]</code>". BERT processes the sentence, looks heavily at "man" and
+                            "bitten", and outputs a probability array over all 50,000 words. When it guesses "dog", Loss
+                            is low. When it guesses "cloud", Loss is high. Through this massive, un-masked puzzle game,
+                            BERT developed a structural understanding of the English language that fundamentally altered
+                            Google Search.</p>
+</div>
+<div class="edu-section edu-section-edge-cases">
+<div class="edu-section-title">8. Edge Cases (Fine-Tuning Catastrophe)</div>
+<p>If you download Llama-3 (Pre-Trained on the internet), and you Fine-Tune it on 10,000 medical
+                            documents, the AI will learn the medical jargon flawlessly.</p>
+<p>However, running gradient descent on the new data causes <strong>Catastrophic
+                                Forgetting</strong>. The weight matrices are violently overwritten by the medical data.
+                            The AI suddenly forgets how to write poetry, translate to Spanish, or even hold a normal
+                            conversational greeting. To solve this, researchers use <strong>PEFT (Parameter-Efficient
+                                Fine-Tuning)</strong> mechanisms like <strong>LoRA (Low-Rank Adaptation)</strong>, which
+                            absolutely freezes the massive 8B foundational weights in RAM, and only trains a tiny,
+                            disposable 10MB "adapter" matrix mathematically super-imposed on top of the brain.</p>
+</div>
+<div class="edu-section edu-section-variations">
+<div class="edu-section-title">9. Variations &amp; Alternatives (RLHF)</div>
+<p>A pure "Predict the next word" GPT model does not answer questions. If you type: "How to fix
+                            a car?", a raw GPT model will just continue the document: "...and other questions mechanics
+                            ask."</p>
+<p>To turn it into an Assistant (like ChatGPT), OpenAI uses <strong>RLHF (Reinforcement Learning
+                                from Human Feedback)</strong>. An initial supervised phase teaches it question/answer
+                            format. Then, the AI generates 4 different answers to a single prompt. A human contractor
+                            reads all 4, and physically ranks them `1st, 2nd, 3rd, 4th`. A massive Reinforcement
+                            Learning reward algorithm (PPO) then mathematically sculpts the model's neuroplasticity to
+                            highly favor the tone, alignment, and formatting style of the Human's #1 preference.</p>
+</div>
+<div class="edu-section edu-section-mistakes">
+<div class="edu-section-title">10. Common Mistakes</div>
+<p><strong>Mistake:</strong> Not Quantizing models for local inference.</p>
+<p>Llama-3 (8 Billion parameters) using standard 32-bit floats (`fp32`) requires 32 Gigabytes of
+                            GPU VRAM just to turn on. Nobody has that at home.</p>
+<p><strong>Fix:</strong> <code>load_in_4bit=True</code> (BitsAndBytes Integration). We strip the
+                            32-bit decimals down to massive, primitive 4-bit block approximations. The model loses less
+                            than 1% of its accuracy, but the RAM requirement crashes from 32GB down to 5.5GB, allowing
+                            it to easily run locally on consumer gaming laptops or MacBooks completely offline.</p>
+</div>
+<div class="edu-section edu-section-advanced">
+<div class="edu-section-title">11. Advanced Explanation (KV-Caching)</div>
+<p>Autoregressive Generation (token by token) is horrifically slow because of redundant math. To
+                            predict word 100, the AI has to re-calculate the massive Attention matrices for words 1
+                            through 99. To predict word 101, it throws the old math away, and recalculates 1 through 100
+                            entirely from scratch!</p>
+<p>All production LLMs use <strong>KV-Caching</strong>. After calculating the Keys (K) and
+                            Values (V) matrix blocks for word 99, it permanently stores those heavily-computed
+                            coordinates physically in GPU memory. When generating word 101, it only computes the matrix
+                            for word 101, and instantaneously references the frozen KV-memories of the past, reducing
+                            compute time from $O(N)$ back to $O(1)$ per step, but fundamentally creating a massive,
+                            ballooning RAM leak during long generations.</p>
+</div>
+<div class="edu-next-steps">
+                        ✅ <strong>Next Steps:</strong> If you want, I can also give you a "100 Most Important Concepts for AI/ML Engineers" (a compact list that interviews and advanced courses focus on).
+                    </div></div>
+</div>
+<div class="toc-panel" id="toc">
+<div class="toc-heading">On this page</div>
+<a class="toc-link" href="#llm-core">LLMs &amp; Architecture</a>
+</div>
+</main>
+</div>
+</body>
+</html>

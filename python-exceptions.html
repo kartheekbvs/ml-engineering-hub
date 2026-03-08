@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Python Exception Handling — TWSS</title>
+<link href="css/style.css" rel="stylesheet"/>
+</head>
+<body>
+<script src="js/shared-layout.js"></script>
+<div class="app-layout has-toc">
+<main class="main-content">
+<div class="content-inner">
+<div class="page-header">
+<div class="page-breadcrumb"><a href="roadmap.html">Roadmap</a> › Python Core</div>
+<h1 class="page-title">Exception Handling</h1>
+<p class="page-subtitle">Understand Traceback Bubbling, the <code>SETUP_FINALLY</code> Bytecode, and
+                        defensive exception trapping.</p>
+</div>
+<div class="edu-concept" id="py-exceptions">
+<div class="edu-concept-title">Error Propagation and Trapping</div>
+<div class="edu-section edu-section-intro">
+<div class="edu-section-title">1. Concept Introduction</div>
+<p>When Python encounters a mathematically impossible operation (like `10 / 0`) or an invalid
+                            memory pointer (like `my_list[500]`), the underlying C-compiler violently halts completely.
+                            It constructs a massive <code>Exception</code> Object containing the exact line of code, the
+                            file name, and the state of the Call Stack, and throws it outward.</p>
+<p>If this object is not caught, it permanently crashes your entire application. Exception
+                            handling (<code>try / except</code>) is the architecture used to place a safety net
+                            underneath dangerous code blocks, intercept the falling Error Object, and cleanly recover
+                            without aborting the server process.</p>
+</div>
+<div class="edu-section edu-section-intuition">
+<div class="edu-section-title">2. Concept Intuition</div>
+<p>Imagine a factory assembly line (The Call Stack).</p>
+<p>Worker C (a deep function) triggers an explosion (an Exception). He immediately abandons his
+                            station and screams the error to his manager, Worker B. If Worker B doesn't know how to
+                            handle the error, he also abandons his station and screams it to Worker A. If Worker A hits
+                            the Top-Level Manager and still no one knows how to handle it, the factory shuts down
+                            (Crash).</p>
+<p>A <code>try / except</code> block is like giving Worker B a fire extinguisher. When Worker C
+                            screams, Worker B intercepts the error, extinguishes the fire, logs it in a notebook, and
+                            tells Worker A to keep the factory running normally.</p>
+</div>
+<div class="edu-section edu-section-syntax">
+<div class="edu-section-title">3. Python Syntax</div>
+<div class="sig-box">
+                            # Basic Structure
+                            try:
+                            # Code that might explode
+                            dangerous_operation()
+                            except SpecificErrorType as e:
+                            # Executes ONLY if SpecificErrorType was thrown
+                            print("Caught the explosion!", e)
+                            except Exception:
+                            # A generic catch-all for literally any other error
+                            pass
+                            else:
+                            # Executes ONLY if the try block succeeded perfectly (No errors)
+                            print("Success!")
+                            finally:
+                            # Executes NO MATTER WHAT (Even if a fatal crash occurs).
+                            # Used to close database connections and file locks.
+                            close_connections()
+                        </div>
+</div>
+<div class="edu-section edu-section-code">
+<div class="edu-section-title">4. Python Code Example</div>
+<div class="code-wrap">
+<div class="code-header"><span class="code-lang">python</span></div>
+<pre><code># Scenario: Safely processing an ML API request payload
+def process_data(payload):
+    try:
+        data = payload["id"]                # Might throw KeyError
+        rate = 100 / payload["views"]       # Might throw ZeroDivisionError
+    except KeyError as error:
+        print(f"Malformed Payload: Missing {error}")
+        return False
+    except ZeroDivisionError:
+        print("Model generated 0 views, defaulting rate to 0.")
+        rate = 0
+    
+    return rate
+
+# Manually launching an error outward
+if rate &lt; 0:
+    raise ValueError("Learning rate cannot be negative.")
+</code></pre>
+</div>
+</div>
+<div class="edu-section edu-section-line-by-line">
+<div class="edu-section-title">5. Line-by-Line Explanation</div>
+<table>
+<tr>
+<th>Code Line</th>
+<th>Explanation</th>
+</tr>
+<tr>
+<td><code>try:</code></td>
+<td>Python executes a <code>SETUP_FINALLY</code> bytecode mechanism. It pushes a "Trap
+                                    Handler" structure onto the active C-Call Stack pointer block, effectively drawing a
+                                    perimeter around the indented code.</td>
+</tr>
+<tr>
+<td><code>rate = 100 / 0</code></td>
+<td>The CPU Arithmetic Unit fails. It returns a C-level signal. Python builds a
+                                    <code>PyObject</code> of class <code>ZeroDivisionError</code> and fires the
+                                    <code>POP_JUMP_IF_EXCEPTION</code> bytecode.</td>
+</tr>
+<tr>
+<td><code>except KeyError as e:</code></td>
+<td>The trap catches the error. It compares the error class (ZeroDiv) to the target
+                                    class (KeyError). It misses. The error passes completely through this net.</td>
+</tr>
+<tr>
+<td><code>except ZeroDivisionError:</code></td>
+<td>The trap catches the error. The class type natively matches! Python executes the
+                                    indented safety code, and the error object is legally Garbage Collected and
+                                    destroyed. The program recovers.</td>
+</tr>
+</table>
+</div>
+<div class="edu-section edu-section-internals">
+<div class="edu-section-title">6. Internal Mechanism (Traceback Bubbling)</div>
+<p>How does an Exception actually crash a program?</p>
+<p>When an Exception is raised, Python extracts the <code>__traceback__</code> attribute. It
+                            violently rips the current working Function Frame off the Call Stack, completely destroying
+                            all local variables instantly. It drops down to the parent function that called it. If it
+                            finds NO `try-except` block there, it violently rips that parent frame off the stack too.
+                        </p>
+<p>This "bubbling up" continues until it hits the Global Module level. If it hits the Absolute
+                            Top of the script without being caught, Python activates its final system exit routine,
+                            printing the entire destroyed Call Stack path to the console in red text, and force-kills
+                            the `.exe` process.</p>
+</div>
+<div class="edu-section edu-section-returns">
+<div class="edu-section-title">7. Return Values</div>
+<p>An Exception functionally acts as a forced <code>return</code> statement. The absolute
+                            maximum guarantee in Python is that if a line inside a `try` block throws an error, NO CODE
+                            underneath that line within the same block will execute. Execution is instantaneously
+                            teleported to the `except` block.</p>
+</div>
+<div class="edu-section edu-section-edge-cases">
+<div class="edu-section-title">8. Edge Cases</div>
+<p><strong>The <code>finally</code> vs <code>return</code> War:</strong></p>
+<pre><code>def test():
+    try:
+        return "A"
+    finally:
+        return "B"</code></pre>
+<p>What does this function return? It returns <strong>"B"</strong>!</p>
+<p>Because the <code>finally</code> block is architecturally guaranteed by the C-compiler to
+                            execute no matter what, when the `try` block hits the first `return`, Python literally
+                            suspends the return command in mid-air, executes the `finally` block, sees the second
+                            `return`, completely overrides the suspended one, and yields "B".</p>
+</div>
+<div class="edu-section edu-section-mistakes">
+<div class="edu-section-title">9. Common Mistakes</div>
+<p><strong>Mistake:</strong> The Bare Except Clause.</p>
+<p><code>except: pass</code> ❌ (Catastrophic Error Logging Silencer)</p>
+<p><strong>Why is this disastrous?:</strong> A blank `except:` block will swallow EVERY single
+                            error that passes through it, including absolutely vital System level errors. If a user
+                            presses <code>Ctrl+C</code> in the terminal to kill a runaway script, Python throws a
+                            <code>KeyboardInterrupt</code> exception. A bare `except: pass` block will literally
+                            intercept the user's kill command, destroy it, and force the infinite loop script to
+                            continue running unkillably in the background until the server's RAM burns out.</p>
+<p><strong>Fix:</strong> NEVER use a blank except. Always target specific classes, or at the
+                            maximum, use <code>except Exception as e:</code> (which safely inherits from logical logic
+                            but deliberately ignores System Exit signals).</p>
+</div>
+<div class="edu-section edu-section-advanced">
+<div class="edu-section-title">10. Advanced Explanation</div>
+<p><strong>Exception Object Hierarchy (OOP Inheritance):</strong></p>
+<p>Exceptions are not just strings. They are a massive deep Object-Oriented Class layout.</p>
+<pre><code>BaseException
+ ├── SystemExit
+ ├── KeyboardInterrupt
+ └── Exception
+      ├── ArithmeticError
+      │    ├── ZeroDivisionError
+      │    └── OverflowError
+      ├── LookupError
+           ├── IndexError
+           └── KeyError</code></pre>
+<p>When you write <code>except LookupError:</code>, you are creating a net that polymorphically
+                            catches <strong>both</strong> IndexErrors and KeyErrors simultaneously because they inherit
+                            from the LookupError parent class! This allows data engineers to write incredibly clean,
+                            wide-net trapping structures for entire modules.</p>
+</div>
+<div class="edu-next-steps">
+                        ✅ <strong>Next Steps:</strong> If you want, I can also give you a "100 Most Important Concepts for AI/ML Engineers" (a compact list that interviews and advanced courses focus on).
+                    </div></div>
+</div>
+<div class="toc-panel" id="toc">
+<div class="toc-heading">On this page</div>
+<a class="toc-link" href="#py-exceptions">Error Trapping</a>
+</div>
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Python Functions — TWSS</title>
+<link href="css/style.css" rel="stylesheet"/>
+</head>
+<body>
+<script src="js/shared-layout.js"></script>
+<div class="app-layout has-toc">
+<main class="main-content">
+<div class="content-inner">
+<div class="page-header">
+<div class="page-breadcrumb"><a href="roadmap.html">Roadmap</a> › Python Core</div>
+<h1 class="page-title">Functions &amp; Execution Stacks</h1>
+<p class="page-subtitle">Master First-Class Objects, the LEGB naming rule, Call Stack memory
+                        allocation, and pointer packing (<code>*args</code>).</p>
+</div>
+<div class="edu-concept" id="py-functions">
+<div class="edu-concept-title">Functional Execution Flow</div>
+<div class="edu-section edu-section-intro">
+<div class="edu-section-title">1. Concept Introduction</div>
+<p>Functions are blocks of reusable code designed to perform a single, specific action. In
+                            mathematical terms, a function <code>f(x)</code> ingests variables, computes logic inside a
+                            sealed biological chamber, and excretes a result.</p>
+<p>In Python, <strong>Functions are First-Class Citizens</strong>. This means a function is not
+                            just a grammatical structure; it is a physical Object existing in RAM (specifically, a
+                            <code>PyFunctionObject</code>). You can assign a function to a variable, pass a function
+                            into another function, or return a function from a function.</p>
+</div>
+<div class="edu-section edu-section-intuition">
+<div class="edu-section-title">2. Concept Intuition</div>
+<p>Imagine a factory assembly line. A function is a highly specialized robotic arm on that line.
+                        </p>
+<p>The code outside the function knows nothing about how the robotic arm works internally. It
+                            simply places raw materials (<strong>Arguments</strong>) onto the conveyor belt heading
+                            towards the arm. The arm operates inside a sealed black box (<strong>Local Scope</strong>).
+                            When finished, it places a finished product (<strong>Return Value</strong>) back onto the
+                            conveyor belt and shuts down.</p>
+</div>
+<div class="edu-section edu-section-syntax">
+<div class="edu-section-title">3. Python Syntax</div>
+<div class="sig-box">
+                            # 1. Defining a basic function
+                            def my_function(param1, param2="Default"):
+                            local_var = param1 + param2
+                            return local_var
+
+                            # 2. Variable-length Arguments (Packing)
+                            def dynamic_func(*args, **kwargs):
+                            # args becomes a Tuple of positional arguments
+                            # kwargs becomes a Dictionary of keyword arguments
+                            pass
+
+                            # 3. Anonymous Lambda Functions
+                            squared = lambda x: x ** 2
+                        </div>
+</div>
+<div class="edu-section edu-section-code">
+<div class="edu-section-title">4. Python Code Example</div>
+<div class="code-wrap">
+<div class="code-header"><span class="code-lang">python</span></div>
+<pre><code># Scenario 1: Scope and the LEGB Rule
+x = 10  # Global Scope
+
+def outer():
+    x = 20  # Enclosing Scope
+    def inner():
+        x = 30  # Local Scope
+        print(x)
+    return inner
+
+# Scenario 2: *args Pointer Packing
+def train_model(model_name, *hyperparameters):
+    print(f"Training: {model_name}")
+    for p in hyperparameters:
+        print(f"Applying pointer setting: {p}")
+
+train_model("ResNet50", 0.01, 64, "Adam")
+</code></pre>
+</div>
+</div>
+<div class="edu-section edu-section-line-by-line">
+<div class="edu-section-title">5. Line-by-Line Explanation</div>
+<table>
+<tr>
+<th>Code Line</th>
+<th>Explanation</th>
+</tr>
+<tr>
+<td><code>def outer():</code></td>
+<td>Python allocates a massive <code>PyFunctionObject</code> structure into RAM. It
+                                    compiles the internal code into Bytecode string arrays, attaches a nametag called
+                                    `outer`, and stores it in the Global Dictionary. The code *inside* the function is
+                                    NOT executed yet.</td>
+</tr>
+<tr>
+<td><code>return inner</code></td>
+<td>Because functions are First-Class Objects, the `outer()` function returns a direct
+                                    C-pointer pointing to the newly constructed `inner` function object, allowing the
+                                    global script to access the trapped robotic arm.</td>
+</tr>
+<tr>
+<td><code>def train_model(name, *hyper):</code></td>
+<td>The <code>*</code> is the crucial Packing Operator. Python intercepts all
+                                    overflowing arguments (`0.01`, `64`, `"Adam"`), physically packs all of their memory
+                                    pointers into a brand new immutable `Tuple`, and assigns the nametag
+                                    `hyperparameters` to that Tuple.</td>
+</tr>
+</table>
+</div>
+<div class="edu-section edu-section-io">
+<div class="edu-section-title">6. Input and Output Example</div>
+<p><strong>Input:</strong> <code>def f(x=None): return id(x)</code> called via <code>f()</code>.
+                        </p>
+<p><strong>Transformation:</strong> The namespace is built. The CPU searches for the argument
+                            `x`. Finding none provided, it looks to the function signature and finds the default `None`
+                            object. It ties the local pointer `x` to Python's universal `None` memory address. The
+                            <code>id()</code> function extracts that physical integer address.</p>
+<p><strong>Output State:</strong> The integer `140728956274488` is returned and the function's
+                            local memory environment drops entirely out of RAM.</p>
+</div>
+<div class="edu-section edu-section-internals">
+<div class="edu-section-title">7. Internal Mechanism (The Call Stack)</div>
+<p>When you call a function <code>my_func()</code>, Python freezes the current global execution
+                            script.</p>
+<p>It physically pushes a new <strong>Frame Object</strong> onto the C Call Stack. This Frame
+                            contains:</p>
+<ol>
+<li>A brand new <strong>Local Dictionary</strong> (A blank slate for variables).</li>
+<li>A back-pointer to the Global Dictionary (So it can read outside).</li>
+<li>An Instruction Pointer indicating exactly where to resume the global script.</li>
+</ol>
+<p>When the function hits a <code>return</code> statement, Python evaluates the return value,
+                            instantly obliterates the Local Dictionary (destroying all internal variables),
+                            <em>pops</em> the Frame off the stack, and resumes execution.</p>
+</div>
+<div class="edu-section edu-section-shapes">
+<div class="edu-section-title">8. The LEGB Scope Rule</div>
+<p>When you type a variable name <code>x</code> inside a function, Python must figure out which
+                            memory address <code>x</code> belongs to. It violently searches through 4 distinct layered
+                            dictionaries in exactly this order:</p>
+<ul>
+<li><strong>L (Local):</strong> First checks the function's internal blank-slate dictionary.
+                            </li>
+<li><strong>E (Enclosing):</strong> Check any parent functions that wrap this function.</li>
+<li><strong>G (Global):</strong> Checks the script's main top-level dictionary.</li>
+<li><strong>B (Built-in):</strong> Checks Python's absolute core C-functions (like
+                                <code>len()</code>, <code>print()</code>).</li>
+</ul>
+<p>If it fails all 4, it throws a <code>NameError</code>.</p>
+</div>
+<div class="edu-section edu-section-data-structure">
+<div class="edu-section-title">9. Vector Representation</div>
+<p>Memory representation of Keyword Argument packing <code>**kwargs</code>:</p>
+<pre><code>config_model(epochs=10, lr=0.01)
+
+[ Function Stack Frame ]
+kwargs ------&gt; [ PyDictObject ]
+               "epochs" : -&gt; [PyLong: 10]
+               "lr"     : -&gt; [PyFloat: 0.01]</code></pre>
+<p>The <code>**</code> operator physically intercepts all `name=value` pairs typed into the
+                            function call, allocates a massive Hash Table (Dictionary), and dynamically loads the
+                            pointers into it.</p>
+</div>
+<div class="edu-section edu-section-returns">
+<div class="edu-section-title">10. Return Values</div>
+<p>A Python function <strong>ALWAYS</strong> returns exactly ONE object.</p>
+<p>If you write <code>return</code> with no value, it returns <code>None</code>.</p>
+<p>If you don't write a return statement at all, Python silently injects
+                            <code>return None</code> at the deepest bytecode level.</p>
+<p>If you write <code>return a, b, c</code>, Python instantly builds a hidden
+                            <strong>Tuple</strong>, packs the three pointers inside it, and returns the single Tuple
+                            object.</p>
+</div>
+<div class="edu-section edu-section-edge-cases">
+<div class="edu-section-title">11. Edge Cases</div>
+<p><strong>The Mutable Default Argument Disaster:</strong></p>
+<pre><code>def append_log(msg, log=[]):
+    log.append(msg)
+    return log</code></pre>
+<p><strong>What Happens:</strong> The first time you call <code>append_log("Hi")</code>, it
+                            returns <code>["Hi"]</code>. The second time you call <code>append_log("Hello")</code>, it
+                            returns <code>["Hi", "Hello"]</code>. Why did the memory carry over?!</p>
+<p>Because default arguments are evaluated <strong>EXACTLY ONCE</strong> at compile time, NOT at
+                            function call time. That <code>[]</code> list object is permanently glued to the
+                            <code>PyFunctionObject</code> in memory. Every subsequent call mutates the exact same global
+                            list pointer. <strong>Fix:</strong> Always use
+                            <code>def func(log=None): if log is None: log = []</code>.</p>
+</div>
+<div class="edu-section edu-section-variations">
+<div class="edu-section-title">12. Variations &amp; Alternatives</div>
+<p><strong>Generators (<code>yield</code>):</strong></p>
+<p>If you replace <code>return</code> with <code>yield</code>, the function completely changes
+                            architecture.</p>
+<p>Instead of destroying its Local Dictionary and popping off the Call Stack, a
+                            <code>yield</code> statement <strong>FREEZES</strong> the function. It pauses the robotic
+                            arm mid-motion, hands a value out, and waits. Calling <code>next()</code> on it explicitly
+                            unfreezes the arm to compute the next step. This allows for processing terabytes of Data
+                            Science logs using only megabytes of RAM.</p>
+</div>
+<div class="edu-section edu-section-mistakes">
+<div class="edu-section-title">13. Common Mistakes</div>
+<p><strong>Mistake:</strong> Trying to mutate Global Integers from inside a function.</p>
+<p><code>count = 0</code><br/><code>def increment(): count += 1</code></p>
+<p><strong>Why does this crash?:</strong> <code>count += 1</code> is shorthand for
+                            <code>count = count + 1</code>. Because there is an equals sign, the Python compiler falsely
+                            assumes you are creating a BRAND NEW Local Variable called `count`. But because it tries to
+                            read `count + 1` before creating it, it crashes with <code>UnboundLocalError</code>.</p>
+<p><strong>Fix:</strong> You must explicitly tell the compiler to bypass the L-scope and tap
+                            directly into G-scope by writing <code>global count</code> at the top of the function.</p>
+</div>
+<div class="edu-section edu-section-performance">
+<div class="edu-section-title">14. Performance Considerations</div>
+<p>Calling a function in Python adds immense overhead (allocating dictionaries, pushing Call
+                            Stack frames). If you have a massive math calculation happening 10 million times inside a
+                            tight <code>for</code> loop, you should NEVER abstract that math out into a separate
+                            <code>def math_calc()</code>. You must inline the math directly into the loop to prevent
+                            millions of Call Stack frame creations.</p>
+</div>
+<div class="edu-section edu-section-practice">
+<div class="edu-section-title">15. Practice Exercise</div>
+<p><strong>Challenge:</strong> Write a decorator function called <code>@timer</code> that wraps
+                            any target function. It should record <code>time.time()</code> before the target executes,
+                            run the target, record <code>time.time()</code> after, print the difference, and return the
+                            target's result.</p>
+<p><strong>Expected Concept:</strong> A Decorator is just a function that accepts a Function
+                            Object as an argument, defines a wrapper function internally, and returns that wrapper
+                            pointer!</p>
+</div>
+<div class="edu-section edu-section-advanced">
+<div class="edu-section-title">16. Advanced Explanation</div>
+<p><strong>Closures and the Cell Object:</strong></p>
+<p>If you have an <code>inner()</code> function that relies on variables in an
+                            <code>outer()</code> function, what happens when `outer()` finishes and returns `inner`?
+                            Theoretically, `outer`'s Local Dictionary is annihilated, so `inner` should lose access to
+                            the variables!</p>
+<p>Python intercepts this. If it detects `inner` needs a variable from `outer`, Python creates a
+                            C-level <strong>Cell Object</strong>. It locks the memory pointer inside this titanium Cell
+                            and permanently glues it to the `inner` function object (stored in a hidden attribute called
+                            <code>__closure__</code>). This guarantees the memory survives the garbage collector,
+                            allowing Data Scientists to create highly dynamic parameterized ML pipeline functions!</p>
+</div>
+<div class="edu-next-steps">
+                        ✅ <strong>Next Steps:</strong> If you want, I can also give you a "100 Most Important Concepts
+                        for AI/ML Engineers" (a compact list that interviews and advanced courses focus on).
+                    </div>
+</div>
+</div>
+<div class="toc-panel" id="toc">
+<div class="toc-heading">On this page</div>
+<a class="toc-link" href="#py-functions">Functions &amp; Stacks</a>
+</div>
+</main>
+</div>
+</body>
+</html>

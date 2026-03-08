@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pandas Data Cleaning — TWSS</title>
+<link href="css/style.css" rel="stylesheet"/>
+</head>
+<body>
+<script src="js/shared-layout.js"></script>
+<div class="app-layout has-toc">
+<main class="main-content">
+<div class="content-inner">
+<div class="page-header">
+<div class="page-breadcrumb"><a href="roadmap.html">Roadmap</a> › Data Engineering</div>
+<h1 class="page-title">Data Cleaning &amp; Imputation</h1>
+<p class="page-subtitle">Master the <code>NaN</code> float virus, memory interpolation, and Machine
+                        Learning prep-work.</p>
+</div>
+<div class="edu-concept" id="pd-cleaning">
+<div class="edu-concept-title">Data Pipeline Sterilization</div>
+<div class="edu-section edu-section-intro">
+<div class="edu-section-title">1. Concept Introduction</div>
+<p>Machine Learning models are fundamentally just mathematical calculators. If you feed the math
+                            equation a missing spreadsheet cell, the equation explodes. The golden rule of AI is
+                            <strong>Garbage In, Garbage Out (GIGO)</strong>. 80% of a Data Scientist's job is not
+                            building Neural Networks, it's manually scrubbing corrupt, missing, and duplicate data from
+                            millions of rows before the neural network ever sees it.</p>
+<p>Pandas provides a suite of C-optimized tools to detect missing data fragments (NaN),
+                            surgically remove them, or intelligently guess what the data <em>should</em> have been
+                            through Mathematical Imputation.</p>
+</div>
+<div class="edu-section edu-section-intuition">
+<div class="edu-section-title">2. Concept Intuition</div>
+<p>Imagine a patient medical record sheet where the "Blood Pressure" box is left blank.</p>
+<p>You have three choices:</p>
+<p>1. <strong>Deletion (`dropna()`):</strong> Throw the entire patient's medical record in the
+                            trash. The cleanest approach, but you lose massive amounts of data.</p>
+<p>2. <strong>Imputation (`fillna()`):</strong> Look at the other 1,000 patients, calculate the
+                            statistical Average blood pressure, and boldly write that Average into the missing box. You
+                            keep the patient record, but you injected artificial "fake" data into your model.</p>
+<p>3. <strong>Interpolation (`interpolate()`):</strong> If the patient had a reading on Monday
+                            of 120, and Wednesday of 140, logically infer that the missing Tuesday box was exactly 130.
+                        </p>
+</div>
+<div class="edu-section edu-section-syntax">
+<div class="edu-section-title">3. Python Syntax</div>
+<div class="sig-box">
+                            import pandas as pd
+
+                            # 1. Detection (Finding the voids)
+                            # Returns a boolean mask of identical shape
+                            missing_mask = df.isna()
+                            missing_counts = df.isna().sum()
+
+                            # 2. Deletion (Removing the voids)
+                            clean_rows = df.dropna(axis=0) # Deletes any ROW containing at least 1 NaN
+                            clean_cols = df.dropna(axis=1) # Deletes any COLUMN containing at least 1 NaN
+
+                            # 3. Imputation (Filling the voids)
+                            filled_df = df.fillna(0.0) # Fills with exactly 0.0
+                            mean_fill = df.fillna(df.mean())# Fills with column average
+                        </div>
+</div>
+<div class="edu-section edu-section-code">
+<div class="edu-section-title">4. Python Code Example</div>
+<div class="code-wrap">
+<div class="code-header"><span class="code-lang">python</span></div>
+<pre><code>import pandas as pd
+import numpy as np
+
+# Scenario: Cleaning IoT Sensor data before feeding to an LSTM
+# Sensor B disconnected at 02:00, creating a NaN void.
+data = {
+    'Time': ['01:00', '02:00', '03:00'],
+    'Sensor_A': [10.5, 10.6, 10.7],
+    'Sensor_B': [50.0, np.nan, 70.0]
+}
+df = pd.DataFrame(data)
+
+# 1. Check severity of corruption
+print("Corrupted Rows:\n", df.isna().sum())
+
+# 2. We CANNOT delete row 2, because we need Sensor_A's valid data.
+# We CANNOT fill with 0.0, because a sudden 0.0 will crash the ML model.
+# We must use Interpolation to draw a straight geometric line between 50 and 70.
+
+df['Sensor_B'] = df['Sensor_B'].interpolate(method='linear')
+
+print("\nCleaned Output:")
+print(df)
+# Sensor_B at 02:00 perfectly repairs itself to 60.0!
+</code></pre>
+</div>
+</div>
+<div class="edu-section edu-section-line-by-line">
+<div class="edu-section-title">5. Line-by-Line Explanation</div>
+<table>
+<tr>
+<th>Code Line</th>
+<th>Explanation</th>
+</tr>
+<tr>
+<td><code>np.nan</code></td>
+<td>The literal Python manifestation of a missing value. `NaN` stands for "Not a
+                                    Number", adhering to the IEEE-754 floating-point hardware standard.</td>
+</tr>
+<tr>
+<td><code>df.isna().sum()</code></td>
+<td>Chained operations. First, `isna()` creates a boolean DataFrame of identical size.
+                                    Because Python treats `True` as `1` and `False` as `0`, `.sum()` simply walks down
+                                    each column adding up the 1s, giving you a perfect count of missing values per
+                                    column.</td>
+</tr>
+<tr>
+<td><code>.interpolate('linear')</code></td>
+<td>Pandas detects the missing void. It looks at the valid block before the void (50.0)
+                                    and the valid block after (70.0). It calculates the mathematical slope across the
+                                    missing index, and injects exactly `60.0` into the C-array.</td>
+</tr>
+</table>
+</div>
+<div class="edu-section edu-section-internals">
+<div class="edu-section-title">6. Internal Mechanism (The NaN Virus)</div>
+<p>Why do missing values break Pandas Integer columns?</p>
+<p>Under the IEEE-754 hardware standard, the concept of `NaN` was only programmed into the
+                            architecture for Floating Point decimals. There is literally no C-hardware representation
+                            for an "Integer NaN".</p>
+<p>If you have a column of 10 Million memory-efficient 8-bit Integers, and a single `NaN` creeps
+                            into Row 5... <strong>Pandas Panics.</strong> Because NumPy refuses to mix types, Pandas is
+                            forced to physically rip all 10 Million Integers out of RAM, upgrade them entirely into
+                            massive 64-bit Floating Point decimals, and then inject the 64-bit `NaN` Float virus. Your
+                            RAM usage instantly explodes 800% because of 1 missing cell.</p>
+</div>
+<div class="edu-section edu-section-returns">
+<div class="edu-section-title">7. Return Values (In-Place vs Copies)</div>
+<p>By default, <code>df.fillna()</code> does NOT alter your original DataFrame. It allocates
+                            brand new RAM, builds a cleaned copy, and returns the pointer. To force Pandas to surgically
+                            overwrite the original corrupted memory block without wasting RAM, you must use
+                            <code>df.fillna(0, inplace=True)</code>.</p>
+</div>
+<div class="edu-section edu-section-edge-cases">
+<div class="edu-section-title">8. Edge Cases</div>
+<p><strong>The Mathematical Black Hole of NaN:</strong></p>
+<p>By hardware definitions, `NaN` is infectious. Any math operation involving NaN evaluates to
+                            NaN.</p>
+<p><code>10.5 + NaN = NaN</code><br/><code>NaN == NaN = False!</code></p>
+<p>Wait, NaN does not equal NaN? Because `NaN` represents "The Unknown", the computer has no
+                            idea if Unknown A is the exact same number as Unknown B. Therefore,
+                            <code>df['Col'] == np.nan</code> will FAIL silently. You must explicitly use
+                            <code>df.isna()</code>.</p>
+</div>
+<div class="edu-section edu-section-variations">
+<div class="edu-section-title">9. Variations &amp; Alternatives</div>
+<p><strong>Forward Fill (`ffill`) and Backward Fill (`bfill`):</strong></p>
+<p>If a bank account balance is recorded on Monday as $1,000, and Tuesday is accidentally left
+                            blank, we shouldn't guess. We just drag Monday's value forward to fill Tuesday.
+                            <code>df['Funds'].ffill()</code> physically locks the last known valid C-pointer and stamps
+                            its value sequentially downwards over every `NaN` void it encounters until it hits a new
+                            valid number.</p>
+</div>
+<div class="edu-section edu-section-mistakes">
+<div class="edu-section-title">10. Common Mistakes</div>
+<p><strong>Mistake:</strong> Data Leakage during Mean Imputation in Machine Learning.</p>
+<p><strong>Why is this disastrous?:</strong> You split your data into Training (80%) and
+                            Validation (20%). Then you run <code>df.fillna(df.mean())</code> on the ENTIRE dataset. You
+                            just destroyed your model! The generated "Mean" was mathematically polluted by the
+                            Validation data. When your AI model trains on the Training Data, it is subtly cheating
+                            because it has mathematically seen hints of the Validation data inside the imputed blanks.
+                            <strong>Fix:</strong> You strictly compute the Mean ONLY on the Training split, and apply
+                            that exact singular number to both splits.</p>
+</div>
+<div class="edu-section edu-section-advanced">
+<div class="edu-section-title">11. Advanced Explanation</div>
+<p><strong>The PyArrow Nullable Backend (Pandas 2.0+):</strong></p>
+<p>The "Integer-to-Float NaN Virus" described in Section 6 drove Data Engineers insane for 10
+                            years. In Pandas 2.0, they integrated the Apache Arrow memory architecture. PyArrow
+                            introduces an entirely separate 1-bit Boolean mask layer. It stores your massive Integer
+                            array perfectly intact, and uses a tiny parallel 1-bit array to flag "Missing (0)" or "Valid
+                            (1)". You can now use <code>df['Col'].astype("Int64[pyarrow]")</code> to have true,
+                            memory-efficient Integer Missing Values without exploding into Floats.</p>
+</div>
+<div class="edu-next-steps">
+                        ✅ <strong>Next Steps:</strong> If you want, I can also give you a "100 Most Important Concepts for AI/ML Engineers" (a compact list that interviews and advanced courses focus on).
+                    </div></div>
+</div>
+<div class="toc-panel" id="toc">
+<div class="toc-heading">On this page</div>
+<a class="toc-link" href="#pd-cleaning">NaN &amp; Imputation</a>
+</div>
+</main>
+</div>
+</body>
+</html>

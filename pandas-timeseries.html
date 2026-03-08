@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pandas Time-Series — TWSS</title>
+<link href="css/style.css" rel="stylesheet"/>
+</head>
+<body>
+<script src="js/shared-layout.js"></script>
+<div class="app-layout has-toc">
+<main class="main-content">
+<div class="content-inner">
+<div class="page-header">
+<div class="page-breadcrumb"><a href="roadmap.html">Roadmap</a> › Data Engineering</div>
+<h1 class="page-title">Time-Series &amp; Datetimes</h1>
+<p class="page-subtitle">Master the <code>datetime64[ns]</code> C-Struct, Unix Epoch conversions,
+                        and Financial Resampling.</p>
+</div>
+<div class="edu-concept" id="pd-timeseries">
+<div class="edu-concept-title">4D Chronological Optimization</div>
+<div class="edu-section edu-section-intro">
+<div class="edu-section-title">1. Concept Introduction</div>
+<p>Time-Series data (Stock Market tickers, Server Logs, Patient Heartbeats) is the most
+                            lucrative domain in Data Science. The mathematical complexity comes from the fact that Time
+                            is notoriously difficult for computers to parse. "January 14th, 2024 at 3:00 PM EST" is a
+                            complex String, not a number.</p>
+<p>Pandas converts human-readable strings into hyper-optimized 64-bit Integers underneath the
+                            hood. This process allows Deep Learning LSTMs and Financial models to perform mathematical
+                            operations on "Time" just as easily as they perform math on regular Floats.</p>
+</div>
+<div class="edu-section edu-section-intuition">
+<div class="edu-section-title">2. Concept Intuition</div>
+<p>Imagine explaining "Time" to an alien with no concept of calendars.</p>
+<p>You cannot teach it leap years, time zones, or daylight savings. It's too complex. Instead,
+                            you say: "Let's pretend the Universe started on exactly January 1, 1970 <strong>(The Unix
+                                Epoch)</strong>. From that exact second onward, just count the number of nanoseconds
+                            that have passed."</p>
+<p>The alien understands simple integers. If you give it the number `1705215600000000000`, the
+                            alien is perfectly happy storing it. When you need to read it, Pandas acts as the
+                            translator, converting that massive integer back into `2024-01-14 08:00:00` for human eyes.
+                        </p>
+</div>
+<div class="edu-section edu-section-syntax">
+<div class="edu-section-title">3. Python Syntax</div>
+<div class="sig-box">
+                            import pandas as pd
+
+                            # 1. Parsing Strings into Datetime Objects
+                            df['Date'] = pd.to_datetime(df['String_Column'], format='%Y-%m-%d')
+
+                            # 2. Extracting Attributes (Instant Vectorized access)
+                            df['Year'] = df['Date'].dt.year
+                            df['Month'] = df['Date'].dt.month
+                            df['DayOfWeek'] = df['Date'].dt.day_name()
+
+                            # 3. Time-Delta (Mathematical Subtraction)
+                            df['Lifespan'] = df['End_Date'] - df['Start_Date']
+
+                            # 4. Setting the Index for Chronological Slicing
+                            df.set_index('Date', inplace=True)
+                        </div>
+</div>
+<div class="edu-section edu-section-code">
+<div class="edu-section-title">4. Python Code Example</div>
+<div class="code-wrap">
+<div class="code-header"><span class="code-lang">python</span></div>
+<pre><code>import pandas as pd
+
+# Scenario: Financial Aggregation of Server Logs
+logs = pd.DataFrame({
+    'Timestamp': ['2024-03-01 10:15:00', '2024-03-01 10:45:00', '2024-03-02 09:00:00'],
+    'Server_Load': [45.5, 80.2, 12.0]
+})
+
+# 1. Cast the terrifying Strings into optimized C-structs
+logs['Timestamp'] = pd.to_datetime(logs['Timestamp'])
+
+# 2. To use Time-Series functions, the Dates MUST be the Index
+logs.set_index('Timestamp', inplace=True)
+
+# 3. Resample (The Time-Series version of GroupBy)
+# We want to mathematically group the data by 'Daily' (D) intervals
+daily_avg = logs.resample('D').mean()
+
+print(daily_avg)
+# Output instantly groupings identical days:
+#             Server_Load
+# Timestamp              
+# 2024-03-01        62.85
+# 2024-03-02        12.00
+</code></pre>
+</div>
+</div>
+<div class="edu-section edu-section-line-by-line">
+<div class="edu-section-title">5. Line-by-Line Explanation</div>
+<table>
+<tr>
+<th>Code Line</th>
+<th>Explanation</th>
+</tr>
+<tr>
+<td><code>pd.to_datetime(...)</code></td>
+<td>The Heavy Lifter. Pandas takes the ISO-8601 strings, runs them through a C-parser,
+                                    calculates the distance from 1970 in nanoseconds, and overwrites the column with the
+                                    `datetime64[ns]` array.</td>
+</tr>
+<tr>
+<td><code>logs.set_index(...)</code></td>
+<td>By making Time the primary Row Label (Index), Pandas internally sorts the massive
+                                    integer array. Because the array is sorted, searching for data becomes an `O(log N)`
+                                    Binary Search rather than a slow `O(N)` Linear Scan.</td>
+</tr>
+<tr>
+<td><code>logs.resample('D').mean()</code></td>
+<td>Pandas loops through the sorted index. It draws massive horizontal lines through the
+                                    DataFrame every 24 hours. The `.mean()` function then collapses all rows trapped
+                                    inside that 24-hour block into a single mathematical average.</td>
+</tr>
+</table>
+</div>
+<div class="edu-section edu-section-internals">
+<div class="edu-section-title">6. Internal Mechanism (The <code>.dt</code> Accessor)</div>
+<p>How does <code>df['Date'].dt.year</code> execute instantly on 10 million rows?</p>
+<p>It does NOT convert the 64-bit integer back into a Python object to ask for the year. That
+                            would take an hour. Instead, the <code>.dt</code> accessor triggers a heavily optimized
+                            C-kernel. The kernel executes pure bitwise division and modulo arithmetic directly on the
+                            raw `1705215600000000000` integer in RAM, isolating the bytes that represent the "year", and
+                            returning a brand new C-contiguous array of integers incredibly quickly.</p>
+</div>
+<div class="edu-section edu-section-shapes">
+<div class="edu-section-title">7. DateOffsets and TimeDeltas</div>
+<p>You cannot add <code>5</code> to a Date. Is it 5 days? 5 years?</p>
+<p>Pandas uses <strong>DateOffsets</strong>: <code>df['Date'] + pd.DateOffset(months=2)</code>.
+                            This handles the nightmarish reality of human calendars (February having 28 days, Leap
+                            Years). It mathematically shifts the integer accurately. If you subtract two Dates:
+                            <code>df['A'] - df['B']</code>, it returns a <code>timedelta64[ns]</code> struct,
+                            representing the strict magnitude of elapsed time, independent of the calendar.</p>
+</div>
+<div class="edu-section edu-section-edge-cases">
+<div class="edu-section-title">8. Edge Cases</div>
+<p><strong>The UTC Timezone Nightmare:</strong></p>
+<p>Your database server is in London (UTC +0). Your user is in Tokyo (UTC +9). Your ML Engineer
+                            is in New York (UTC -5). If you just type `2024-01-01 12:00:00`, it implies 3 completely
+                            different moments in reality depending on who reads it. This corrupts financial data.
+                            <strong>Fix:</strong> You MUST localize all datetimes immediately:
+                            <code>df['Date'] = df['Date'].dt.tz_localize('UTC')</code>. This forces the 64-bit integer
+                            to be absolutely anchored to London time, guaranteeing universal truth.</p>
+</div>
+<div class="edu-section edu-section-variations">
+<div class="edu-section-title">9. Variations &amp; Alternatives</div>
+<p><strong>Rolling Windows:</strong></p>
+<p>When analyzing Stocks, pointing to a single day is useless due to volatility. You need
+                            exactly the "30-Day Moving
+                            Average".<br/><code>df['MA_30'] = df['Price'].rolling(window=30).mean()</code>.<br/>This
+                            creates a dynamic 30-day "slider window" that moves down the DataFrame row by row. At Row
+                            50, it calculates the mean of Rows 20 through 50. At Row 51, it drops Row 20 and includes
+                            51. This is the foundation of Technical Analysis.</p>
+</div>
+<div class="edu-section edu-section-mistakes">
+<div class="edu-section-title">10. Common Mistakes</div>
+<p><strong>Mistake:</strong> Trusting Pandas to auto-infer Custom Formats.</p>
+<p><code>pd.to_datetime(['10/11/2024'])</code></p>
+<p>Is this October 11th (USA)? Or November 10th (UK)? By default, Pandas will literally guess
+                            (usually assuming USA: Month first). If it guesses wrong, you just reversed time.
+                            <strong>Fix:</strong> Always rigorously provide the C-string format directive whenever
+                            possible: <code>pd.to_datetime(col, format='%d/%m/%Y')</code> to force it to read
+                            `Day/Month/Year`.</p>
+</div>
+<div class="edu-section edu-section-advanced">
+<div class="edu-section-title">11. Advanced Explanation (The 2262 Overflow Bug)</div>
+<p><strong>The Y2K-style integer overflow in Pandas:</strong></p>
+<p>Because Pandas limits time to a 64-bit Integer representing Nanoseconds (`ns`) since 1970,
+                            there is a hard, mathematical ceiling. A 64-bit signed integer maxes out at
+                            `9,223,372,036,854,775,807`. If you count up to that many nanoseconds starting from 1970,
+                            you hit the deadline: <strong>April 11, 2262</strong>. Attempting to parse a datetime past
+                            the year 2262 in Pandas immediately triggers a physical memory overflow wrap-around,
+                            generating massive negative integers and crashing the database back to the 1600s.</p>
+</div>
+<div class="edu-next-steps">
+                        ✅ <strong>Next Steps:</strong> If you want, I can also give you a "100 Most Important Concepts for AI/ML Engineers" (a compact list that interviews and advanced courses focus on).
+                    </div></div>
+</div>
+<div class="toc-panel" id="toc">
+<div class="toc-heading">On this page</div>
+<a class="toc-link" href="#pd-timeseries">Unix Epoch Time</a>
+</div>
+</main>
+</div>
+</body>
+</html>

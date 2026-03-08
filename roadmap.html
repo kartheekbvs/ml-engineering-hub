@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Master Curriculum Roadmap — TWSS</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+        .roadmap-list {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .roadmap-category {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+        }
+
+        .roadmap-cat-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary-light);
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .roadmap-cat-title span {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .roadmap-topics {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .roadmap-topic {
+            padding: 16px;
+            background: var(--bg-card-hover);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius);
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.2s;
+        }
+
+        .roadmap-topic:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .topic-name {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--text-heading);
+            margin-bottom: 8px;
+        }
+
+        .topic-status {
+            font-size: 12px;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ef4444;
+        }
+
+        .status-dot.done {
+            background: #10b981;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="js/shared-layout.js"></script>
+    <div class="app-layout has-toc">
+        <main class="main-content">
+            <div class="content-inner">
+                <div class="page-header">
+                    <div class="page-breadcrumb"><a href="index.html">Home</a> › Curriculum</div>
+                    <h1 class="page-title">The Master Curriculum Roadmap</h1>
+                    <p class="page-subtitle">The complete ML Engineering master curriculum. Every concept listed here receives an ultra-deep conversational breakdown detailing arrays, memory layouts, and architectural routing.</p>
+                </div>
+                <div class="roadmap-list">
+
+                    <div class="roadmap-category" id="python-core">
+                        <div class="roadmap-cat-title">1. Python Core Concepts <span>17 Topics</span></div>
+                        <div class="roadmap-topics">
+                            <a href="python-variables.html" class="roadmap-topic">
+                                <div class="topic-name">Variables & Types</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="python-operators.html" class="roadmap-topic">
+                                <div class="topic-name">Operators</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="python-control-flow.html" class="roadmap-topic">
+                                <div class="topic-name">Control Flow (if/else)</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="python-loops.html" class="roadmap-topic">
+                                <div class="topic-name">Loops (for/while)</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="python-functions.html" class="roadmap-topic">
+                                <div class="topic-name">Functions & Scope</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="python-basics.html" class="roadmap-topic">
+                                <div class="topic-name">Lists & Mutability</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="python-tuples.html" class="roadmap-topic">
+                                <div class="topic-name">Tuples & Immutability</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="python-dictionaries.html" class="roadmap-topic">
+                                <div class="topic-name">Dictionaries & Sets</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="python-strings.html" class="roadmap-topic">
+                                <div class="topic-name">String Operations</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="python-comprehensions.html" class="roadmap-topic">
+                                <div class="topic-name">Comprehensions</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="python-modules.html" class="roadmap-topic">
+                                <div class="topic-name">Modules & SYS Path</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="python-file-io.html" class="roadmap-topic">
+                                <div class="topic-name">File I/O & Context</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="python-exceptions.html" class="roadmap-topic">
+                                <div class="topic-name">Exceptions & Tracebacks</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="python-advanced-functions.html" class="roadmap-topic">
+                                <div class="topic-name">Advanced Functions (*args)</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="python-generators.html" class="roadmap-topic">
+                                <div class="topic-name">Generators & Yield</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="python-oop.html" class="roadmap-topic">
+                                <div class="topic-name">OOP & Metaclasses</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="python-concurrency.html" class="roadmap-topic">
+                                <div class="topic-name">Concurrency & the GIL</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="roadmap-category" id="data-engineering">
+                        <div class="roadmap-cat-title">2. Data Engineering (NumPy & Pandas) <span>7 Topics</span></div>
+                        <div class="roadmap-topics">
+                            <a href="numpy-creation.html" class="roadmap-topic">
+                                <div class="topic-name">NumPy Arrays & Memory</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="numpy-linear-algebra.html" class="roadmap-topic">
+                                <div class="topic-name">NumPy Linear Algebra</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="matplotlib.html" class="roadmap-topic">
+                                <div class="topic-name">Matplotlib Visualization</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="pandas-dataframe.html" class="roadmap-topic">
+                                <div class="topic-name">Pandas DataFrames</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="pandas-merging.html" class="roadmap-topic">
+                                <div class="topic-name">Pandas Merges & Joins</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="pandas-timeseries.html" class="roadmap-topic">
+                                <div class="topic-name">Pandas Time Series</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="pandas-cleaning.html" class="roadmap-topic">
+                                <div class="topic-name">Pandas Data Cleaning</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="roadmap-category" id="ml-core">
+                        <div class="roadmap-cat-title">3. Machine Learning (Scikit-Learn) <span>3 Topics</span></div>
+                        <div class="roadmap-topics">
+                            <a href="sklearn-preprocessing.html" class="roadmap-topic">
+                                <div class="topic-name">Data Preprocessing</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="sklearn-models.html" class="roadmap-topic">
+                                <div class="topic-name">Supervised ML Models</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="sklearn-evaluation.html" class="roadmap-topic">
+                                <div class="topic-name">Model Evaluation & Metrics</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="roadmap-category" id="dl-core">
+                        <div class="roadmap-cat-title">4. Deep Learning (TensorFlow/Keras) <span>3 Topics</span></div>
+                        <div class="roadmap-topics">
+                            <a href="tensorflow.html" class="roadmap-topic">
+                                <div class="topic-name">TensorFlow Core & Graphs</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="tensorflow-nlp.html" class="roadmap-topic">
+                                <div class="topic-name">NLP Tokenization</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="tensorflow-lstm.html" class="roadmap-topic">
+                                <div class="topic-name">RNNs & LSTMs</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="roadmap-category" id="transformers">
+                        <div class="roadmap-cat-title">5. Transformers & LLMs <span>2 Topics</span></div>
+                        <div class="roadmap-topics">
+                            <a href="transformers-attention.html" class="roadmap-topic">
+                                <div class="topic-name">Self-Attention Mechanism</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="transformers-llm.html" class="roadmap-topic">
+                                <div class="topic-name">Large Language Models (GPT)</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="roadmap-category" id="cv-core">
+                        <div class="roadmap-cat-title">6. Computer Vision <span>2 Topics</span></div>
+                        <div class="roadmap-topics">
+                            <a href="cv-convolutions.html" class="roadmap-topic">
+                                <div class="topic-name">CNNs & Convolutions</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="cv-transfer-learning.html" class="roadmap-topic">
+                                <div class="topic-name">Transfer Learning (ResNet)</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="roadmap-category" id="mlops">
+                        <div class="roadmap-cat-title">7. MLOps & Deployment <span>3 Topics</span></div>
+                        <div class="roadmap-topics">
+                            <a href="deployment-fastapi.html" class="roadmap-topic">
+                                <div class="topic-name">FastAPI Model Serving</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="deployment-docker.html" class="roadmap-topic">
+                                <div class="topic-name">Docker Containerization</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                            <a href="deployment-cloud.html" class="roadmap-topic">
+                                <div class="topic-name">Cloud Deployment & CI/CD</div>
+                                <div class="topic-status">
+                                    <div class="status-dot done"></div>Available (Extensive Depth)
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

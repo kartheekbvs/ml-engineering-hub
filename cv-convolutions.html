@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Convolutional Neural Networks (CNNs) — TWSS</title>
+<link href="css/style.css" rel="stylesheet"/>
+</head>
+<body>
+<script src="js/shared-layout.js"></script>
+<div class="app-layout has-toc">
+<main class="main-content">
+<div class="content-inner">
+<div class="page-header">
+<div class="page-breadcrumb"><a href="roadmap.html">Roadmap</a> › Computer Vision</div>
+<h1 class="page-title">Convolutional Neural Networks (CNN)</h1>
+<p class="page-subtitle">Master the mathematics of 2D Vision: Kernels, Stride, Padding, and Max
+                        Pooling.</p>
+</div>
+<div class="edu-concept" id="cv-core">
+<div class="edu-concept-title">Spatial Pattern Recognition</div>
+<div class="edu-section edu-section-intro">
+<div class="edu-section-title">1. Concept Introduction</div>
+<p>Standard Neural Networks (Dense layers) are mathematically ignorant of geometry. If you feed
+                            a 100x100 pixel image of a dog into a Dense Network, Python forcefully flattens the 2D image
+                            into a 1-dimensional array of 10,000 floats. The AI literally loses the mathematical concept
+                            of "up", "down", "left", and "right". The dog's ear is now 5,000 rows away from the dog's
+                            eye in RAM.</p>
+<p><strong>Convolutional Neural Networks (CNNs)</strong> solve this. They do NOT flatten the
+                            image. They process the image purely in 2D or 3D space, dragging a mathematical "Flashlight"
+                            (A Kernel) across the pixels to detect strict geometric relationships like vertical edges,
+                            curves, and textures.</p>
+</div>
+<div class="edu-section edu-section-intuition">
+<div class="edu-section-title">2. Concept Intuition</div>
+<p>Imagine searching for a Waldo in a massive <i>Where's Waldo</i> picture.</p>
+<p><strong>Dense Network:</strong> You cut the Waldo picture into 10,000 individual paper
+                            squares, put them in a blender, pour them out in a straight line, and try to find Waldo.
+                            It's impossible.</p>
+<p><strong>CNN:</strong> You keep the poster intact. You take a literal magnifying glass (The
+                            Kernel). You start at the top-left margin. You scan the 3x3 inch square beneath the glass.
+                            Is Waldo there? No. You slide the glass 1 inch to the right (Stride). You scan again. You
+                            systematically sweep the entire image, guaranteeing you maintain the spatial integrity of
+                            the picture.</p>
+</div>
+<div class="edu-section edu-section-syntax">
+<div class="edu-section-title">3. Python Syntax (Keras)</div>
+<div class="sig-box">
+                            from tensorflow.keras.models import Sequential
+                            from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+
+                            model = Sequential()
+
+                            # 1. The Conv2D "Magnifying Glass" Layer
+                            # 32 unique lenses, each 3x3 pixels wide
+                            model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(150, 150, 3)))
+
+                            # 2. The Pooling "Compression" Layer
+                            model.add(MaxPooling2D(pool_size=(2, 2)))
+
+                            # 3. Repeat (Building Spatial Hierarchies)
+                            model.add(Conv2D(64, kernel_size=(3, 3), activation='relu'))
+                            model.add(MaxPooling2D(pool_size=(2, 2)))
+                        </div>
+</div>
+<div class="edu-section edu-section-code">
+<div class="edu-section-title">4. Python Code Example (Handwritten Digit Recognition)</div>
+<div class="code-wrap">
+<div class="code-header"><span class="code-lang">python</span></div>
+<pre><code>from tensorflow.keras import layers, models
+
+# Scenario: Building LeNet-5 for MNIST (28x28 grayscale images)
+# The data arrives as 3D Tensors: (BatchSize, 28, 28, 1)
+
+model = models.Sequential()
+
+# Layer 1: Detect basic edges. Outputs a (26x26x32) Volume.
+model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)))
+# Compression: Shrinks the image from 26x26 to 13x13.
+model.add(layers.MaxPooling2D((2, 2)))
+
+# Layer 2: Detect complex shapes (circles, loops). 
+# Increases depth to 64 filters.
+model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+model.add(layers.MaxPooling2D((2, 2)))
+
+# The transition: We finally crush the 3D volume into 1D 
+# to feed it into the final decision-making Dense brain.
+model.add(layers.Flatten())
+model.add(layers.Dense(64, activation='relu'))
+model.add(layers.Dense(10, activation='softmax')) # Detect digits 0-9
+</code></pre>
+</div>
+</div>
+<div class="edu-section edu-section-line-by-line">
+<div class="edu-section-title">5. Line-by-Line Explanation</div>
+<table>
+<tr>
+<th>Code Line</th>
+<th>Explanation</th>
+</tr>
+<tr>
+<td><code>input_shape=(28, 28, 1)</code></td>
+<td>The 1 stands for "Channels". Grayscale images have 1 channel (Light intensity).
+                                    Colored RGB images are massively heavier, requiring a 3D matrix depth of `(28, 28,
+                                    3)` because Red, Green, and Blue are physically stacked as separate matrices.</td>
+</tr>
+<tr>
+<td><code>kernel_size=(3, 3)</code></td>
+<td>The Flashlight parameters. The AI literally spawns a 3x3 sliding matrix of 9
+                                    weights. It multiplies these 9 weights against the 9 underlying pixels, sums them up
+                                    into a single dot-product Number, and saves that number to a brand new output map.
+                                </td>
+</tr>
+<tr>
+<td><code>layers.Flatten()</code></td>
+<td>By the end of the CNN, the image might be a tiny `5x5` box, but the Neural Network
+                                    discovered `64` different patterns in it. So the math shape is `(5, 5, 64)`. Flatten
+                                    simply destroys the 3D cube, unrolling it into a massive 1D array of `1,600`
+                                    numbers.</td>
+</tr>
+</table>
+</div>
+<div class="edu-section edu-section-internals">
+<div class="edu-section-title">6. Internal Mechanism (The Filter Hierarchy)</div>
+<p>A CNN learns exactly like the human visual cortex.</p>
+<p><strong>Layer 1 (32 Filters):</strong> The AI physically learns 32 different geometric
+                            primitives. It learns a "Vertical Line Filter", a "Horizontal Line Filter", a "Diagonal
+                            Filter". To prove this, Data Scientists visualize Layer 1 outputs, and the dog image reduces
+                            into 32 stark, glowing wireframes.</p>
+<p><strong>Layer 2 (64 Filters):</strong> The AI stops looking at pixels. It starts combining
+                            the shapes from Layer 1. Combining a vertical line with a horizontal line makes a "Corner".
+                            Combining a curve with a curve makes a "Circle".</p>
+<p><strong>Layer 3 (128 Filters):</strong> The AI combines Circles and Corners into "A Dog's
+                            Eye" or "A Car Tire". Spatial Hierarchies are the undisputed genius of Computer Vision.</p>
+</div>
+<div class="edu-section edu-section-shapes">
+<div class="edu-section-title">7. Max Pooling (Dimensionality Reduction)</div>
+<p>If you have an 8-Megapixel photo (`3000 x 3000`), a CNN will instantly overflow your GPU RAM.
+                            You must downsample the image aggressively.</p>
+<p><code>MaxPooling2D(pool_size=(2,2))</code> drags a 2x2 empty box across the image. It looks
+                            at the 4 pixels inside the box, deletes the 3 weakest pixels, and only keeps the 1
+                            mathematically highest "maximum" pixel. This instantly obliterates 75% of the data width and
+                            height (reducing a 100x100 image to exactly 50x50), aggressively compressing the file while
+                            perfectly preserving the strongest "Edges" the AI detected.</p>
+</div>
+<div class="edu-section edu-section-edge-cases">
+<div class="edu-section-title">8. Edge Cases (Padding)</div>
+<p>If you have a 10x10 image, and you drag a 3x3 magnifying glass across it, you physically
+                            cannot reach the exact right-edge margin of the image without the magnifying glass falling
+                            off the picture.</p>
+<p>By default (<code>padding='valid'</code>), TensorFlow just ignores the edges. Your 10x10
+                            image mathematically shrinks to 8x8 after scanning. If you do this 5 times, your image
+                            vanishes into `0x0` math singularity. <strong>Fix:</strong> <code>padding='same'</code>.
+                            TensorFlow physically glues a 1-pixel border of `0.0`s around the entire outside of the
+                            image. The magnifying glass can now scan the edge pixels perfectly, and the output matrix
+                            remains a perfect `10x10`.</p>
+</div>
+<div class="edu-section edu-section-variations">
+<div class="edu-section-title">9. Variations &amp; Alternatives (Strided Convolutions)</div>
+<p>Max Pooling has a philosophical problem: You are blindly throwing away 75% of your data
+                            without using calculus. It is a "dumb" hardcoded operation.</p>
+<p>Modern architectures (like ResNet) delete MaxPooling layers completely. Instead, they use
+                            <strong>Strided Convolutions</strong>: <code>Conv2D(strides=(2,2))</code>. Exactly like
+                            MaxPooling, it forces the AI to "skip" a pixel, shrinking the image by 50%. BUT, because it
+                            is a Convolutional Layer, it possesses Neural Weights! Therefore, the AI uses
+                            Backpropagation to mathematically <em>teach itself exactly how to compress</em> the image
+                            optimally, vastly outperforming dumb Pooling algorithms.</p>
+</div>
+<div class="edu-section edu-section-mistakes">
+<div class="edu-section-title">10. Common Mistakes</div>
+<p><strong>Mistake:</strong> Assuming CNNs are rotationally invariant.</p>
+<p>If you train a CNN on 10,000 pictures of Cars facing Left, it learns a Left-Facing-Bumper
+                            Filter. If you show the AI a Car facing Right, it will spectacularly fail and guess it's a
+                            toaster. CNNs are Translation Invariant (it knows a car is a car even if it's shifted to the
+                            corner of the photo), but they are <strong>NOT</strong> Rotation Invariant.
+                            <strong>Fix:</strong> Data Augmentation. You must artificially flip, rotate, and zoom all
+                            images inside the Data Pipeline before feeding them to the GPU.</p>
+</div>
+<div class="edu-section edu-section-advanced">
+<div class="edu-section-title">11. Advanced Explanation (1x1 Convolutions / Pointwise)</div>
+<p>How do you compress the *Depth* of an image? (e.g., You have 512 filters, and you want to
+                            shrink it to 64 filters to save RAM without shrinking the `10x10` width?).</p>
+<p>You use a <strong>1x1 Convolution</strong>. <code>Conv2D(64, kernel_size=(1,1))</code>. A
+                            `1x1` magnifying glass covers literally 1 single pixel. It does not look at neighbors. Why
+                            do it? Because it skewers straight down through the Z-axis (Depth)! It takes the 512 numbers
+                            stacked on top of each other, executes a localized Dense mathematical dot-product, and
+                            outputs exactly 64 numbers. It is a magical, GPU-accelerated dimension-reduction weapon used
+                            extensively by Google's Inception architectures.</p>
+</div>
+<div class="edu-next-steps">
+                        ✅ <strong>Next Steps:</strong> If you want, I can also give you a "100 Most Important Concepts for AI/ML Engineers" (a compact list that interviews and advanced courses focus on).
+                    </div></div>
+</div>
+<div class="toc-panel" id="toc">
+<div class="toc-heading">On this page</div>
+<a class="toc-link" href="#cv-core">Kernels &amp; Convolutions</a>
+</div>
+</main>
+</div>
+</body>
+</html>

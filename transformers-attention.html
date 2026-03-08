@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Transformers &amp; Self-Attention — TWSS</title>
+<link href="css/style.css" rel="stylesheet"/>
+</head>
+<body>
+<script src="js/shared-layout.js"></script>
+<div class="app-layout has-toc">
+<main class="main-content">
+<div class="content-inner">
+<div class="page-header">
+<div class="page-breadcrumb"><a href="roadmap.html">Roadmap</a> › Deep Learning</div>
+<h1 class="page-title">Transformers &amp; Self-Attention</h1>
+<p class="page-subtitle">Master the <code>Query/Key/Value</code> architecture, Positional Encoding,
+                        and the $O(1)$ bottlenecks.</p>
+</div>
+<div class="edu-concept" id="transformers-core">
+<div class="edu-concept-title">Parallel Sequence Perception</div>
+<div class="edu-section edu-section-intro">
+<div class="edu-section-title">1. Concept Introduction</div>
+<p>Until 2017, the NLP world relied on Recurrent Neural Networks (LSTMs). They read text like a
+                            human: word by word, left to right. This was disastrously slow, because you mathematically
+                            <strong>could not parallelize it</strong> on a 10,000-core GPU.</p>
+<p>In 2017, Google Brain published <em>"Attention Is All You Need"</em>. It proposed the
+                            <strong>Transformer</strong> model. It fundamentally deleted Recurrence entirely. Instead, a
+                            Transformer reads the <em>entire 2,000-word essay simultaneously in a single massive
+                                hardware tick</em>. It uses a pure Linear Algebra operation called
+                            <strong>Self-Attention</strong> to mathematically interlock every single word with every
+                            other word instantly.</p>
+</div>
+<div class="edu-section edu-section-intuition">
+<div class="edu-section-title">2. Concept Intuition (The Cocktail Party)</div>
+<p>Imagine being at a crowded cocktail party.</p>
+<p>An LSTM walks up to Person 1, listens for 5 minutes. Then Person 2. By Person 50, it forgot
+                            what Person 1 said.</p>
+<p>A Transformer has 50 sets of ears. It listens to all 50 people <em>simultaneously</em>. But
+                            how does it not get overwhelmed with noise? <strong>Attention.</strong> When it hears
+                            someone yell your name, the AI mathematically multiplies that person's volume by `1.0`, and
+                            physically mutes the other 49 people by multiplying their volume by `0.0`. It dynamically
+                            routes its processing power only to the context that actually matters.</p>
+</div>
+<div class="edu-section edu-section-syntax">
+<div class="edu-section-title">3. Python Syntax (PyTorch)</div>
+<div class="sig-box">
+                            import torch
+                            import torch.nn as nn
+
+                            # 1. The Multi-Head Attention Engine
+                            # Embed size: 512 | Heads: 8 (8 unique parallel perspectives)
+                            attention = nn.MultiheadAttention(embed_dim=512, num_heads=8, batch_first=True)
+
+                            # 2. Feeding the Q, K, V matrices
+                            # Q = What I want | K = What I have | V = The actual data payload
+                            attn_output, attn_weights = attention(query=q, key=k, value=v)
+
+                            # 3. Standard PyTorch Transformer Layer (Attention + FeedForward norm)
+                            encoder_layer = nn.TransformerEncoderLayer(d_model=512, nhead=8)
+                        </div>
+</div>
+<div class="edu-section edu-section-code">
+<div class="edu-section-title">4. Python Code Example (The Math of Attention)</div>
+<div class="code-wrap">
+<div class="code-header"><span class="code-lang">python</span></div>
+<pre><code>import torch
+import torch.nn.functional as F
+
+# Scenario: Manually coding Self-Attention from scratch.
+# We have a sentence with 3 words (e.g., "The bank robbed"). 
+# Each word is a 4-dimensional embedding vector.
+# Sequence Length: 3 | Embedding Dim: 4
+
+Q = torch.rand(3, 4)  # Queries: What is each word looking for?
+K = torch.rand(3, 4)  # Keys: What is each word offering?
+V = torch.rand(3, 4)  # Values: The actual semantic payload
+
+# Step 1: The Dot Product (Measuring Similarity)
+# We multiply Q by the Transpose of K. 
+# Result shape is (3, 3) - An Attention Matrix!
+# Word 1 compares itself to Word 1, 2, and 3 simultaneously.
+scores = torch.matmul(Q, K.transpose(0, 1))
+
+# Step 2: Scale and Softmax (Probabilistic Muting)
+# We divide by the square root of dimension size to prevent Gradient Explosion
+# Softmax bends all scores between 0.0 and 1.0 (Summing to 100%)
+attention_weights = F.softmax(scores / (4 ** 0.5), dim=-1)
+
+# Step 3: Extract the Payload
+# The 100% probabilities dictates exactly which Values (V) survive
+final_output = torch.matmul(attention_weights, V)
+
+print(final_output.shape) # Output remains exactly (3, 4)
+</code></pre>
+</div>
+</div>
+<div class="edu-section edu-section-line-by-line">
+<div class="edu-section-title">5. Line-by-Line Explanation</div>
+<table>
+<tr>
+<th>Code Line</th>
+<th>Explanation</th>
+</tr>
+<tr>
+<td><code>Q, K, V</code></td>
+<td>The genius of the architecture. The word "bank" physically splits its embedding
+                                    vector into 3 separate clones via 3 separate neural weights. `Q` asks: "Does anyone
+                                    have money?". `K` broadcasts: "I am a building". `V` holds the underlying numerical
+                                    definition of a financial institution.</td>
+</tr>
+<tr>
+<td><code>Q @ K.T</code></td>
+<td>The Dot Product is mathematically identical to a Cosine Similarity search. If Word
+                                    1's Query perfectly aligns with Word 3's Key, their dot product explodes into a
+                                    massive positive integer. If they are unrelated, it approaches zero or negative.
+                                </td>
+</tr>
+<tr>
+<td><code>F.softmax(...)</code></td>
+<td>The massive integers are mathematically bent into perfect percentages. `[0.10, 0.05,
+                                    0.85]`. Word 1 realizes it must ignore Word 2 entirely (5%) and absorb 85% of Word
+                                    3's numerical meaning into its own vector.</td>
+</tr>
+</table>
+</div>
+<div class="edu-section edu-section-internals">
+<div class="edu-section-title">6. Internal Mechanism (Positional Encoding)</div>
+<p>Because Transformers delete the `for` loop, they read "A dog bit a man" identically to "A man
+                            bit a dog". All words enter the GPU at the identical microsecond. The Neural Network has
+                            zero concept of word order.</p>
+<p><strong>Positional Encoding</strong> fixes this. Before feeding the integers to the AI, we
+                            use pure geometry (Sine and Cosine waves). The 1st word gets injected with the mathematical
+                            signature of $sin(1)$. The 20th word gets injected with the mathematical signature of
+                            $sin(20)$. The AI receives the word "dog", looks at the Sine-wave payload physically
+                            embedded inside the float, and mathematically deduces: "This word arrived exactly at index
+                            20."</p>
+</div>
+<div class="edu-section edu-section-shapes">
+<div class="edu-section-title">7. Multi-Head Attention</div>
+<p>If you only have one Attention engine, Word 1 might only focus on the Grammar of the
+                            sentence.</p>
+<p>Instead, we use <strong>Multi-Head Attention</strong>. We split the Embedding dimension into
+                            8 parallel "Heads". Head 1 is trained exclusively to look for Grammatical nouns. Head 2
+                            looks for Sarcasm. Head 3 looks for emotional Tone. Head 4 looks for historical facts. All 8
+                            engines run entirely in physically separated C-memory buffers, then concatenate their
+                            findings back together at the very end.</p>
+</div>
+<div class="edu-section edu-section-edge-cases">
+<div class="edu-section-title">8. Edge Cases (The $O(N^2)$ Memory Bottleneck)</div>
+<p>If you feed 1,000 words into an LSTM, it requires 1,000 computation cycles (Linear time,
+                            $O(N)$).</p>
+<p>Because a Transformer multiplies <strong>every word against every other word</strong>,
+                            computing a 1,000-word essay requires generating a `1,000 x 1,000` Attention Matrix
+                            ($1,000,000$ computations). This is <strong>Quadratic Time $O(N^2)$</strong>. If you try to
+                            feed an entire Harry Potter book (100k words) into an Attention layer, it generates a
+                            10-billion cell matrix. Your 80GB NVIDIA A100 GPU instantly runs out of memory and crashes.
+                            This constraint defines the "Context Window" limit of modern LLMs (e.g., 4k, 8k, 32k
+                            tokens).</p>
+</div>
+<div class="edu-section edu-section-variations">
+<div class="edu-section-title">9. Variations &amp; Alternatives (FlashAttention)</div>
+<p>In 2022, Tri Dao released <strong>FlashAttention</strong>. He realized the GPU was spending
+                            90% of its time transferring the massive $O(N^2)$ matrix back and forth between the slow
+                            VRAM and the ultra-fast SRAM cores on the chip.</p>
+<p>FlashAttention physically rewrote the C++ CUDA kernels to compute the Softmax mathematically
+                            <em>in fragmented tiles</em>. It never writes the massive attention matrix back to global
+                            VRAM. This pure hardware-level hack doubled the speed of all Transformers overnight, and
+                            allows massive 128k context windows (like Claude or GPT-4 Turbo) to exist without exploding
+                            the GPU.</p>
+</div>
+<div class="edu-section edu-section-mistakes">
+<div class="edu-section-title">10. Common Mistakes</div>
+<p><strong>Mistake:</strong> Using a Transformer for small datasets.</p>
+<p><strong>Why is this disastrous?:</strong> An LSTM has a strong biological inductive bias (it
+                            is hard-coded to assume sequences are chronological). A Transformer has <strong>Zero
+                                Inductive Bias</strong>. It has to learn that time exists entirely from scratch using
+                            the Sine-wave encodings. Because it has no guardrails, a Transformer requires astronomically
+                            more data to train from scratch (100x more than an LSTM) just to figure out the basic rules
+                            of reality.</p>
+</div>
+<div class="edu-section edu-section-advanced">
+<div class="edu-section-title">11. Advanced Explanation (Layer Normalization &amp; Residuals)</div>
+<p>Passing a word through 100 Attention layers violently degrades the mathematical stability of
+                            the floats. To prevent this, Transformers use <strong>Skip Connections (Residuals)</strong>.
+                            They literally draw a physical wire that bypasses the Attention block entirely, taking the
+                            raw input and adding it to the Attention output ($Output + Input$).</p>
+<p>They then immediately hit it with <strong>Layer Normalization</strong> (The NLP version of
+                            StandardScaler). Unlike Batch Normalization which calculates statistics vertically across
+                            batch elements, LayerNorm calculates the Z-Score horizontally <em>across the embedding
+                                dimension of a single word</em>, ensuring that every single word vector has a strict
+                            mean of `0.0` and variance of `1.0` before entering the next layer.</p>
+</div>
+<div class="edu-next-steps">
+                        ✅ <strong>Next Steps:</strong> If you want, I can also give you a "100 Most Important Concepts for AI/ML Engineers" (a compact list that interviews and advanced courses focus on).
+                    </div></div>
+</div>
+<div class="toc-panel" id="toc">
+<div class="toc-heading">On this page</div>
+<a class="toc-link" href="#transformers-core">Self-Attention</a>
+</div>
+</main>
+</div>
+</body>
+</html>

@@ -1,1045 +1,200 @@
 <!DOCTYPE html>
+
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sklearn Preprocessing — TWSS</title>
-    <link rel="stylesheet" href="css/style.css" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Scikit-Learn Preprocessing &amp; Pipelines — TWSS</title>
+<link href="css/style.css" rel="stylesheet"/>
 </head>
-
 <body>
-    <script src="js/shared-layout.js"></script>
-    <div class="app-layout has-toc">
-        <main class="main-content">
-            <div class="content-inner">
+<script src="js/shared-layout.js"></script>
+<div class="app-layout has-toc">
+<main class="main-content">
+<div class="content-inner">
+<div class="page-header">
+<div class="page-breadcrumb"><a href="roadmap.html">Roadmap</a> › Machine Learning</div>
+<h1 class="page-title">Preprocessing &amp; Pipelines</h1>
+<p class="page-subtitle">Master <code>StandardScaler</code>, <code>OneHotEncoder</code>, and the
+                        architectural prevention of Data Leakage.</p>
+</div>
+<div class="edu-concept" id="sk-preprocessing">
+<div class="edu-concept-title">Mathematical Feature Engineering</div>
+<div class="edu-section edu-section-intro">
+<div class="edu-section-title">1. Concept Introduction</div>
+<p>Machine Learning models are blind mathematical engines. If you feed an AI a dataset where
+                            "Age" is `25` and "Salary" is `100,000`, the neural network will physically assume Salary is
+                            4,000 times more important than Age, simply because the raw number is bigger. This destroys
+                            the model.</p>
+<p><strong>Preprocessing</strong> is the discipline of scaling, encoding, and mathematically
+                            twisting raw human data into perfectly stabilized floating-point tensors that AI algorithms
+                            can safely digest without gradient explosion.</p>
+</div>
+<div class="edu-section edu-section-intuition">
+<div class="edu-section-title">2. Concept Intuition</div>
+<p>Imagine teaching an athlete to throw a baseball.</p>
+<p>If you hand them a 5-ounce baseball (Age: 25) and then suddenly hand them a 1,000-pound
+                            boulder (Salary: 100,000), they will tear their shoulder (Gradient Explosion). </p>
+<p><strong>Standardization</strong> mathematically shrinks both the baseball and the boulder
+                            down so they weigh exactly 1 pound (Mean = 0, Variance = 1). The athlete can now easily
+                            learn the throwing mechanics (the actual relationships in the data) without being crushed by
+                            the raw scale of the objects.</p>
+</div>
+<div class="edu-section edu-section-syntax">
+<div class="edu-section-title">3. Python Syntax</div>
+<div class="sig-box">
+                            from sklearn.preprocessing import StandardScaler, OneHotEncoder
+                            from sklearn.pipeline import Pipeline
 
-                <div class="page-header">
-                    <div class="page-breadcrumb"><a href="index.html">Home</a> › Scikit-learn › Preprocessing</div>
-                    <h1 class="page-title">Sklearn — Preprocessing</h1>
-                    <p class="page-subtitle">train_test_split, Scalers, Encoders, Imputers, ColumnTransformer, and
-                        Pipeline — with internals, parameters, and data-leakage prevention.</p>
-                    <div class="page-meta"><span class="page-badge badge-sklearn">⚙️ sklearn</span><span
-                            class="page-badge badge-sklearn">11 Functions</span></div>
-                </div>
+                            # 1. Independent Transformers
+                            scaler = StandardScaler()
+                            X_scaled = scaler.fit_transform(X_train)
 
-                <!-- ═══ SECTION: Splitting ═══ -->
-                <h2 class="section-title" id="s-split">Data Splitting</h2>
+                            # 2. Categorical Encoders (Mapping Strings to Math)
+                            ohe = OneHotEncoder(sparse_output=False)
+                            categories_encoded = ohe.fit_transform(df[['City']])
 
-                <div class="func-card expanded" id="train-test-split">
-                    <div class="func-card-header">
-                        <div class="func-icon">✂️</div>
-                        <div class="func-info">
-                            <div class="func-name">train_test_split()</div>
-                            <div class="func-tagline">Split arrays into train/test subsets — the most critical
-                                preprocessing step</div>
-                            <div class="func-tags"><span class="func-tag">splitting</span><span
-                                    class="func-tag">stratify</span><span class="func-tag">random_state</span></div>
+                            # 3. The Pipeline (Bulletproof Architecture)
+                            pipe = Pipeline([
+                            ('scaler', StandardScaler()),
+                            ('model', LogisticRegression())
+                            ])
+                            pipe.fit(X_train, y_train)
                         </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Syntax</div>
-                            <div class="func-tab">Parameters</div>
-                            <div class="func-tab">Internals</div>
-                            <div class="func-tab">Example</div>
-                            <div class="func-tab">Mistakes</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box"><span class="kw">from</span> sklearn.model_selection <span
-                                    class="kw">import</span> train_test_split
-
-                                <span class="fn">train_test_split</span>(
-                                *arrays,
-                                test_size=<span class="kw">None</span>, <span class="cmt"># float (0-1) or int</span>
-                                train_size=<span class="kw">None</span>,
-                                random_state=<span class="kw">None</span>,
-                                shuffle=<span class="kw">True</span>,
-                                stratify=<span class="kw">None</span>
-                                )
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <table class="param-table">
-                                <thead>
-                                    <tr>
-                                        <th>Parameter</th>
-                                        <th>Type</th>
-                                        <th>Default</th>
-                                        <th>Description</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="param-name">*arrays</td>
-                                        <td class="param-type">array-like</td>
-                                        <td class="param-default">required</td>
-                                        <td class="param-desc">Any number of arrays with same first dimension. Always
-                                            pass X and y together so splits are aligned.</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="param-name">test_size</td>
-                                        <td class="param-type">float or int</td>
-                                        <td class="param-default">0.25</td>
-                                        <td class="param-desc">Float = proportion (0.0–1.0). Int = absolute number of
-                                            samples. If None, complement of train_size. Standard ML ratios: 0.2 (80/20)
-                                            or 0.1 (90/10 for large datasets).</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="param-name">random_state</td>
-                                        <td class="param-type">int or None</td>
-                                        <td class="param-default">None</td>
-                                        <td class="param-desc">Seeds the random number generator. <strong>Always set
-                                                this</strong> for reproducibility. Any integer works; 42 is community
-                                            convention.</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="param-name">shuffle</td>
-                                        <td class="param-type">bool</td>
-                                        <td class="param-default">True</td>
-                                        <td class="param-desc">Shuffle before splitting. Set <code>False</code> only for
-                                            time-series data where temporal ordering must be preserved.</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="param-name">stratify</td>
-                                        <td class="param-type">array-like or None</td>
-                                        <td class="param-default">None</td>
-                                        <td class="param-desc">If provided, split preserves class proportions from this
-                                            array. Essential for imbalanced classification. Pass <code>y</code> for
-                                            standard stratification.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="func-tab-content">
-                            <p class="body-text"><strong>How it works internally:</strong></p>
-                            <ul class="doc-list">
-                                <li><strong>Step 1 — Validate:</strong> Checks all arrays have the same first dimension
-                                    (n_samples).</li>
-                                <li><strong>Step 2 — Shuffle:</strong> Creates a permuted index array using
-                                    <code>np.random.permutation(n)</code> seeded with <code>random_state</code>.
-                                </li>
-                                <li><strong>Step 3 — Split:</strong> Slices the permuted indices at the split boundary.
-                                </li>
-                                <li><strong>Stratified split:</strong> Uses <code>StratifiedShuffleSplit</code>
-                                    internally — splits each class separately, then concatenates to maintain proportions
-                                    exactly.</li>
-                            </ul>
-                            <div class="callout callout-note">
-                                <div class="callout-icon">💡</div>
-                                <div>
-                                    <div class="callout-label">Returns copies, not views</div>The output arrays are
-                                    always new copies, never views of the original. Modifying them won't affect the
-                                    source data.
-                                </div>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code><span class="kw">import</span> pandas <span class="kw">as</span> pd
-<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> train_test_split
-
-df = pd.<span class="fn">read_csv</span>(<span class="str">'dataset.csv'</span>)
-X = df.<span class="fn">drop</span>(<span class="str">'target'</span>, axis=<span class="num">1</span>)
-y = df[<span class="str">'target'</span>]
-
-<span class="cmt"># Standard 80/20 split</span>
-X_train, X_test, y_train, y_test = <span class="fn">train_test_split</span>(
-    X, y, test_size=<span class="num">0.2</span>, random_state=<span class="num">42</span>
-)
-
-<span class="cmt"># Stratified split (classification with imbalanced classes)</span>
-X_train, X_test, y_train, y_test = <span class="fn">train_test_split</span>(
-    X, y, test_size=<span class="num">0.2</span>, random_state=<span class="num">42</span>, stratify=y
-)
-
-<span class="cmt"># Verify class distribution is preserved</span>
-<span class="fn">print</span>(y_train.<span class="fn">value_counts</span>(normalize=<span class="kw">True</span>))
-<span class="fn">print</span>(y_test.<span class="fn">value_counts</span>(normalize=<span class="kw">True</span>))
-
-<span class="cmt"># 3-way split: train / val / test</span>
-X_temp, X_test, y_temp, y_test = <span class="fn">train_test_split</span>(
-    X, y, test_size=<span class="num">0.1</span>, random_state=<span class="num">42</span>, stratify=y
-)
-X_train, X_val, y_train, y_val = <span class="fn">train_test_split</span>(
-    X_temp, y_temp, test_size=<span class="num">0.111</span>, random_state=<span class="num">42</span>
-)
-<span class="cmt"># Result: ~80% train, ~10% val, ~10% test</span></code></pre>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <ul class="warning-list">
-                                <li><strong>Missing random_state:</strong> Every run produces a different split →
-                                    different scores → unreproducible experiments.</li>
-                                <li><strong>Splitting before EDA:</strong> Any statistics (mean, std, class counts)
-                                    computed before splitting contaminate test data. Split first, analyze train only.
-                                </li>
-                                <li><strong>Forgetting stratify for imbalanced data:</strong> A 1% minority class could
-                                    end up entirely in train or test by chance.</li>
-                                <li><strong>shuffle=True with time-series:</strong> This leaks future data into
-                                    training. Always <code>shuffle=False</code> for temporal data and use
-                                    <code>TimeSeriesSplit</code>.
-                                </li>
-                                <li><strong>Using test set for model selection:</strong> Test set = final evaluation
-                                    only. Use validation set / cross-validation for hyperparameter tuning.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ═══ SECTION: Scalers ═══ -->
-                <h2 class="section-title" id="s-scalers">Feature Scaling</h2>
-
-                <div class="func-card" id="standard-scaler">
-                    <div class="func-card-header">
-                        <div class="func-icon">📏</div>
-                        <div class="func-info">
-                            <div class="func-name">StandardScaler</div>
-                            <div class="func-tagline">Standardize features: zero mean, unit variance — required by most
-                                linear models and neural networks</div>
-                            <div class="func-tags"><span class="func-tag">scaling</span><span
-                                    class="func-tag">z-score</span><span class="func-tag">normalization</span></div>
-                        </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Syntax</div>
-                            <div class="func-tab">Internals</div>
-                            <div class="func-tab">Example</div>
-                            <div class="func-tab">When to Use</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box"><span class="kw">from</span> sklearn.preprocessing <span
-                                    class="kw">import</span> StandardScaler
-
-                                scaler = <span class="fn">StandardScaler</span>(
-                                copy=<span class="kw">True</span>, <span class="cmt"># False modifies data
-                                    in-place</span>
-                                with_mean=<span class="kw">True</span>, <span class="cmt"># subtract mean</span>
-                                with_std=<span class="kw">True</span> <span class="cmt"># divide by std</span>
-                                )
-
-                                scaler.<span class="fn">fit</span>(X_train) <span class="cmt"># learns mean_ and
-                                    scale_</span>
-                                X_train_s = scaler.<span class="fn">transform</span>(X_train)
-                                X_test_s = scaler.<span class="fn">transform</span>(X_test) <span class="cmt"># use SAME
-                                    scaler</span>
-                                <span class="cmt"># Or combined:</span>
-                                X_train_s = scaler.<span class="fn">fit_transform</span>(X_train) <span class="cmt">#
-                                    fit+transform on train</span>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <p class="body-text">Formula per feature: <code>z = (x − mean) / std</code></p>
-                            <ul class="doc-list">
-                                <li><strong>fit(X_train)</strong> — stores <code>mean_</code> and <code>scale_</code>
-                                    (std) per feature, computed only on training data.</li>
-                                <li><strong>transform(X)</strong> — applies the stored mean/std. Must never call
-                                    <code>fit</code> on test data.
-                                </li>
-                                <li>Outliers inflate <code>std</code>, pulling scaled values toward zero — use
-                                    <code>RobustScaler</code> when outliers are present.
-                                </li>
-                            </ul>
-                            <div class="callout callout-danger">
-                                <div class="callout-icon">🚨</div>
-                                <div>
-                                    <div class="callout-label">Data Leakage</div>NEVER call
-                                    <code>fit_transform(X_all)</code> before splitting. NEVER call
-                                    <code>scaler.fit(X_test)</code>. The scaler must only see training data.
-                                </div>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code><span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> StandardScaler
-<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> train_test_split
-
-X_train, X_test, y_train, y_test = <span class="fn">train_test_split</span>(
-    X, y, test_size=<span class="num">0.2</span>, random_state=<span class="num">42</span>
-)
-
-scaler = <span class="fn">StandardScaler</span>()
-X_train_s = scaler.<span class="fn">fit_transform</span>(X_train)  <span class="cmt"># fit on train, transform train</span>
-X_test_s  = scaler.<span class="fn">transform</span>(X_test)       <span class="cmt"># transform test with SAME params</span>
-
-<span class="cmt"># Inspect learned parameters</span>
-<span class="fn">print</span>(scaler.mean_)    <span class="cmt"># mean of each feature</span>
-<span class="fn">print</span>(scaler.scale_)   <span class="cmt"># std of each feature</span>
-
-<span class="cmt"># Invert scaling for predictions in original units</span>
-y_pred_scaled = model.<span class="fn">predict</span>(X_test_s)
-<span class="cmt"># If target was also scaled:</span>
-target_scaler = <span class="fn">StandardScaler</span>().<span class="fn">fit</span>(y_train.<span class="fn">values</span>.<span class="fn">reshape</span>(-<span class="num">1</span>, <span class="num">1</span>))
-y_pred_orig = target_scaler.<span class="fn">inverse_transform</span>(y_pred_scaled.<span class="fn">reshape</span>(-<span class="num">1</span>, <span class="num">1</span>))</code></pre>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <table class="param-table">
-                                <thead>
-                                    <tr>
-                                        <th>Scaler</th>
-                                        <th>Formula</th>
-                                        <th>Best For</th>
-                                        <th>Outlier Sensitive?</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="param-name">StandardScaler</td>
-                                        <td class="param-type">(x-μ)/σ</td>
-                                        <td class="param-desc">Linear models, SVM, Neural nets, PCA</td>
-                                        <td class="param-desc" style="color:var(--danger)">YES</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="param-name">MinMaxScaler</td>
-                                        <td class="param-type">(x-min)/(max-min)</td>
-                                        <td class="param-desc">Neural nets when bounded [0,1] needed</td>
-                                        <td class="param-desc" style="color:var(--danger)">YES (extreme)</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="param-name">RobustScaler</td>
-                                        <td class="param-type">(x-median)/IQR</td>
-                                        <td class="param-desc">Data with significant outliers</td>
-                                        <td class="param-desc" style="color:var(--success)">NO</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="param-name">None needed</td>
-                                        <td class="param-type">—</td>
-                                        <td class="param-desc">Tree models (RF, GBM, XGBoost)</td>
-                                        <td class="param-desc">N/A</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="func-card" id="minmax-scaler">
-                    <div class="func-card-header">
-                        <div class="func-icon">📐</div>
-                        <div class="func-info">
-                            <div class="func-name">MinMaxScaler / RobustScaler</div>
-                            <div class="func-tagline">Scale to fixed range [0,1] or use robust median/IQR statistics
-                            </div>
-                            <div class="func-tags"><span class="func-tag">MinMax</span><span
-                                    class="func-tag">RobustScaler</span><span class="func-tag">outliers</span></div>
-                        </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Syntax</div>
-                            <div class="func-tab">Example</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box"><span class="kw">from</span> sklearn.preprocessing <span
-                                    class="kw">import</span> MinMaxScaler, RobustScaler
-
-                                <span class="fn">MinMaxScaler</span>(feature_range=(<span class="num">0</span>, <span
-                                    class="num">1</span>), copy=<span class="kw">True</span>)
-                                <span class="cmt"># Formula: (x - min) / (max - min) → scales to [0,1]</span>
-                                <span class="cmt"># feature_range=(−1,1) for tanh-activated networks</span>
-
-                                <span class="fn">RobustScaler</span>(
-                                with_centering=<span class="kw">True</span>,
-                                with_scaling=<span class="kw">True</span>,
-                                quantile_range=(<span class="num">25.0</span>, <span class="num">75.0</span>) <span
-                                    class="cmt"># IQR range (default = Q1–Q3)</span>
-                                )
-                                <span class="cmt"># Formula: (x - median) / IQR → outliers don't skew scale</span>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code><span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> MinMaxScaler, RobustScaler
-<span class="kw">import</span> numpy <span class="kw">as</span> np
-
-rng = np.random.<span class="fn">default_rng</span>(<span class="num">42</span>)
-X = rng.<span class="fn">standard_normal</span>((<span class="num">100</span>, <span class="num">5</span>))
-<span class="cmt"># Inject outliers</span>
-X[<span class="num">0</span>, :] = <span class="num">100</span>
-
-<span class="cmt"># StandardScaler — distorted by outlier</span>
-ss = <span class="fn">StandardScaler</span>().<span class="fn">fit</span>(X)
-<span class="fn">print</span>(<span class="str">'STD scale:'</span>, ss.scale_)   <span class="cmt"># inflated by outlier</span>
-
-<span class="cmt"># RobustScaler — resistant to outlier</span>
-rs = <span class="fn">RobustScaler</span>().<span class="fn">fit</span>(X)
-<span class="fn">print</span>(<span class="str">'Robust scale (IQR):'</span>, rs.scale_)
-
-<span class="cmt"># MinMaxScaler for pixels/images → [0, 1]</span>
-mm = <span class="fn">MinMaxScaler</span>().<span class="fn">fit</span>(pixel_array)
-pixels_norm = mm.<span class="fn">transform</span>(pixel_array)</code></pre>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ═══ SECTION: Encoders ═══ -->
-                <h2 class="section-title" id="s-encoders">Categorical Encoding</h2>
-
-                <div class="func-card" id="label-encoder">
-                    <div class="func-card-header">
-                        <div class="func-icon">🏷️</div>
-                        <div class="func-info">
-                            <div class="func-name">LabelEncoder / OrdinalEncoder</div>
-                            <div class="func-tagline">Convert string categories to integer codes — with important usage
-                                constraints</div>
-                            <div class="func-tags"><span class="func-tag">encoding</span><span
-                                    class="func-tag">categorical</span><span class="func-tag">ordinal</span></div>
-                        </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Syntax</div>
-                            <div class="func-tab">Example</div>
-                            <div class="func-tab">Mistakes</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box"><span class="kw">from</span> sklearn.preprocessing <span
-                                    class="kw">import</span> LabelEncoder, OrdinalEncoder
-
-                                <span class="cmt"># LabelEncoder: for TARGET variable only (1D)</span>
-                                le = <span class="fn">LabelEncoder</span>()
-                                y_enc = le.<span class="fn">fit_transform</span>(y) <span class="cmt"># 'cat'→0,
-                                    'dog'→1</span>
-                                y_orig = le.<span class="fn">inverse_transform</span>(y_enc) <span class="cmt"># decode
-                                    back</span>
-
-                                <span class="cmt"># OrdinalEncoder: for FEATURES (2D), supports multiple columns</span>
-                                oe = <span class="fn">OrdinalEncoder</span>(
-                                categories=<span class="str">'auto'</span>,
-                                handle_unknown=<span class="str">'use_encoded_value'</span>,
-                                unknown_value=-<span class="num">1</span>
-                                )
-                                X_enc = oe.<span class="fn">fit_transform</span>(X[cat_cols])
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code><span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> LabelEncoder
-
-le = <span class="fn">LabelEncoder</span>()
-y_train_enc = le.<span class="fn">fit_transform</span>(y_train)
-y_test_enc  = le.<span class="fn">transform</span>(y_test)  <span class="cmt"># use fitted encoder on test</span>
-
-<span class="fn">print</span>(le.classes_)          <span class="cmt"># ['cat' 'dog' 'fish']</span>
-<span class="fn">print</span>(le.transform([<span class="str">'dog'</span>]))  <span class="cmt"># [1]</span>
-
-<span class="cmt"># Decode model predictions back to labels</span>
-y_pred = model.<span class="fn">predict</span>(X_test)
-y_pred_labels = le.<span class="fn">inverse_transform</span>(y_pred)</code></pre>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <ul class="warning-list">
-                                <li><strong>LabelEncoder on features (not target):</strong> Assigns arbitrary integers
-                                    (dog=0, cat=1, fish=2) — implies dog &lt; cat &lt; fish which is false for nominal
-                                    data. Use OneHotEncoder for features.</li>
-                                <li><strong>LabelEncoder with 2D arrays:</strong> It's 1D only. Calling it on a
-                                    DataFrame column works; calling it on a DataFrame raises an error.</li>
-                                <li><strong>Unseen categories at test time:</strong> Raises <code>ValueError</code>. Use
-                                    OrdinalEncoder with <code>handle_unknown='use_encoded_value'</code>.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="func-card" id="onehot-encoder">
-                    <div class="func-card-header">
-                        <div class="func-icon">🔢</div>
-                        <div class="func-info">
-                            <div class="func-name">OneHotEncoder</div>
-                            <div class="func-tagline">Encode nominal categories as binary vectors — the correct way for
-                                ML features</div>
-                            <div class="func-tags"><span class="func-tag">one-hot</span><span
-                                    class="func-tag">dummy</span><span class="func-tag">sparse</span></div>
-                        </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Syntax</div>
-                            <div class="func-tab">Example</div>
-                            <div class="func-tab">Performance</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box"><span class="kw">from</span> sklearn.preprocessing <span
-                                    class="kw">import</span> OneHotEncoder
-
-                                <span class="fn">OneHotEncoder</span>(
-                                categories=<span class="str">'auto'</span>, <span class="cmt"># or list of arrays per
-                                    feature</span>
-                                drop=<span class="kw">None</span>, <span class="cmt"># 'first' to avoid dummy
-                                    trap</span>
-                                sparse_output=<span class="kw">True</span>, <span class="cmt"># use sparse matrix
-                                    output</span>
-                                handle_unknown=<span class="str">'error'</span>, <span class="cmt"># 'ignore' for prod
-                                    inference</span>
-                                min_frequency=<span class="kw">None</span> <span class="cmt"># group rare categories
-                                    into 'infrequent'</span>
-                                )
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code><span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> OneHotEncoder
-<span class="kw">import</span> numpy <span class="kw">as</span> np
-
-cats = np.<span class="fn">array</span>([[<span class="str">'cat'</span>], [<span class="str">'dog'</span>], [<span class="str">'cat'</span>], [<span class="str">'fish'</span>]])
-ohe = <span class="fn">OneHotEncoder</span>(sparse_output=<span class="kw">False</span>, handle_unknown=<span class="str">'ignore'</span>)
-X_enc = ohe.<span class="fn">fit_transform</span>(cats)
-<span class="fn">print</span>(X_enc)
-<span class="cmt"># [[1. 0. 0.]   ← cat</span>
-<span class="cmt">#  [0. 1. 0.]   ← dog</span>
-<span class="cmt">#  [1. 0. 0.]   ← cat</span>
-<span class="cmt">#  [0. 0. 1.]]  ← fish</span>
-
-<span class="fn">print</span>(ohe.categories_)  <span class="cmt"># [array(['cat', 'dog', 'fish'])]</span>
-
-<span class="cmt"># Production: use inside Pipeline to handle unknown categories</span>
-ohe_prod = <span class="fn">OneHotEncoder</span>(
-    handle_unknown=<span class="str">'ignore'</span>,   <span class="cmt"># unknown → all zeros at inference</span>
-    min_frequency=<span class="num">100</span>,         <span class="cmt"># rare cats < 100 occurrences → 'infrequent_sklearn'</span>
-    sparse_output=<span class="kw">True</span>          <span class="cmt"># save memory for high-cardinality</span>
-)</code></pre>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="perf-grid">
-                                <div class="perf-item">
-                                    <div class="perf-item-label">Sparse vs Dense</div>
-                                    <div class="perf-item-value"><code>sparse_output=True</code> (default) uses scipy
-                                        sparse matrices — up to 100× less memory for high-cardinality features.</div>
-                                </div>
-                                <div class="perf-item">
-                                    <div class="perf-item-label">High Cardinality</div>
-                                    <div class="perf-item-value">Use <code>min_frequency</code> to group rare
-                                        categories. For 10K+ unique values, consider target encoding or hashing instead.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ═══ SECTION: Imputers ═══ -->
-                <h2 class="section-title" id="s-imputers">Missing Value Imputation</h2>
-
-                <div class="func-card" id="simple-imputer">
-                    <div class="func-card-header">
-                        <div class="func-icon">🩹</div>
-                        <div class="func-info">
-                            <div class="func-name">SimpleImputer / KNNImputer</div>
-                            <div class="func-tagline">Fill missing values using statistical strategies — always inside a
-                                Pipeline</div>
-                            <div class="func-tags"><span class="func-tag">imputation</span><span
-                                    class="func-tag">NaN</span><span class="func-tag">SimpleImputer</span></div>
-                        </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Syntax</div>
-                            <div class="func-tab">Example</div>
-                            <div class="func-tab">Mistakes</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box"><span class="kw">from</span> sklearn.impute <span
-                                    class="kw">import</span> SimpleImputer, KNNImputer
-
-                                <span class="fn">SimpleImputer</span>(
-                                missing_values=np.nan,
-                                strategy=<span class="str">'mean'</span>, <span class="cmt">#
-                                    'mean'|'median'|'most_frequent'|'constant'</span>
-                                fill_value=<span class="kw">None</span>, <span class="cmt"># used when
-                                    strategy='constant'</span>
-                                keep_empty_features=<span class="kw">False</span>
-                                )
-
-                                <span class="fn">KNNImputer</span>(
-                                n_neighbors=<span class="num">5</span>, <span class="cmt"># k nearest neighbors to
-                                    average</span>
-                                weights=<span class="str">'uniform'</span>, <span class="cmt"># 'distance' weights
-                                    closer neighbors more</span>
-                                metric=<span class="str">'nan_euclidean'</span>
-                                )
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code><span class="kw">from</span> sklearn.impute <span class="kw">import</span> SimpleImputer, KNNImputer
-
-<span class="cmt"># Numeric imputer — median is outlier-robust</span>
-num_imputer = <span class="fn">SimpleImputer</span>(strategy=<span class="str">'median'</span>)
-X_train_imp = num_imputer.<span class="fn">fit_transform</span>(X_train[num_cols])
-X_test_imp  = num_imputer.<span class="fn">transform</span>(X_test[num_cols])
-
-<span class="cmt"># Categorical imputer</span>
-cat_imputer = <span class="fn">SimpleImputer</span>(strategy=<span class="str">'most_frequent'</span>)
-
-<span class="cmt"># KNN imputer — better accuracy, higher cost</span>
-knn_imp = <span class="fn">KNNImputer</span>(n_neighbors=<span class="num">5</span>)
-X_knn = knn_imp.<span class="fn">fit_transform</span>(X_train)   <span class="cmt"># uses kNN to fill NaN</span>
-
-<span class="cmt"># ✅ Always use inside Pipeline to prevent leakage</span>
-<span class="kw">from</span> sklearn.pipeline <span class="kw">import</span> Pipeline
-<span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> LogisticRegression
-
-pipe = <span class="fn">Pipeline</span>([
-    (<span class="str">'imputer'</span>, <span class="fn">SimpleImputer</span>(strategy=<span class="str">'median'</span>)),
-    (<span class="str">'scaler'</span>,  <span class="fn">StandardScaler</span>()),
-    (<span class="str">'model'</span>,   <span class="fn">LogisticRegression</span>())
-])
-pipe.<span class="fn">fit</span>(X_train, y_train)
-score = pipe.<span class="fn">score</span>(X_test, y_test)</code></pre>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <ul class="warning-list">
-                                <li><strong>Fitting on full data:</strong> Computing mean/median on (train+test) before
-                                    split is data leakage. Fit imputer only on train, transform both.</li>
-                                <li><strong>KNNImputer on large data:</strong> O(n²) complexity — very slow for datasets
-                                    with 100K+ rows. Use SimpleImputer or IterativeImputer for large datasets.</li>
-                                <li><code>strategy='mean'</code> on skewed distributions gives a biased fill. Prefer
-                                    <code>'median'</code> for robustness.
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ═══ SECTION: Pipeline ═══ -->
-                <h2 class="section-title" id="s-pipeline">Pipeline & ColumnTransformer</h2>
-
-                <div class="func-card" id="pipeline">
-                    <div class="func-card-header">
-                        <div class="func-icon">🔗</div>
-                        <div class="func-info">
-                            <div class="func-name">Pipeline / ColumnTransformer</div>
-                            <div class="func-tagline">Chain transformers and estimators — the correct way to avoid data
-                                leakage in production</div>
-                            <div class="func-tags"><span class="func-tag">Pipeline</span><span
-                                    class="func-tag">ColumnTransformer</span><span class="func-tag">production</span>
-                            </div>
-                        </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Syntax</div>
-                            <div class="func-tab">Internals</div>
-                            <div class="func-tab">Full Example</div>
-                            <div class="func-tab">Mistakes</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box"><span class="kw">from</span> sklearn.pipeline <span
-                                    class="kw">import</span> Pipeline, make_pipeline
-                                <span class="kw">from</span> sklearn.compose <span class="kw">import</span>
-                                ColumnTransformer, make_column_transformer
-
-                                <span class="fn">Pipeline</span>(
-                                steps=[ <span class="cmt"># list of (name, estimator) tuples</span>
-                                (<span class="str">'step_name'</span>, estimator),
-                                (<span class="str">'model'</span>, classifier)
-                                ],
-                                memory=<span class="kw">None</span> <span class="cmt"># path to cache fitted
-                                    transformers</span>
-                                )
-
-                                <span class="fn">ColumnTransformer</span>(
-                                transformers=[ <span class="cmt"># list of (name, transformer, columns)</span>
-                                (<span class="str">'num'</span>, numeric_pipeline, num_cols),
-                                (<span class="str">'cat'</span>, cat_pipeline, cat_cols)
-                                ],
-                                remainder=<span class="str">'drop'</span>, <span class="cmt"># 'passthrough' to keep
-                                    unspecified cols</span>
-                                n_jobs=-<span class="num">1</span>
-                                )
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <p class="body-text"><strong>How Pipeline.fit() works:</strong></p>
-                            <ul class="doc-list">
-                                <li>Calls <code>fit_transform(X, y)</code> on each step except the last.</li>
-                                <li>On the last step (final estimator), calls <code>fit(X_transformed, y)</code>.</li>
-                                <li>During <code>predict(X_test)</code>, calls <code>transform(X_test)</code> on every
-                                    step except the last, then <code>predict</code>.</li>
-                                <li>Because <code>fit</code> and <code>transform</code> are always called in sequence on
-                                    the same data, leakage is architecturally impossible within the pipeline.</li>
-                            </ul>
-                            <div class="callout callout-tip">
-                                <div class="callout-icon">💡</div>
-                                <div>
-                                    <div class="callout-label">GridSearchCV + Pipeline</div>When using GridSearchCV with
-                                    a Pipeline, parameter names use double underscore notation:
-                                    <code>{'model__C': [0.1, 1, 10], 'scaler__with_mean': [True]}</code>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code><span class="kw">import</span> pandas <span class="kw">as</span> pd
-<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> train_test_split
-<span class="kw">from</span> sklearn.pipeline <span class="kw">import</span> Pipeline
-<span class="kw">from</span> sklearn.compose <span class="kw">import</span> ColumnTransformer
-<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> StandardScaler, OneHotEncoder
-<span class="kw">from</span> sklearn.impute <span class="kw">import</span> SimpleImputer
-<span class="kw">from</span> sklearn.ensemble <span class="kw">import</span> RandomForestClassifier
-<span class="kw">from</span> sklearn.metrics <span class="kw">import</span> classification_report
-
-df = pd.<span class="fn">read_csv</span>(<span class="str">'titanic.csv'</span>)
-X = df.<span class="fn">drop</span>(<span class="str">'survived'</span>, axis=<span class="num">1</span>)
-y = df[<span class="str">'survived'</span>]
-
-num_cols = [<span class="str">'age'</span>, <span class="str">'fare'</span>, <span class="str">'pclass'</span>]
-cat_cols = [<span class="str">'sex'</span>, <span class="str">'embarked'</span>]
-
-X_train, X_test, y_train, y_test = <span class="fn">train_test_split</span>(
-    X, y, test_size=<span class="num">0.2</span>, random_state=<span class="num">42</span>, stratify=y
-)
-
-<span class="cmt"># Numeric pipeline</span>
-num_pipe = <span class="fn">Pipeline</span>([
-    (<span class="str">'imputer'</span>, <span class="fn">SimpleImputer</span>(strategy=<span class="str">'median'</span>)),
-    (<span class="str">'scaler'</span>,  <span class="fn">StandardScaler</span>())
-])
-
-<span class="cmt"># Categorical pipeline</span>
-cat_pipe = <span class="fn">Pipeline</span>([
-    (<span class="str">'imputer'</span>, <span class="fn">SimpleImputer</span>(strategy=<span class="str">'most_frequent'</span>)),
-    (<span class="str">'encoder'</span>, <span class="fn">OneHotEncoder</span>(handle_unknown=<span class="str">'ignore'</span>, sparse_output=<span class="kw">False</span>))
-])
-
-<span class="cmt"># ColumnTransformer: apply different preprocessing per column type</span>
-preprocessor = <span class="fn">ColumnTransformer</span>([
-    (<span class="str">'num'</span>, num_pipe, num_cols),
-    (<span class="str">'cat'</span>, cat_pipe, cat_cols)
-])
-
-<span class="cmt"># Full pipeline: preprocessing + model</span>
-full_pipeline = <span class="fn">Pipeline</span>([
-    (<span class="str">'preprocessor'</span>, preprocessor),
-    (<span class="str">'model'</span>, <span class="fn">RandomForestClassifier</span>(n_estimators=<span class="num">100</span>, random_state=<span class="num">42</span>))
-])
-
-full_pipeline.<span class="fn">fit</span>(X_train, y_train)
-y_pred = full_pipeline.<span class="fn">predict</span>(X_test)
-<span class="fn">print</span>(<span class="fn">classification_report</span>(y_test, y_pred))
-
-<span class="cmt"># GridSearchCV with pipeline params</span>
-<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> GridSearchCV
-
-param_grid = {
-    <span class="str">'model__n_estimators'</span>: [<span class="num">50</span>, <span class="num">100</span>, <span class="num">200</span>],
-    <span class="str">'model__max_depth'</span>: [<span class="kw">None</span>, <span class="num">5</span>, <span class="num">10</span>],
-    <span class="str">'preprocessor__num__scaler__with_mean'</span>: [<span class="kw">True</span>]
-}
-gs = <span class="fn">GridSearchCV</span>(full_pipeline, param_grid, cv=<span class="num">5</span>, n_jobs=-<span class="num">1</span>)
-gs.<span class="fn">fit</span>(X_train, y_train)
-<span class="fn">print</span>(gs.best_params_)
-<span class="fn">print</span>(gs.best_score_)</code></pre>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <ul class="warning-list">
-                                <li><strong>Forgetting to use Pipeline:</strong> Manual fit_transform on full data
-                                    before cross-validation leaks information into every fold.</li>
-                                <li><strong>Calling fit_transform on test data:</strong> Every transformer in the
-                                    pipeline must only be fitted on training data — Pipeline enforces this
-                                    automatically.</li>
-                                <li><strong>Wrong step order:</strong> Imputation must come before Scaling. Scaling must
-                                    come before model fitting. Pipeline enforces sequential execution.</li>
-                                <li><strong>ColumnTransformer drops unlisted columns by default</strong> — set
-                                    <code>remainder='passthrough'</code> to keep them.
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ═══ SECTION: PCA ═══ -->
-                <h2 class="section-title" id="s-pca">Dimensionality Reduction</h2>
-
-                <div class="func-card" id="pca">
-                    <div class="func-card-header">
-                        <div class="func-icon">📉</div>
-                        <div class="func-info">
-                            <div class="func-name">PCA — Principal Component Analysis</div>
-                            <div class="func-tagline">Project data to its most informative directions — for
-                                visualization, noise removal, and collinearity removal</div>
-                            <div class="func-tags"><span class="func-tag">PCA</span><span
-                                    class="func-tag">SVD</span><span class="func-tag">variance</span><span
-                                    class="func-tag">dimensionality</span></div>
-                        </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Syntax</div>
-                            <div class="func-tab">Example</div>
-                            <div class="func-tab">Internals</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box"><span class="kw">from</span> sklearn.decomposition <span
-                                    class="kw">import</span> PCA
-
-                                <span class="fn">PCA</span>(
-                                n_components=<span class="kw">None</span>, <span class="cmt"># int = exact, float (0-1)
-                                    = auto (keep % variance)</span>
-                                whiten=<span class="kw">False</span>, <span class="cmt"># normalize components to unit
-                                    variance</span>
-                                svd_solver=<span class="str">'auto'</span>, <span class="cmt">#
-                                    'full','arpack','randomized','auto'</span>
-                                random_state=<span class="num">42</span>
-                                )
-                                pca.<span class="fn">fit</span>(X_train_scaled) <span class="cmt"># ALWAYS fit on SCALED
-                                    data</span>
-                                X_pca = pca.<span class="fn">transform</span>(X_train_scaled)
-
-                                <span class="cmt"># Key attributes after fit:</span>
-                                pca.explained_variance_ratio_ <span class="cmt"># per-component variance fraction</span>
-                                pca.components_ <span class="cmt"># eigenvectors (loadings)</span>
-                                pca.n_components_ <span class="cmt"># actual n if auto-selected</span>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code><span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> StandardScaler
-<span class="kw">from</span> sklearn.decomposition <span class="kw">import</span> PCA
-<span class="kw">import</span> numpy <span class="kw">as</span> np
-<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
-
-<span class="cmt"># 1. Scale first (PCA is variance-based)</span>
-scaler = <span class="fn">StandardScaler</span>()
-X_scaled = scaler.<span class="fn">fit_transform</span>(X_train)
-
-<span class="cmt"># 2. Fit PCA: keep 95% of variance</span>
-pca = <span class="fn">PCA</span>(n_components=<span class="num">0.95</span>, random_state=<span class="num">42</span>)
-X_pca = pca.<span class="fn">fit_transform</span>(X_scaled)
-<span class="fn">print</span>(<span class="str">f'Original: {X_scaled.shape[1]} features → PCA: {pca.n_components_}'</span>)
-
-<span class="cmt"># Scree plot — find elbow</span>
-evr = pca95.explained_variance_ratio_
-cum_evr = np.<span class="fn">cumsum</span>(evr)
-fig, ax = plt.<span class="fn">subplots</span>(figsize=(<span class="num">8</span>, <span class="num">4</span>))
-ax.<span class="fn">bar</span>(<span class="fn">range</span>(<span class="fn">len</span>(evr)), evr, label=<span class="str">'Individual'</span>)
-ax.<span class="fn">plot</span>(<span class="fn">range</span>(<span class="fn">len</span>(evr)), cum_evr, <span class="str">'r--'</span>, marker=<span class="str">'o'</span>, label=<span class="str">'Cumulative'</span>)
-ax.<span class="fn">axhline</span>(<span class="num">0.95</span>, ls=<span class="str">'--'</span>, color=<span class="str">'gray'</span>, label=<span class="str">'95% threshold'</span>)
-ax.<span class="fn">legend</span>(); ax.<span class="fn">set_xlabel</span>(<span class="str">'Component'</span>); ax.<span class="fn">set_ylabel</span>(<span class="str">'Explained Variance'</span>)
-
-<span class="cmt"># Use in Pipeline</span>
-<span class="kw">from</span> sklearn.pipeline <span class="kw">import</span> Pipeline
-<span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> LogisticRegression
-pipe = <span class="fn">Pipeline</span>([
-    (<span class="str">'scaler'</span>, <span class="fn">StandardScaler</span>()),
-    (<span class="str">'pca'</span>,    <span class="fn">PCA</span>(n_components=<span class="num">0.95</span>)),
-    (<span class="str">'model'</span>,  <span class="fn">LogisticRegression</span>())
-])
-pipe.<span class="fn">fit</span>(X_train, y_train)</code></pre>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <ul class="doc-list">
-                                <li><strong>Algorithm:</strong> Computes the covariance matrix of X, then runs Singular
-                                    Value Decomposition (SVD). Principal components = eigenvectors of the covariance
-                                    matrix, sorted by eigenvalue (variance) descending.</li>
-                                <li><strong>svd_solver choices:</strong> <code>'full'</code> = exact (slow for large n);
-                                    <code>'randomized'</code> = Halko et al. approximation — use for large datasets
-                                    (n_components ≪ n_features); <code>'arpack'</code> = sparse data.
-                                </li>
-                                <li><strong>Whitening:</strong> <code>whiten=True</code> divides each component by its
-                                    standard deviation → unit variance per component. Helps algorithms sensitive to
-                                    feature scale (e.g., SVM, Gaussian mixture models).</li>
-                                <li><strong>Inverse transform:</strong> <code>pca.inverse_transform(X_pca)</code>
-                                    projects back to original space — useful for visualization and anomaly detection
-                                    (large reconstruction error = anomaly).</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ═══ SECTION: Feature Selection ═══ -->
-                <h2 class="section-title" id="s-feature-selection">Feature Selection</h2>
-
-                <div class="func-card" id="select-kbest">
-                    <div class="func-card-header">
-                        <div class="func-icon">🎯</div>
-                        <div class="func-info">
-                            <div class="func-name">SelectKBest / SelectFromModel / RFE</div>
-                            <div class="func-tagline">Remove irrelevant features — reduce overfitting, training time,
-                                and improve interpretability</div>
-                            <div class="func-tags"><span class="func-tag">SelectKBest</span><span
-                                    class="func-tag">RFE</span><span class="func-tag">feature importance</span></div>
-                        </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Syntax</div>
-                            <div class="func-tab">Example</div>
-                            <div class="func-tab">Which Method?</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box"><span class="kw">from</span> sklearn.feature_selection <span
-                                    class="kw">import</span> (
-                                SelectKBest, f_classif, mutual_info_classif,
-                                SelectFromModel, RFE, RFECV
-                                )
-                                <span class="cmt"># Univariate: score each feature independently</span>
-                                <span class="fn">SelectKBest</span>(score_func=f_classif, k=<span class="num">10</span>)
-
-                                <span class="cmt"># Model-based: use model's feature_importances_</span>
-                                <span class="fn">SelectFromModel</span>(estimator, threshold=<span
-                                    class="str">'mean'</span>)
-
-                                <span class="cmt"># Recursive elimination: iteratively remove weakest</span>
-                                <span class="fn">RFE</span>(estimator, n_features_to_select=<span class="num">20</span>,
-                                step=<span class="num">1</span>)
-                                <span class="fn">RFECV</span>(estimator, cv=<span class="num">5</span>, scoring=<span
-                                    class="str">'roc_auc'</span>) <span class="cmt"># auto-selects k</span>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code><span class="kw">from</span> sklearn.feature_selection <span class="kw">import</span> (
-    SelectKBest, f_classif, mutual_info_classif,
-    SelectFromModel, RFECV
-)
-<span class="kw">from</span> sklearn.ensemble <span class="kw">import</span> RandomForestClassifier
-<span class="kw">import</span> pandas <span class="kw">as</span> pd
-
-<span class="cmt"># ── Method 1: Univariate (ANOVA F-test)</span>
-selector = <span class="fn">SelectKBest</span>(f_classif, k=<span class="num">15</span>)
-X_sel = selector.<span class="fn">fit_transform</span>(X_train, y_train)
-selected_mask  = selector.<span class="fn">get_support</span>()
-selected_feats = X_train.columns[selected_mask].<span class="fn">tolist</span>()
-<span class="fn">print</span>(<span class="str">'Selected:'</span>, selected_feats)
-
-<span class="cmt"># ── Method 2: Model-based (tree feature importances)</span>
-rf = <span class="fn">RandomForestClassifier</span>(n_estimators=<span class="num">100</span>, random_state=<span class="num">42</span>)
-sfm = <span class="fn">SelectFromModel</span>(rf, threshold=<span class="str">'0.5*mean'</span>)
-sfm.<span class="fn">fit</span>(X_train, y_train)
-X_sfm = sfm.<span class="fn">transform</span>(X_train)
-feat_imp = pd.<span class="fn">Series</span>(rf.feature_importances_, index=X_train.columns)
-<span class="fn">print</span>(feat_imp.<span class="fn">sort_values</span>(ascending=<span class="kw">False</span>).<span class="fn">head</span>(<span class="num">10</span>))
-
-<span class="cmt"># ── Method 3: RFECV — cross-validated RFE</span>
-rfecv = <span class="fn">RFECV</span>(
-    estimator=<span class="fn">RandomForestClassifier</span>(<span class="num">50</span>, random_state=<span class="num">42</span>),
-    cv=<span class="num">5</span>, scoring=<span class="str">'roc_auc'</span>, step=<span class="num">1</span>, n_jobs=-<span class="num">1</span>
-)
-rfecv.<span class="fn">fit</span>(X_train, y_train)
-<span class="fn">print</span>(<span class="str">f'Optimal features: {rfecv.n_features_}'</span>)
-X_rfecv = rfecv.<span class="fn">transform</span>(X_train)
-
-<span class="cmt"># Use inside Pipeline to prevent leakage</span>
-<span class="kw">from</span> sklearn.pipeline <span class="kw">import</span> Pipeline
-<span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> LogisticRegression
-pipe = <span class="fn">Pipeline</span>([
-    (<span class="str">'selector'</span>, <span class="fn">SelectKBest</span>(f_classif, k=<span class="num">10</span>)),
-    (<span class="str">'scaler'</span>,   <span class="fn">StandardScaler</span>()),
-    (<span class="str">'model'</span>,    <span class="fn">LogisticRegression</span>())
-])
-pipe.<span class="fn">fit</span>(X_train, y_train)</code></pre>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <table class="param-table">
-                                <thead>
-                                    <tr>
-                                        <th>Method</th>
-                                        <th>Speed</th>
-                                        <th>Considers Interactions</th>
-                                        <th>Best For</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="param-name">SelectKBest (f_classif)</td>
-                                        <td>Fast</td>
-                                        <td>❌ No</td>
-                                        <td>Quick baseline, linear relationships</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="param-name">SelectKBest (mutual_info)</td>
-                                        <td>Medium</td>
-                                        <td>Partially</td>
-                                        <td>Non-linear relationships, classification</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="param-name">SelectFromModel</td>
-                                        <td>Medium</td>
-                                        <td>✅ Yes</td>
-                                        <td>Tree-based importance, fast model selection</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="param-name">RFE / RFECV</td>
-                                        <td>🐢 Slow</td>
-                                        <td>✅ Yes</td>
-                                        <td>Best accuracy, high-stakes feature selection</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="doc-footer">
-                    <span>Sklearn Preprocessing — TWSS</span>
-                    <div class="footer-links">
-                        <a href="matplotlib.html">← Matplotlib</a>
-                        <a href="sklearn-models.html">Models →</a>
-                    </div>
-                </div>
-
-            </div><!-- /content-inner -->
-        </main>
-
-        <div class="toc-panel">
-            <div class="toc-heading">On This Page</div>
-            <a href="#s-split" class="toc-link">Data Splitting</a>
-            <a href="#train-test-split" class="toc-link toc-h3">train_test_split</a>
-            <a href="#s-scalers" class="toc-link">Feature Scaling</a>
-            <a href="#standard-scaler" class="toc-link toc-h3">StandardScaler</a>
-            <a href="#minmax-scaler" class="toc-link toc-h3">MinMax / Robust</a>
-            <a href="#s-encoders" class="toc-link">Categorical Encoding</a>
-            <a href="#label-encoder" class="toc-link toc-h3">LabelEncoder</a>
-            <a href="#onehot-encoder" class="toc-link toc-h3">OneHotEncoder</a>
-            <a href="#s-imputers" class="toc-link">Imputation</a>
-            <a href="#simple-imputer" class="toc-link toc-h3">SimpleImputer / KNN</a>
-            <a href="#s-pipeline" class="toc-link">Pipeline</a>
-            <a href="#pipeline" class="toc-link toc-h3">Pipeline / ColumnTransformer</a>
-            <a href="#s-pca" class="toc-link">Dimensionality Reduction</a>
-            <a href="#pca" class="toc-link toc-h3">PCA</a>
-            <a href="#s-feature-selection" class="toc-link">Feature Selection</a>
-            <a href="#select-kbest" class="toc-link toc-h3">SelectKBest / RFE</a>
-        </div>
-    </div>
-    <script src="js/main.js"></script>
-    <script src="js/ai-chat.js"></script>
+</div>
+<div class="edu-section edu-section-code">
+<div class="edu-section-title">4. Python Code Example</div>
+<div class="code-wrap">
+<div class="code-header"><span class="code-lang">python</span></div>
+<pre><code>import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+# Scenario: Predicting house prices based on Square Footage.
+X = pd.DataFrame({'SqFt': [1000, 1500, 2000, 2500, 10000]}) # Notice the 10k outlier
+y = pd.Series([100k, 150k, 200k, 250k, 1M])
+
+# 1. Split the data FIRST (Critical step)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 2. Initialize the Mathematical Transformer
+scaler = StandardScaler()
+
+# 3. FIT computes the Mean/Variance. TRANSFORM physically alters the data.
+# We ONLY fit on the Training Set!
+X_train_scaled = scaler.fit_transform(X_train)
+
+# 4. We transform the Test set using the TRAINING SET'S math!
+# We DO NOT call .fit() on the test set!
+X_test_scaled = scaler.transform(X_test)
+</code></pre>
+</div>
+</div>
+<div class="edu-section edu-section-line-by-line">
+<div class="edu-section-title">5. Line-by-Line Explanation</div>
+<table>
+<tr>
+<th>Code Line</th>
+<th>Explanation</th>
+</tr>
+<tr>
+<td><code>StandardScaler()</code></td>
+<td>Calculates the Z-Score: <code>Z = (X - Mean) / Standard_Deviation</code>. This
+                                    centers all data at 0.0, tightly packing the majority of data points between -3.0
+                                    and +3.0.</td>
+</tr>
+<tr>
+<td><code>scaler.fit_transform(X_train)</code></td>
+<td>The <code>.fit()</code> method looks at `X_train`, calculates its Mean (e.g., 1500)
+                                    and Standard Deviation, and permanently locks those scalars into its RAM.
+                                    <code>.transform()</code> then actually executes the Z-Score math on the data,
+                                    mutating it.</td>
+</tr>
+<tr>
+<td><code>scaler.transform(X_test)</code></td>
+<td>CRITICAL RULE. Notice we did <em>not</em> type `fit_transform()`. We just typed
+                                    `.transform()`. It applies the Training Set's Mean (1500) to the Test Set. This
+                                    prevents the Test Set from altering the mathematical baseline.</td>
+</tr>
+</table>
+</div>
+<div class="edu-section edu-section-internals">
+<div class="edu-section-title">6. Internal Mechanism (Data Leakage)</div>
+<p>Why do we <code>.fit()</code> only on the Training Data?</p>
+<p>The Test Set represents "The Unknown Future". If you execute
+                            <code>StandardScaler().fit(Entire_Dataset)</code>, the Scaler's Average mathematically
+                            incorporates the Test Set's numbers into its equation. </p>
+<p>When you later evaluate your model on the Test Set, the model performs miraculously well!
+                            Why? Because the Test Set's mathematical footprint "Leaked" into the Training phase through
+                            the Scaler. You just built a model that can predict the past, but the moment you put it in
+                            Production with truly unseen future data, it catastrophically collapses. <strong>Data
+                                Leakage is a fireable offense in Data Science.</strong></p>
+</div>
+<div class="edu-section edu-section-shapes">
+<div class="edu-section-title">7. The OneHotEncoder Architecture</div>
+<p>Machine Learning cannot multiply by the word "New York".</p>
+<p>If you use <strong>Label Encoding</strong> (New York=1, London=2, Paris=3), the AI assumes
+                            Paris is mathematically 3x greater than New York. This is false logic.</p>
+<p><strong>One-Hot Encoding</strong> expands the single column into 3 separate binary columns:
+                            `Is_NY`, `Is_London`, `Is_Paris`. The matrix fills with `0`s and exactly one `1`. The Shape
+                            of your data expands massively (From `100x1` to `100x3`). This allows the AI to weigh each
+                            city independently without artificial hierarchical ranking.</p>
+</div>
+<div class="edu-section edu-section-edge-cases">
+<div class="edu-section-title">8. Edge Cases (The Dummy Variable Trap)</div>
+<p>If you have a binary column "Gender" (Male/Female), One-Hot Encoding creates two columns:
+                            `Is_Male` and `Is_Female`.</p>
+<p>This triggers <strong>Multicollinearity</strong>. If `Is_Male` is 0, we already
+                            mathematically know `Is_Female` MUST be 1. The columns are perfectly correlated. This
+                            destroys Linear Regression models (Matrix Singularities). <strong>Fix:</strong> You must
+                            drop the first column: <code>OneHotEncoder(drop='first')</code>. The AI will learn that
+                            `Is_Female=0` inherently implies Male, solving the linear algebra collapse.</p>
+</div>
+<div class="edu-section edu-section-variations">
+<div class="edu-section-title">9. Variations &amp; Alternatives</div>
+<p><strong>ColumnTransformer:</strong></p>
+<p>In a real dataset, you have 5 Numeric columns that need `StandardScaler`, and 3 Text columns
+                            that need `OneHotEncoder`. Manually separating them, processing them, and zipping them back
+                            together is a nightmare.</p>
+<p><code>ColumnTransformer([('num', StandardScaler(), [0,1,2]), ('cat', OneHotEncoder(), [3,4])])</code>
+</p>
+<p>This object takes the entire raw DataFrame, parallelizes the scaling and encoding paths
+                            independently via OS threads, and automatically concatenates the final C-contiguous NumPy
+                            matrix at the end.</p>
+</div>
+<div class="edu-section edu-section-mistakes">
+<div class="edu-section-title">10. Common Mistakes</div>
+<p><strong>Mistake:</strong> Running preprocessing in Jupyter Notebook cells independently.</p>
+<p><strong>Why is this disastrous?:</strong> When you deploy to a live Server (Production), the
+                            server receives a raw JSON payload from a user. If your preprocessors are scattered across
+                            10 Python files, you cannot easily transform the user's data. </p>
+<p><strong>Fix:</strong> The `Pipeline` Object.
+                            <code>pipe = Pipeline([('scaler', StandardScaler()), ('ai', Model())])</code>. You train the
+                            Pipeline. You save the singular Pipeline to disk `.pkl`. In production, you load the
+                            Pipeline, feed it raw JSON, and the Pipeline handles the scaling, encoding, and inference in
+                            one guaranteed stroke.</p>
+</div>
+<div class="edu-section edu-section-advanced">
+<div class="edu-section-title">11. Advanced Explanation (Sparse Matrices)</div>
+<p>If you One-Hot Encode a "City" column that contains 10,000 unique cities, your DataFrame will
+                            expand to have 10,000 columns. 99.99% of that matrix will be filled with `0`s. This will
+                            immediately consume hundreds of Gigabytes of RAM and crash the server.</p>
+<p>By default, Scikit-Learn returns a <strong>SciPy Sparse Matrix</strong> (Compressed Sparse
+                            Row - CSR format). Instead of storing 10,000 zeros, it only stores the C-Pointer coordinates
+                            of the <code>1</code>s (e.g., `Row 5, Col 821 = 1`). This reduces RAM usage from 100GB to
+                            10MB instantaneously. All Scikit-Learn models are mathematically programmed to accept and
+                            compute on Sparse Matrices natively without ever needing to decompress them.</p>
+</div>
+<div class="edu-next-steps">
+                        ✅ <strong>Next Steps:</strong> If you want, I can also give you a "100 Most Important Concepts for AI/ML Engineers" (a compact list that interviews and advanced courses focus on).
+                    </div></div>
+</div>
+<div class="toc-panel" id="toc">
+<div class="toc-heading">On this page</div>
+<a class="toc-link" href="#sk-preprocessing">Pipelines &amp; Encoding</a>
+</div>
+</main>
+</div>
 </body>
-
 </html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Python Variables &amp; Data Types — TWSS</title>
+<link href="css/style.css" rel="stylesheet"/>
+</head>
+<body>
+<script src="js/shared-layout.js"></script>
+<div class="app-layout has-toc">
+<main class="main-content">
+<div class="content-inner">
+<div class="page-header">
+<div class="page-breadcrumb"><a href="roadmap.html">Roadmap</a> › Python Core</div>
+<h1 class="page-title">Variables &amp; Data Types</h1>
+<p class="page-subtitle">Understand Dynamic Typing, Memory Allocation, and Reference Counting under
+                        the hood of CPython.</p>
+</div>
+<div class="edu-concept" id="py-vars">
+<div class="edu-concept-title">Variables as Pointers (Dynamic Typing)</div>
+<div class="edu-section edu-section-intro">
+<div class="edu-section-title">1. Concept Introduction</div>
+<p>In languages like C++ or Java, a variable is like an empty physical bucket. If you declare an
+                            integer bucket, it physically takes up 4 bytes of memory, and you pour a number into it. You
+                            can never pour a string into an integer bucket.</p>
+<p>In Python, <strong>variables are not buckets—they are nametags (pointers)</strong> tied to
+                            objects in memory with a string. The data itself floats independently in the computer's
+                            memory. When you write <code>x = 10</code>, Python builds the integer `10` heavily wrapped
+                            in a C-structure, and then ties a nametag called `x` to it.</p>
+</div>
+<div class="edu-section edu-section-intuition">
+<div class="edu-section-title">2. Concept Intuition</div>
+<p>Imagine a massive warehouse (RAM). You build a wooden chair (the Integer object `10`) and
+                            place it in the warehouse. Then, you take a sticky note, write "x" on it, and slap it on the
+                            chair.</p>
+<p>Later, you type <code>x = "Hello"</code>. In Python, this does NOT mean you painted the
+                            wooden chair into a string. It means you built a brand new television (the String object
+                            "Hello") on the other side of the warehouse, ripped the "x" sticky note off the chair, and
+                            slapped it onto the television. The wooden chair is now abandoned.</p>
+</div>
+<div class="edu-section edu-section-syntax">
+<div class="edu-section-title">3. Python Syntax</div>
+<div class="sig-box">
+                            # Variable assignment (Pointer binding)
+                            variable_name = data_object
+
+                            # Checking data types
+                            type(variable_name)
+
+                            # Checking raw memory address
+                            id(variable_name)
+
+                            # Type Casting (Creating new objects from old ones)
+                            int("10")
+                            float(5)
+                            str(3.14)
+                            bool(1)
+                        </div>
+</div>
+<div class="edu-section edu-section-code">
+<div class="edu-section-title">4. Python Code Example</div>
+<div class="code-wrap">
+<div class="code-header"><span class="code-lang">python</span></div>
+<pre><code># 1. Dynamic Binding
+x = 42
+print(type(x))  # <class 'int'="">
+
+# 2. Rebinding (Changing the pointer)
+x = "AI Engineer"
+print(type(x))  # <class 'str'="">
+
+# 3. Multiple Pointers to the same Object
+a = [1, 2, 3]
+b = a           # b points to the EXACT same list
+
+b.append(4)
+print(a)        # Outputs: [1, 2, 3, 4]</class></class></code></pre>
+</div>
+</div>
+<div class="edu-section edu-section-line-by-line">
+<div class="edu-section-title">5. Line-by-Line Explanation</div>
+<table>
+<tr>
+<th>Code Line</th>
+<th>Explanation</th>
+</tr>
+<tr>
+<td><code>x = 42</code></td>
+<td>Python calls <code>malloc()</code> to claim memory, builds a
+                                    <code>PyLongObject</code> containing the number 42, sets its Reference Count to 1,
+                                    and binds the namespace pointer <code>x</code> to that memory address.</td>
+</tr>
+<tr>
+<td><code>x = "AI Engineer"</code></td>
+<td>Python allocates a brand new <code>PyUnicodeObject</code>. It moves the
+                                    <code>x</code> pointer to this new object. The Reference Count for the original `42`
+                                    drops to 0, triggering the Garbage Collector to destroy `42` and free the RAM.</td>
+</tr>
+<tr>
+<td><code>b = a</code></td>
+<td>Python does NOT copy the list. It simply creates a second sticky note `b` and slaps
+                                    it onto the exact same <code>PyListObject</code> in memory. The list's Reference
+                                    Count becomes 2.</td>
+</tr>
+<tr>
+<td><code>b.append(4)</code></td>
+<td>The <code>append()</code> method mutates the underlying memory buffer of the single
+                                    list object. Because <code>a</code> and <code>b</code> are looking at the exact same
+                                    physical warehouse item, printing <code>a</code> reveals the mutation.</td>
+</tr>
+</table>
+</div>
+<div class="edu-section edu-section-io">
+<div class="edu-section-title">6. Input and Output Example</div>
+<p><strong>Input:</strong> <code>age = 25; age_str = str(age)</code></p>
+<p><strong>Transformation:</strong> The <code>str()</code> casting function does not modify the
+                            integer `25`. It reads the bytes of the integer, executes string encoding logic, allocates a
+                            totally isolated memory block for a string object `"25"`, and returns a pointer to it.</p>
+<p><strong>Output State:</strong> You now possess two independent objects in RAM. Modifying one
+                            will never affect the other.</p>
+</div>
+<div class="edu-section edu-section-internals">
+<div class="edu-section-title">7. Internal Mechanism (Everything is an Object)</div>
+<p>In standard C, an integer `int x = 5;` is literally just 4 bytes of raw binary
+                            (<code>00000000 00000000 00000000 00000101</code>).</p>
+<p>In CPython, an integer is a massive C-struct called <code>PyObject</code>. Every single
+                            variable you create carries a massive overhead consisting of:</p>
+<ul>
+<li><strong>ob_refcnt:</strong> (8 bytes) Tracks how many nametags point to this object.
+                            </li>
+<li><strong>ob_type:</strong> (8 bytes) A pointer to the class defining what this object is
+                                (e.g., Integer definitions).</li>
+<li><strong>ob_size:</strong> (8 bytes) For variable length items.</li>
+<li><strong>ob_digit:</strong> (4+ bytes) The actual raw binary data.</li>
+</ul>
+<p>This is why Python is slower and consumes 3x more RAM than C++—every simple number is
+                            actually a complex, heavyweight software object.</p>
+</div>
+<div class="edu-section edu-section-data-structure">
+<div class="edu-section-title">8. Vector Representation</div>
+<p>Memory layout of <code>x = 3.14</code>:</p>
+<pre><code>Namespace Dictionary:
+{"x": 0x1A4B2F890}  ------&gt;  [ PyFloatObject at 0x1A4B2F890 ]
+                             | ob_refcnt = 1                |
+                             | ob_type   = float            |
+                             | ob_fval   = 3.14             |</code></pre>
+</div>
+<div class="edu-section edu-section-shapes">
+<div class="edu-section-title">9. Shape and Dimensions</div>
+<p>Scalar primitives (<code>int</code>, <code>float</code>, <code>bool</code>) are
+                            0-Dimensional. They hold single values.</p>
+<p>Sequence types (<code>str</code>) are 1-Dimensional arrays of characters under the hood.</p>
+</div>
+<div class="edu-section edu-section-returns">
+<div class="edu-section-title">10. Return Values</div>
+<p><strong>id(variable):</strong> Returns a base-10 integer representing the literal C memory
+                            address of the object (e.g., `140728994554632`).</p>
+<p><strong>type(variable):</strong> Returns a <code>&lt;class 'type'&gt;</code> object
+                            indicating the structure map.</p>
+</div>
+<div class="edu-section edu-section-edge-cases">
+<div class="edu-section-title">11. Edge Cases</div>
+<p><strong>Integer Caching (-5 to 256):</strong></p>
+<p>If you type <code>a = 100</code> and <code>b = 100</code>, you would expect Python to build
+                            two separate Integer objects. However, doing <code>a is b</code> returns
+                            <strong>True</strong>!</p>
+<p>Why? To save memory, when Python boots up, it permanently pre-allocates an array of integers
+                            from -5 to 256. If you assign a variable to any number in this range, Python intercepts it
+                            and simply hands you a pointer to the globally cached object. If you do
+                            <code>a = 300; b = 300</code>, `a is b` will return <strong>False</strong> because 300
+                            exceeds the cache array bounds, forcing Python to allocate two independent memory blocks.
+                        </p>
+</div>
+<div class="edu-section edu-section-variations">
+<div class="edu-section-title">12. Variations &amp; Alternatives</div>
+<p><strong>Type Hinting (PEP 484):</strong> Python 3 introduced syntax like
+                            <code>age: int = 25</code>. It's critical to know that this changes absolutely nothing about
+                            Python's dynamic memory allocation. The <code>: int</code> is purely a visual suggestion for
+                            external Linters (like MyPy) to read. You can still maliciously type `age = "hello"` on the
+                            next line and Python will execute it perfectly without a runtime error.</p>
+</div>
+<div class="edu-section edu-section-mistakes">
+<div class="edu-section-title">13. Common Mistakes</div>
+<p><strong>Mistake:</strong> Shadowing built-in functions.</p>
+<p><code>list = [1, 2, 3]</code></p>
+<p><strong>Why is this disastrous?:</strong> Python possesses a global pointer named `list` that
+                            points to the internal C-code for building lists. When you execute this, you overwrite that
+                            nametag to point to your `[1,2,3]` array instead. If you try to cast a tuple later using
+                            <code>list((4,5))</code>, your program crashes with
+                            <code>TypeError: 'list' object is not callable</code> because you destroyed the global
+                            factory pointer.</p>
+</div>
+<div class="edu-section edu-section-performance">
+<div class="edu-section-title">14. Performance Considerations</div>
+<p>Because variables are just pointers, passing a 1-Gigabyte List into a function mapping
+                            <code>def process(data):</code> takes O(1) instantaneous time. The computer does not copy
+                            1GB of data into the function scope; it simply passes a microscopic 8-byte pointer looking
+                            at the original memory block.</p>
+</div>
+<div class="edu-section edu-section-practice">
+<div class="edu-section-title">15. Practice Exercise</div>
+<p><strong>Challenge:</strong> Write code to prove whether casting an integer
+                            <code>a = 10</code> to a float <code>b = float(a)</code> modifies the original object or
+                            creates a new one.</p>
+<p><strong>Expected Answer:</strong> <code>print(id(a) == id(b))</code>. It outputs False,
+                            proving casting always allocates fresh memory architecture.</p>
+</div>
+<div class="edu-section edu-section-advanced">
+<div class="edu-section-title">16. Advanced Explanation</div>
+<p><strong>Garbage Collection (The GIL and Refcount):</strong> Why doesn't Python crash your
+                            computer's RAM?</p>
+<p>Every time a variable goes out of scope (like when a function ends), Python looks at the
+                            `ob_refcnt` inside the object's C-struct and decrements it by 1. The microsecond that
+                            counter hits exactly `0`, Python's memory manager immediately triggers a C `free()` command,
+                            permanently obliterating the object and handing the RAM back to the operating system. If two
+                            objects have pointers referencing each other (Cyclic Reference), the counter never hits
+                            0—this is why Python includes a secondary backup system (The Generational Garbage Collector)
+                            that periodically sweeps the RAM looking for abandoned loops.</p>
+</div>
+<div class="edu-next-steps">
+                        ✅ <strong>Next Steps:</strong> If you want, I can also give you a "100 Most Important Concepts for AI/ML Engineers" (a compact list that interviews and advanced courses focus on).
+                    </div></div>
+</div>
+<div class="toc-panel" id="toc">
+<div class="toc-heading">On this page</div>
+<a class="toc-link" href="#py-vars">Variables &amp; Typing</a>
+</div>
+</main>
+</div>
+</body>
+</html>

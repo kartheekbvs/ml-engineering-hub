@@ -1,266 +1,362 @@
 <!DOCTYPE html>
+
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NumPy Reference — TWSS</title>
-    <link rel="stylesheet" href="css/style.css" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NumPy Reference — TWSS</title>
+<link href="css/style.css" rel="stylesheet"/>
 </head>
-
 <body>
-    <script src="js/shared-layout.js"></script>
-    <div class="app-layout has-toc">
-        <main class="main-content">
-            <div class="content-inner">
-
-                <div class="page-header">
-                    <div class="page-breadcrumb"><a href="index.html">Home</a> › NumPy</div>
-                    <h1 class="page-title">NumPy</h1>
-                    <p class="page-subtitle">Array creation, indexing, reshaping, math, linear algebra, random module,
+<script src="js/shared-layout.js"></script>
+<div class="app-layout has-toc">
+<main class="main-content">
+<div class="content-inner">
+<div class="page-header">
+<div class="page-breadcrumb"><a href="index.html">Home</a> › NumPy</div>
+<h1 class="page-title">NumPy</h1>
+<p class="page-subtitle">Array creation, indexing, reshaping, math, linear algebra, random module,
                         broadcasting — complete implementation reference for ML engineering.</p>
-                    <div class="page-meta">
-                        <span class="page-badge badge-numpy">🔢 NumPy</span>
-                        <span class="page-badge badge-numpy">6 Sections · 25+ Functions</span>
-                    </div>
-                </div>
+<div class="page-meta">
+<span class="page-badge badge-numpy">🔢 NumPy</span>
+<span class="page-badge badge-numpy">6 Sections · 25+ Functions</span>
+</div>
+</div>
+<!-- ═══ SECTION 1: Array Creation ═══ -->
+<h2 class="section-title" id="s-creation">Array Creation</h2>
+<div class="edu-concept" id="np-array">
+<div class="edu-concept-title">np.array() - Creating NumPy Arrays</div>
+<div class="edu-section edu-section-intro">
+<div class="edu-section-title">1. Concept Introduction</div>
+<p>The <code>np.array()</code> function is the core foundation of NumPy. It converts Python
+                            lists or tuples into high-performance, multi-dimensional NumPy arrays (ndarrays). These
+                            arrays are the fundamental data structure used across all Python ML libraries, solving the
+                            problem of Python's slow native lists by storing data in contiguous memory blocks with
+                            homogeneous types.</p>
+</div>
+<div class="edu-section edu-section-intuition">
+<div class="edu-section-title">2. Concept Intuition</div>
+<p>Imagine a Python list as a flexible box that can hold anything (a book, an apple, a shoe).
+                            Because it's flexible, the computer has to carefully inspect each item when processing them,
+                            which is slow. A NumPy array is like an egg carton: every slot holds exactly one egg of the
+                            exact same size. Because the computer knows exactly what is in every slot without checking,
+                            it can process the entire carton instantly.</p>
+</div>
+<div class="edu-section edu-section-syntax">
+<div class="edu-section-title">3. Python Syntax</div>
+<div class="sig-box">
+                            np.array(object, dtype=None, copy=True, order='K', subok=False, ndmin=0)
 
-                <!-- ═══ SECTION 1: Array Creation ═══ -->
-                <h2 class="section-title" id="s-creation">Array Creation</h2>
-
-                <div class="func-card expanded" id="np-array">
-                    <div class="func-card-header">
-                        <div class="func-icon">🧱</div>
-                        <div class="func-info">
-                            <div class="func-name">np.array / np.asarray / np.zeros / np.ones / np.full</div>
-                            <div class="func-tagline">Core array construction — dtype, copy semantics, and memory safety
-                            </div>
-                            <div class="func-tags"><span class="func-tag">array creation</span><span
-                                    class="func-tag">dtype</span><span class="func-tag">copy</span></div>
+                            # Parameters:
+                            # object: Any array-like object (list, tuple, etc.)
+                            # dtype: The desired data-type for the array (e.g., np.float32)
+                            # copy: If True (default), the object is copied into new memory
                         </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Syntax</div>
-                            <div class="func-tab">Internals</div>
-                            <div class="func-tab">Example</div>
-                            <div class="func-tab">Mistakes</div>
+</div>
+<div class="edu-section edu-section-code">
+<div class="edu-section-title">4. Python Code Example</div>
+<div class="code-wrap">
+<div class="code-header"><span class="code-lang">python</span></div>
+<pre><code>import numpy as np
+
+# Creating a 2D array (matrix) from a nested list
+data_list = [[1.0, 2.0], [3.0, 4.0]]
+X = np.array(data_list, dtype=np.float32)
+
+print(X)</code></pre>
+</div>
+</div>
+<div class="edu-section edu-section-line-by-line">
+<div class="edu-section-title">5. Line-by-Line Explanation</div>
+<table>
+<tr>
+<th>Code Line</th>
+<th>Explanation</th>
+</tr>
+<tr>
+<td><code>import numpy as np</code></td>
+<td>Imports the library under the standard alias <code>np</code>.</td>
+</tr>
+<tr>
+<td><code>data_list = [...]</code></td>
+<td>Defines a standard Python list of lists containing floats.</td>
+</tr>
+<tr>
+<td><code>X = np.array(...)</code></td>
+<td>Calls the core function, passing the list and explicitly forcing a 32-bit float data
+                                    type (preferred for ML).</td>
+</tr>
+<tr>
+<td><code>print(X)</code></td>
+<td>Outputs the constructed ndarray to the console.</td>
+</tr>
+</table>
+</div>
+<div class="edu-section edu-section-io">
+<div class="edu-section-title">6. Input and Output Example</div>
+<p><strong>Input:</strong> <code>[[1.0, 2.0], [3.0, 4.0]]</code> (Nested Python List)</p>
+<p><strong>Output:</strong></p>
+<pre><code>[[1. 2.]
+ [3. 4.]]</code></pre>
+<p><strong>Transformation:</strong> The irregular Python objects in memory are serialized into a
+                            strict C-array structure.</p>
+</div>
+<div class="edu-section edu-section-internals">
+<div class="edu-section-title">7. Internal Mechanism</div>
+<p>Under the hood, <code>np.array()</code> creates a C-struct that contains a pointer to a raw
+                            block of memory, along with metadata describing the shape, strides (how many bytes to jump
+                            to get to the next element), and data type. Memory is allocated via C's <code>malloc</code>,
+                            entirely bypassing the slow Python GIL (Global Interpreter Lock).</p>
+</div>
+<div class="edu-section edu-section-data-structure">
+<div class="edu-section-title">8. Vector Representation</div>
+<p>In memory, the 2D matrix <code>[[1, 2], [3, 4]]</code> is stored flatly as
+                            <code>[1.0, 2.0, 3.0, 4.0]</code>. The object just uses 'strides' mathematics to simulate a
+                            grid when you ask for row 2, column 1.
+                        </p>
+</div>
+<div class="edu-section edu-section-shapes">
+<div class="edu-section-title">9. Shape and Dimensions</div>
+<p>A nested list with 2 elements, where each element has 2 elements, yields a shape of
+                            <code>(2, 2)</code>.
+                        </p>
+<p><strong>Before:</strong> Nested Lists.</p>
+<p><strong>After:</strong> <code>X.shape = (batch_size=2, features=2)</code></p>
+</div>
+<div class="edu-section edu-section-returns">
+<div class="edu-section-title">10. Return Values</div>
+<p><strong>Object Type:</strong> <code>numpy.ndarray</code></p>
+<p><strong>Data Type:</strong> Follows the <code>dtype</code> parameter (e.g.,
+                            <code>float32</code>).
+                        </p>
+<p><strong>Shape:</strong> Tuple of integers representing dimension sizes.</p>
+</div>
+<div class="edu-section edu-section-edge-cases">
+<div class="edu-section-title">11. Edge Cases</div>
+<p><strong>Ragged Arrays:</strong> If inner lists have different lengths (e.g.,
+                            <code>[[1], [2, 3]]</code>), NumPy cannot build a grid. It falls back to an array of Python
+                            objects (<code>dtype=object</code>), which ruins performance entirely.
+                        </p>
+<p><strong>Empty Inputs:</strong> <code>np.array([])</code> evaluates safely but defaults to
+                            <code>float64</code>.
+                        </p>
+</div>
+<div class="edu-section edu-section-variations">
+<div class="edu-section-title">12. Variations &amp; Alternatives</div>
+<p><strong><code>np.asarray(obj)</code>:</strong> Use this instead of <code>np.array()</code>
+                            inside functions! If <code>obj</code> is already an array, it returns a 0-copy view, saving
+                            memory.</p>
+<p><strong><code>np.zeros(shape)</code> / <code>np.ones(shape)</code>:</strong> Use when the
+                            data isn't known yet (e.g. initializing model weights).</p>
+</div>
+<div class="edu-section edu-section-mistakes">
+<div class="edu-section-title">13. Common Mistakes</div>
+<p><strong>Mistake:</strong> Not specifying <code>dtype</code> when feeding a GPU model like
+                            PyTorch. Default is <code>float64</code>, but GPUs operate best on <code>float32</code>,
+                            causing slow automatic casting later.</p>
+<p><strong>Fix:</strong> Always write <code>np.array(data, dtype=np.float32)</code> during
+                            feature engineering pipelines.</p>
+</div>
+<div class="edu-section edu-section-performance">
+<div class="edu-section-title">14. Performance Considerations</div>
+<p>Creating an array implies looping over the Python list and type-converting every element in
+                            C. It is an O(N) operation. You should build your data as an array immediately when
+                            generating data, rather than building a giant list for millions of rows and calling
+                            <code>np.array()</code> at the end.
+                        </p>
+</div>
+<div class="edu-section edu-section-practice">
+<div class="edu-section-title">15. Practice Exercise</div>
+<p><strong>Challenge:</strong> Write a single line of code to create a 3-element 1D array of
+                            type 8-bit integer containing values 10, 20, 30.</p>
+<p><strong>Expected Output:</strong> <code>[10 20 30]</code> with <code>dtype('int8')</code></p>
+</div>
+<div class="edu-section edu-section-advanced">
+<div class="edu-section-title">16. Advanced Explanation</div>
+<p>The <code>order='K'</code> parameter determines memory layout. By default, NumPy prefers
+                            C-contiguous (row-major) order. Fortran-contiguous (column-major) order
+                            (<code>order='F'</code>) is faster for column-wise operations and is the memory layout
+                            expected by certain BLAS/LAPACK Fortran routines solving linear algebra equations in
+                            Scikit-Learn.</p>
+</div>
+<div class="edu-next-steps">
+                        ✅ <strong>Next Steps:</strong> If you want, I can also give you a "100 Most Important Concepts for AI/ML Engineers" (a compact list that interviews and advanced courses focus on).
+                    </div></div>
+<!-- ═══ SECTION 2: Indexing & Slicing ═══ -->
+<h2 class="section-title" id="s-indexing">Indexing, Slicing &amp; Boolean Masking</h2>
+<div class="edu-concept" id="np-indexing">
+<div class="edu-concept-title">Indexing &amp; Slicing NumPy Arrays</div>
+<div class="edu-section edu-section-intro">
+<div class="edu-section-title">1. Concept Introduction</div>
+<p>Indexing and slicing allow you to access, modify, or extract specific elements and subarrays
+                            from a larger NumPy array. This is critical for tasks like selecting training batches,
+                            isolating features in a dataset, or creating validation splits without copying unnecessary
+                            memory.</p>
+</div>
+<div class="edu-section edu-section-intuition">
+<div class="edu-section-title">2. Concept Intuition</div>
+<p>Think of an array like a spreadsheet. Basic slicing (<code>[1:4]</code>) is like dragging
+                            your mouse over rows 1 through 3—you just "look" at them (a View). Fancy indexing (passing a
+                            list of specific rows like <code>[[0, 5, 8]]</code>) or boolean masking
+                            (<code>[a &gt; 0]</code>) is like using the Filter tool to copy specific rows into a brand new
+                            spreadsheet (a Copy).</p>
+</div>
+<div class="edu-section edu-section-syntax">
+<div class="edu-section-title">3. Python Syntax</div>
+<div class="sig-box">
+                            # Basic Slicing (View)
+                            a[start:stop:step] # 1D array
+                            a[row_expr, col_expr] # 2D array
+
+                            # Fancy Indexing (Copy)
+                            a[[idx1, idx2, idx3]] # Select by list of indices
+
+                            # Boolean Masking (Copy)
+                            a[condition_array] # Select where condition is True
                         </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box"><span class="kw">import</span> numpy <span class="kw">as</span> np
+</div>
+<div class="edu-section edu-section-code">
+<div class="edu-section-title">4. Python Code Example</div>
+<div class="code-wrap">
+<div class="code-header"><span class="code-lang">python</span></div>
+<pre><code>import numpy as np
 
-                                np.<span class="fn">array</span>(object, dtype=<span class="kw">None</span>, copy=<span
-                                    class="kw">True</span>, order=<span class="str">'K'</span>)
-                                np.<span class="fn">asarray</span>(a, dtype=<span class="kw">None</span>) <span
-                                    class="cmt"># no copy if already array of correct dtype</span>
-                                np.<span class="fn">zeros</span>(shape, dtype=<span class="kw">float</span>)
-                                np.<span class="fn">ones</span>(shape, dtype=<span class="kw">float</span>)
-                                np.<span class="fn">full</span>(shape, fill_value, dtype=<span class="kw">None</span>)
-                                np.<span class="fn">empty</span>(shape, dtype=<span class="kw">float</span>) <span
-                                    class="cmt"># uninitialized — fastest, do NOT read</span>
-                                np.<span class="fn">eye</span>(N, M=<span class="kw">None</span>, k=<span
-                                    class="num">0</span>, dtype=<span class="kw">float</span>) <span class="cmt">#
-                                    identity / off-diagonal</span>
-                                np.<span class="fn">arange</span>(start, stop, step, dtype=<span class="kw">None</span>)
-                                np.<span class="fn">linspace</span>(start, stop, num=<span class="num">50</span>,
-                                endpoint=<span class="kw">True</span>)</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <p class="body-text"><strong>dtype hierarchy & ML implications:</strong></p>
-                            <ul class="doc-list">
-                                <li><code>float64</code> — default NumPy float. Most sklearn estimators expect this.
-                                </li>
-                                <li><code>float32</code> — half the memory; preferred by TensorFlow/PyTorch for GPU
-                                    training.</li>
-                                <li><code>int32</code> / <code>int64</code> — for labels, indices. Loss functions accept
-                                    <code>int32</code>.
-                                </li>
-                                <li><code>bool</code> — for masks; stored as 1 byte (not 1 bit).</li>
-                            </ul>
-                            <p class="body-text"><strong>np.array vs np.asarray:</strong></p>
-                            <p class="body-text"><code>np.array()</code> always copies. <code>np.asarray()</code>
-                                returns a view if the input is already a compatible array — zero-copy. Use
-                                <code>asarray</code> in library code to avoid accidental copies.
-                            </p>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code><span class="kw">import</span> numpy <span class="kw">as</span> np
+X = np.arange(24).reshape(6, 4)
 
-<span class="cmt"># Float32 for GPU-compatible features</span>
-X = np.<span class="fn">array</span>([[<span class="num">1.0</span>, <span class="num">2.0</span>], [<span class="num">3.0</span>, <span class="num">4.0</span>]], dtype=np.float32)
+# 1. Basic Slicing (first 4 rows, all columns)
+X_train = X[:4, :]
 
-<span class="cmt"># Avoid copy when safe</span>
-X_view = np.<span class="fn">asarray</span>(X, dtype=np.float32)
-<span class="fn">print</span>(X_view <span class="kw">is</span> X)  <span class="cmt"># True — no copy!</span>
+# 2. Fancy Indexing (columns 0 and 2)
+X_subset = X[:, [0, 2]]
 
-<span class="cmt"># Weight matrix init (zeros)</span>
-W = np.<span class="fn">zeros</span>((<span class="num">128</span>, <span class="num">64</span>), dtype=np.float32)
-
-<span class="cmt"># Bias init</span>
-b = np.<span class="fn">full</span>(<span class="num">64</span>, <span class="num">0.01</span>, dtype=np.float32)
-
-<span class="cmt"># Identity (useful for transformations)</span>
-I = np.<span class="fn">eye</span>(<span class="num">4</span>)
-
-<span class="cmt"># Evenly spaced samples (e.g. for ROC threshold grid)</span>
-thresholds = np.<span class="fn">linspace</span>(<span class="num">0</span>, <span class="num">1</span>, num=<span class="num">101</span>)
-
-<span class="cmt"># Integer ranges for batch indices</span>
-indices = np.<span class="fn">arange</span>(<span class="num">0</span>, <span class="num">10000</span>, step=<span class="num">32</span>)  <span class="cmt"># batch start positions</span>
-
-<span class="cmt"># Check dtype and memory</span>
-<span class="fn">print</span>(X.dtype, X.nbytes, X.itemsize)</code></pre>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <ul class="warning-list">
-                                <li><strong>np.empty is NOT zeroed:</strong> Contains whatever was in memory. Never use
-                                    to initialize weight arrays — use <code>np.zeros</code> or <code>np.random</code>.
-                                </li>
-                                <li><strong>Integer division pitfall:</strong> <code>np.arange(0, 1, 0.1)</code> may
-                                    give 11 elements due to floating-point stepping. Use
-                                    <code>np.linspace(0, 1, 11)</code> instead.
-                                </li>
-                                <li><strong>Nested list → ragged:</strong> <code>np.array([[1,2],[3]])</code> gives
-                                    dtype=object. Always ensure all rows are the same length.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ═══ SECTION 2: Indexing & Slicing ═══ -->
-                <h2 class="section-title" id="s-indexing">Indexing, Slicing & Boolean Masking</h2>
-
-                <div class="func-card" id="indexing">
-                    <div class="func-card-header">
-                        <div class="func-icon">🎯</div>
-                        <div class="func-info">
-                            <div class="func-name">Basic slicing / Fancy indexing / Boolean masking</div>
-                            <div class="func-tagline">Select, filter, and extract subarrays — the most common NumPy
-                                operations in ML pipelines</div>
-                            <div class="func-tags"><span class="func-tag">indexing</span><span
-                                    class="func-tag">slicing</span><span class="func-tag">boolean mask</span><span
-                                    class="func-tag">fancy indexing</span></div>
-                        </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Syntax</div>
-                            <div class="func-tab">Internals</div>
-                            <div class="func-tab">Example</div>
-                            <div class="func-tab">Mistakes</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box"><span class="cmt"># Basic slicing — returns a VIEW</span>
-                                a[start:stop:step]
-                                a[<span class="num">2</span>:<span class="num">5</span>] <span class="cmt"># rows
-                                    2,3,4</span>
-                                a[::- <span class="num">1</span>] <span class="cmt"># reverse</span>
-                                a[<span class="num">1</span>:<span class="num">5</span>, <span
-                                    class="num">2</span>:<span class="num">4</span>] <span class="cmt"># 2D slice</span>
-                                a[:, np.<span class="fn">newaxis</span>] <span class="cmt"># add axis (=
-                                    a[:,None])</span>
-
-                                <span class="cmt"># Fancy indexing — returns a COPY</span>
-                                a[[<span class="num">0</span>, <span class="num">3</span>, <span class="num">5</span>]]
-                                <span class="cmt"># select rows by list</span>
-                                a[np.<span class="fn">array</span>([<span class="num">0</span>,<span
-                                    class="num">3</span>])]
-
-                                <span class="cmt"># Boolean masking — returns a COPY</span>
-                                mask = a > <span class="num">0</span>
-                                a[mask]
-                                a[a % <span class="num">2</span> == <span class="num">0</span>] <span class="cmt"># even
-                                    elements</span>
-                                np.<span class="fn">where</span>(condition, x, y) <span class="cmt"># element-wise
-                                    ternary</span>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <p class="body-text"><strong>View vs Copy — critical for memory efficiency:</strong></p>
-                            <ul class="doc-list">
-                                <li><strong>View:</strong> Basic slicing (<code>a[1:4]</code>) returns a view — no data
-                                    is copied. Modifying the view modifies the original. Share memory
-                                    (<code>a.base is original</code> is True).</li>
-                                <li><strong>Copy:</strong> Fancy indexing (<code>a[[1,2,3]]</code>) and boolean masking
-                                    (<code>a[a>0]</code>) always return copies. Mutations don't affect original.</li>
-                                <li>Use <code>a.flags['OWNDATA']</code> or <code>a.base is None</code> to check
-                                    ownership.</li>
-                                <li>Force a copy: <code>a[1:4].copy()</code>.</li>
-                            </ul>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code>X = np.<span class="fn">arange</span>(<span class="num">24</span>).<span class="fn">reshape</span>(<span class="num">6</span>, <span class="num">4</span>)
-
-<span class="cmt"># Slice first 4 rows, all columns — VIEW</span>
-X_train = X[:<span class="num">4</span>, :]
-X_test  = X[<span class="num">4</span>:, :]
-
-<span class="cmt"># Select specific features by column index</span>
-feature_idx = [<span class="num">0</span>, <span class="num">2</span>]
-X_subset = X[:, feature_idx]           <span class="cmt"># fancy index → copy</span>
-
-<span class="cmt"># Boolean masking: select rows where target > 0</span>
-y = np.<span class="fn">array</span>([<span class="num">1</span>, <span class="num">0</span>, <span class="num">1</span>, <span class="num">1</span>, <span class="num">0</span>, <span class="num">1</span>])
-X_pos = X[y == <span class="num">1</span>]                      <span class="cmt"># only positive class samples</span>
-
-<span class="cmt"># np.where: clip outliers</span>
-X_clean = np.<span class="fn">where</span>(np.<span class="fn">abs</span>(X) > <span class="num">10</span>, np.<span class="fn">sign</span>(X) * <span class="num">10</span>, X)
-
-<span class="cmt"># np.where as argwhere: find indices of non-zero</span>
-nonzero_rows = np.<span class="fn">where</span>(y == <span class="num">1</span>)[<span class="num">0</span>]
-
-<span class="cmt"># Argmax along axis</span>
-preds = np.<span class="fn">argmax</span>(logits, axis=<span class="num">1</span>)     <span class="cmt"># multiclass predictions
-
-# Advanced: select upper triangle (covariance matrices)</span>
-mask = np.<span class="fn">triu</span>(np.<span class="fn">ones</span>((<span class="num">4</span>, <span class="num">4</span>), dtype=<span class="kw">bool</span>), k=<span class="num">1</span>)
-upper_vals = corr_matrix[mask]</code></pre>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <ul class="warning-list">
-                                <li><strong>Chained indexing on assignment:</strong> <code>X[X>0][0] = 99</code>
-                                    silently fails — creates a temporary copy. Use
-                                    <code>X[np.where(X>0)[0][0]] = 99</code>.
-                                </li>
-                                <li><strong>View mutation:</strong> <code>a = X[1:3]; a[:] = 0</code> zeros out rows 1-2
-                                    of X. To avoid, use <code>a = X[1:3].copy()</code>.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Reshape & stacking -->
-                <div class="func-card" id="reshape">
-                    <div class="func-card-header">
-                        <div class="func-icon">🔄</div>
-                        <div class="func-info">
-                            <div class="func-name">reshape / ravel / stack / concatenate / split</div>
-                            <div class="func-tagline">Reshape, combine, and split arrays — batch processing and data
+# 3. Boolean Masking (values greater than 10)
+X_large = X[X &gt; 10]</code></pre>
+</div>
+</div>
+<div class="edu-section edu-section-line-by-line">
+<div class="edu-section-title">5. Line-by-Line Explanation</div>
+<table>
+<tr>
+<th>Code Line</th>
+<th>Explanation</th>
+</tr>
+<tr>
+<td><code>X = np.arange(24).reshape(6, 4)</code></td>
+<td>Creates a 6x4 matrix containing numbers 0 through 23.</td>
+</tr>
+<tr>
+<td><code>X_train = X[:4, :]</code></td>
+<td>Slices rows index 0 to 3. The <code>:</code> means "all columns". This returns a
+                                    memory view.</td>
+</tr>
+<tr>
+<td><code>X_subset = X[:, [0, 2]]</code></td>
+<td>Selects all rows but specifically copies out columns 0 and 2 using a list.</td>
+</tr>
+<tr>
+<td><code>X_large = X[X &gt; 10]</code></td>
+<td>Evaluates <code>X &gt; 10</code> (creates a T/F mask) and filters the array, collapsing
+                                    it into 1D.</td>
+</tr>
+</table>
+</div>
+<div class="edu-section edu-section-io">
+<div class="edu-section-title">6. Input and Output Example</div>
+<p><strong>Input:</strong> Array of shape (6,4)</p>
+<p><strong>Applying Slicing:</strong> <code>X[:2, 1:3]</code></p>
+<p><strong>Output:</strong></p>
+<pre><code>[[1  2]
+ [5  6]]</code></pre>
+<p><strong>Transformation:</strong> Extracts the intersection of the first two rows and the
+                            middle two columns.</p>
+</div>
+<div class="edu-section edu-section-internals">
+<div class="edu-section-title">7. Internal Mechanism</div>
+<p>Basic slices only alter the <strong>strides</strong> and <strong>offset</strong> metadata of
+                            the C-struct. No data is duplicated in RAM. Fancy indexing requires NumPy to allocate a new
+                            memory block and iterate through the requested indices to populate it.</p>
+</div>
+<div class="edu-section edu-section-data-structure">
+<div class="edu-section-title">8. Vector Representation</div>
+<p>A boolean mask <code>X &gt; 10</code> is represented as an array of 8-bit booleans:
+                            <code>[False, False, ..., True, True]</code>. Memory filtering iterates over this mask
+                            mapping against the original pointers.</p>
+</div>
+<div class="edu-section edu-section-shapes">
+<div class="edu-section-title">9. Shape and Dimensions</div>
+<p><strong>Basic 2D Slice:</strong> <code>(6,4)</code> sliced with <code>[:4, :]</code> →
+                            <code>(4, 4)</code></p>
+<p><strong>Boolean Mask:</strong> Masking a multi-dimensional array ALWAYS flattens the result
+                            to 1D, e.g., <code>(N,)</code> where N is True count.</p>
+</div>
+<div class="edu-section edu-section-returns">
+<div class="edu-section-title">10. Return Values</div>
+<p><strong>Object Type:</strong> <code>numpy.ndarray</code></p>
+<p><strong>Note:</strong> Either a new object pointing to shared memory (View) or entirely new
+                            memory (Copy).</p>
+</div>
+<div class="edu-section edu-section-edge-cases">
+<div class="edu-section-title">11. Edge Cases</div>
+<p><strong>Out of Bounds:</strong> <code>a[10:20]</code> on a 5-element array doesn't crash; it
+                            returns an empty array <code>[]</code>.</p>
+<p><strong>Negative Step:</strong> <code>a[::-1]</code> instantly reverses the array logic by
+                            flipping the memory strides to negative values.</p>
+</div>
+<div class="edu-section edu-section-variations">
+<div class="edu-section-title">12. Variations &amp; Alternatives</div>
+<p><strong><code>np.where(cond, x, y)</code>:</strong> A variation of boolean masking providing
+                            ternary logic (if condition then x else y), often used to cap outliers:
+                            <code>np.where(X &gt; 100, 100, X)</code>.</p>
+</div>
+<div class="edu-section edu-section-mistakes">
+<div class="edu-section-title">13. Common Mistakes</div>
+<p><strong>Mistake:</strong> Chained assignment like <code>X[X &gt; 0][0] = 99</code>. This
+                            silently modifies a temporary copy, leaving X unchanged.</p>
+<p><strong>Fix:</strong> Use a single boolean index with <code>np.where</code> or direct
+                            assignment: <code>X[X &gt; 0] = 99</code>.</p>
+</div>
+<div class="edu-section edu-section-performance">
+<div class="edu-section-title">14. Performance Considerations</div>
+<p>Always heavily favor basic slices over fancy indexing when dealing with massive datasets
+                            (like images or batches), because generating a View is O(1) instantaneous time and 0 extra
+                            memory.</p>
+</div>
+<div class="edu-section edu-section-practice">
+<div class="edu-section-title">15. Practice Exercise</div>
+<p><strong>Challenge:</strong> Given a 1D array <code>a = np.array([1, 2, 3, 4, 5])</code>,
+                            extract only the odd numbers without using a loop.</p>
+<p><strong>Expected Output:</strong> <code>[1 3 5]</code></p>
+</div>
+<div class="edu-section edu-section-advanced">
+<div class="edu-section-title">16. Advanced Explanation</div>
+<p>Adding new axes via <code>np.newaxis</code> (or <code>None</code>) during slicing simply
+                            inserts a stride of 0 into the struct metadata. <code>X[:, np.newaxis]</code> turns a shape
+                            of <code>(5,)</code> into <code>(5, 1)</code> instantly, preparing arrays for broadcasting
+                            without computationally expensive reshape functions.</p>
+</div>
+<div class="edu-next-steps">
+                        ✅ <strong>Next Steps:</strong> If you want, I can also give you a "100 Most Important Concepts for AI/ML Engineers" (a compact list that interviews and advanced courses focus on).
+                    </div></div>
+<!-- Reshape & stacking -->
+<div class="func-card" id="reshape">
+<div class="func-card-header">
+<div class="func-icon">🔄</div>
+<div class="func-info">
+<div class="func-name">reshape / ravel / stack / concatenate / split</div>
+<div class="func-tagline">Reshape, combine, and split arrays — batch processing and data
                                 pipelining</div>
-                            <div class="func-tags"><span class="func-tag">reshape</span><span
-                                    class="func-tag">stack</span><span class="func-tag">concatenate</span><span
-                                    class="func-tag">split</span></div>
-                        </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Syntax</div>
-                            <div class="func-tab">Example</div>
-                            <div class="func-tab">Mistakes</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box">a.<span class="fn">reshape</span>(shape) <span class="cmt"># -1 infers
+<div class="func-tags"><span class="func-tag">reshape</span><span class="func-tag">stack</span><span class="func-tag">concatenate</span><span class="func-tag">split</span></div>
+</div>
+<div class="func-toggle">▾</div>
+</div>
+<div class="func-body">
+<div class="func-tabs">
+<div class="func-tab">Syntax</div>
+<div class="func-tab">Example</div>
+<div class="func-tab">Mistakes</div>
+</div>
+<div class="func-tab-content">
+<div class="sig-box">a.<span class="fn">reshape</span>(shape) <span class="cmt"># -1 infers
                                     dimension</span>
                                 a.<span class="fn">ravel</span>() <span class="cmt"># flatten to 1D (view if
                                     contiguous)</span>
@@ -269,22 +365,18 @@ upper_vals = corr_matrix[mask]</code></pre>
                                 np.<span class="fn">expand_dims</span>(a, axis) <span class="cmt"># insert axis at
                                     position</span>
 
-                                np.<span class="fn">concatenate</span>([a, b], axis=<span class="num">0</span>) <span
-                                    class="cmt"># join along existing axis</span>
-                                np.<span class="fn">stack</span>([a, b], axis=<span class="num">0</span>) <span
-                                    class="cmt"># join along NEW axis</span>
+                                np.<span class="fn">concatenate</span>([a, b], axis=<span class="num">0</span>) <span class="cmt"># join along existing axis</span>
+                                np.<span class="fn">stack</span>([a, b], axis=<span class="num">0</span>) <span class="cmt"># join along NEW axis</span>
                                 np.<span class="fn">vstack</span>([a, b]) <span class="cmt"># stack row-wise
                                     (axis=0)</span>
                                 np.<span class="fn">hstack</span>([a, b]) <span class="cmt"># stack col-wise
                                     (axis=1)</span>
-                                np.<span class="fn">split</span>(a, indices, axis=<span class="num">0</span>) <span
-                                    class="cmt"># split into sub-arrays</span></div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code>X = np.<span class="fn">random</span>.<span class="fn">randn</span>(<span class="num">100</span>, <span class="num">28</span>, <span class="num">28</span>)  <span class="cmt"># 100 grayscale images 28x28</span>
+                                np.<span class="fn">split</span>(a, indices, axis=<span class="num">0</span>) <span class="cmt"># split into sub-arrays</span></div>
+</div>
+<div class="func-tab-content">
+<div class="code-wrap">
+<div class="code-header"><span class="code-lang">python</span><button class="copy-btn"><span>⎘</span> Copy</button></div>
+<pre><code>X = np.<span class="fn">random</span>.<span class="fn">randn</span>(<span class="num">100</span>, <span class="num">28</span>, <span class="num">28</span>)  <span class="cmt"># 100 grayscale images 28x28</span>
 
 <span class="cmt"># Flatten for Dense layer input</span>
 X_flat = X.<span class="fn">reshape</span>(<span class="num">100</span>, -<span class="num">1</span>)       <span class="cmt"># (100, 784) — -1 infers 784</span>
@@ -304,55 +396,49 @@ folds = np.<span class="fn">array_split</span>(X, <span class="num">5</span>)   
 
 <span class="cmt"># Remove singleton dims (e.g. from model output)</span>
 y_pred = model_out.<span class="fn">squeeze</span>()     <span class="cmt"># (100,1) → (100,)</span></code></pre>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <ul class="warning-list">
-                                <li><strong>np.stack vs np.concatenate:</strong> <code>stack</code> creates a new axis;
+</div>
+</div>
+<div class="func-tab-content">
+<ul class="warning-list">
+<li><strong>np.stack vs np.concatenate:</strong> <code>stack</code> creates a new axis;
                                     <code>concatenate</code> joins along existing axis. For 1D arrays:
                                     <code>np.stack([a,b], axis=0)</code> gives (2, N);
                                     <code>np.concatenate([a,b])</code> gives (2N,).
                                 </li>
-                                <li><strong>ravel vs flatten:</strong> <code>ravel</code> returns a view when possible
+<li><strong>ravel vs flatten:</strong> <code>ravel</code> returns a view when possible
                                     (no copy); <code>flatten</code> always copies. Use <code>ravel</code> for
                                     performance.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ═══ SECTION 3: Math & Statistics ═══ -->
-                <h2 class="section-title" id="s-math">Math, Statistics & Sorting</h2>
-
-                <div class="func-card" id="math-stats">
-                    <div class="func-card-header">
-                        <div class="func-icon">📊</div>
-                        <div class="func-info">
-                            <div class="func-name">mean / std / var / sum / cumsum / sort / argsort</div>
-                            <div class="func-tagline">Reduction operations and sorting — understanding axis, keepdims,
+</ul>
+</div>
+</div>
+</div>
+<!-- ═══ SECTION 3: Math & Statistics ═══ -->
+<h2 class="section-title" id="s-math">Math, Statistics &amp; Sorting</h2>
+<div class="func-card" id="math-stats">
+<div class="func-card-header">
+<div class="func-icon">📊</div>
+<div class="func-info">
+<div class="func-name">mean / std / var / sum / cumsum / sort / argsort</div>
+<div class="func-tagline">Reduction operations and sorting — understanding axis, keepdims,
                                 and ddof</div>
-                            <div class="func-tags"><span class="func-tag">statistics</span><span
-                                    class="func-tag">axis</span><span class="func-tag">sorting</span></div>
-                        </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Syntax</div>
-                            <div class="func-tab">Example</div>
-                            <div class="func-tab">Performance</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box">np.<span class="fn">mean</span>(a, axis=<span class="kw">None</span>,
+<div class="func-tags"><span class="func-tag">statistics</span><span class="func-tag">axis</span><span class="func-tag">sorting</span></div>
+</div>
+<div class="func-toggle">▾</div>
+</div>
+<div class="func-body">
+<div class="func-tabs">
+<div class="func-tab">Syntax</div>
+<div class="func-tab">Example</div>
+<div class="func-tab">Performance</div>
+</div>
+<div class="func-tab-content">
+<div class="sig-box">np.<span class="fn">mean</span>(a, axis=<span class="kw">None</span>,
                                 keepdims=<span class="kw">False</span>)
-                                np.<span class="fn">std</span>(a, axis=<span class="kw">None</span>, ddof=<span
-                                    class="num">0</span>, keepdims=<span class="kw">False</span>)
-                                np.<span class="fn">var</span>(a, axis=<span class="kw">None</span>, ddof=<span
-                                    class="num">0</span>)
+                                np.<span class="fn">std</span>(a, axis=<span class="kw">None</span>, ddof=<span class="num">0</span>, keepdims=<span class="kw">False</span>)
+                                np.<span class="fn">var</span>(a, axis=<span class="kw">None</span>, ddof=<span class="num">0</span>)
                                 np.<span class="fn">sum</span>(a, axis=<span class="kw">None</span>)
                                 np.<span class="fn">cumsum</span>(a, axis=<span class="kw">None</span>)
-                                np.<span class="fn">min</span>(a) / np.<span class="fn">max</span>(a) / np.<span
-                                    class="fn">ptp</span>(a) <span class="cmt"># ptp = peak-to-peak(max-min)</span>
+                                np.<span class="fn">min</span>(a) / np.<span class="fn">max</span>(a) / np.<span class="fn">ptp</span>(a) <span class="cmt"># ptp = peak-to-peak(max-min)</span>
                                 np.<span class="fn">percentile</span>(a, q) <span class="cmt"># q in 0-100</span>
                                 np.<span class="fn">quantile</span>(a, q) <span class="cmt"># q in 0.0-1.0</span>
                                 np.<span class="fn">median</span>(a, axis=<span class="kw">None</span>)
@@ -361,17 +447,15 @@ y_pred = model_out.<span class="fn">squeeze</span>()     <span class="cmt"># (10
                                 np.<span class="fn">sort</span>(a, axis=-<span class="num">1</span>) <span class="cmt">#
                                     returns sorted copy</span>
                                 np.<span class="fn">argsort</span>(a) <span class="cmt"># indices that sort a</span>
-                                np.<span class="fn">argmax</span>(a, axis=<span class="kw">None</span>) <span
-                                    class="cmt"># index of max</span>
+                                np.<span class="fn">argmax</span>(a, axis=<span class="kw">None</span>) <span class="cmt"># index of max</span>
                                 np.<span class="fn">argmin</span>(a, axis=<span class="kw">None</span>)
                                 np.<span class="fn">unique</span>(a, return_counts=<span class="kw">False</span>)
                             </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code>X = np.<span class="fn">random</span>.<span class="fn">randn</span>(<span class="num">1000</span>, <span class="num">20</span>)  <span class="cmt"># 1000 samples, 20 features</span>
+</div>
+<div class="func-tab-content">
+<div class="code-wrap">
+<div class="code-header"><span class="code-lang">python</span><button class="copy-btn"><span>⎘</span> Copy</button></div>
+<pre><code>X = np.<span class="fn">random</span>.<span class="fn">randn</span>(<span class="num">1000</span>, <span class="num">20</span>)  <span class="cmt"># 1000 samples, 20 features</span>
 
 <span class="cmt"># Per-feature statistics (axis=0 collapses rows)</span>
 mean = X.<span class="fn">mean</span>(axis=<span class="num">0</span>)   <span class="cmt"># (20,)</span>
@@ -393,56 +477,52 @@ top3 = np.<span class="fn">argsort</span>(logits, axis=<span class="num">1</span
 q1, q3 = np.<span class="fn">percentile</span>(X, [<span class="num">25</span>, <span class="num">75</span>], axis=<span class="num">0</span>)
 iqr = q3 - q1
 lower, upper = q1 - <span class="num">1.5</span>*iqr, q3 + <span class="num">1.5</span>*iqr
-mask = np.<span class="fn">all</span>((X >= lower) & (X <= upper), axis=<span class="num">1</span>)
+mask = np.<span class="fn">all</span>((X &gt;= lower) &amp; (X &lt;= upper), axis=<span class="num">1</span>)
 X_no_outliers = X[mask]</code></pre>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="perf-grid">
-                                <div class="perf-item">
-                                    <div class="perf-item-label">ddof</div>
-                                    <div class="perf-item-value"><code>ddof=0</code> (default) = population std;
+</div>
+</div>
+<div class="func-tab-content">
+<div class="perf-grid">
+<div class="perf-item">
+<div class="perf-item-label">ddof</div>
+<div class="perf-item-value"><code>ddof=0</code> (default) = population std;
                                         <code>ddof=1</code> = sample std (Bessel's correction). For ML normalization
                                         either is fine, but use ddof=1 to match sklearn's StandardScaler.
                                     </div>
-                                </div>
-                                <div class="perf-item">
-                                    <div class="perf-item-label">In-place sort</div>
-                                    <div class="perf-item-value"><code>a.sort()</code> sorts in-place (no copy).
+</div>
+<div class="perf-item">
+<div class="perf-item-label">In-place sort</div>
+<div class="perf-item-value"><code>a.sort()</code> sorts in-place (no copy).
                                         <code>np.sort(a)</code> returns a new array. Use in-place to save memory on
                                         large arrays.
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ═══ SECTION 4: Linear Algebra ═══ -->
-                <h2 class="section-title" id="s-linalg">Linear Algebra (np.linalg)</h2>
-
-                <div class="func-card" id="linalg">
-                    <div class="func-card-header">
-                        <div class="func-icon">📐</div>
-                        <div class="func-info">
-                            <div class="func-name">dot / matmul / @ / linalg.inv / svd / eig / norm / solve</div>
-                            <div class="func-tagline">Matrix operations that underpin every ML algorithm — from OLS to
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ═══ SECTION 4: Linear Algebra ═══ -->
+<h2 class="section-title" id="s-linalg">Linear Algebra (np.linalg)</h2>
+<div class="func-card" id="linalg">
+<div class="func-card-header">
+<div class="func-icon">📐</div>
+<div class="func-info">
+<div class="func-name">dot / matmul / @ / linalg.inv / svd / eig / norm / solve</div>
+<div class="func-tagline">Matrix operations that underpin every ML algorithm — from OLS to
                                 PCA to backprop</div>
-                            <div class="func-tags"><span class="func-tag">linalg</span><span
-                                    class="func-tag">SVD</span><span class="func-tag">matmul</span><span
-                                    class="func-tag">eigenvalues</span></div>
-                        </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Syntax</div>
-                            <div class="func-tab">Internals</div>
-                            <div class="func-tab">Example</div>
-                            <div class="func-tab">Performance</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box">np.<span class="fn">dot</span>(a, b) <span class="cmt"># scalar/1D/2D
+<div class="func-tags"><span class="func-tag">linalg</span><span class="func-tag">SVD</span><span class="func-tag">matmul</span><span class="func-tag">eigenvalues</span></div>
+</div>
+<div class="func-toggle">▾</div>
+</div>
+<div class="func-body">
+<div class="func-tabs">
+<div class="func-tab">Syntax</div>
+<div class="func-tab">Internals</div>
+<div class="func-tab">Example</div>
+<div class="func-tab">Performance</div>
+</div>
+<div class="func-tab-content">
+<div class="sig-box">np.<span class="fn">dot</span>(a, b) <span class="cmt"># scalar/1D/2D
                                     dot product</span>
                                 np.<span class="fn">matmul</span>(a, b) <span class="cmt"># = a @ b; no broadcasting for
                                     0D</span>
@@ -455,39 +535,36 @@ X_no_outliers = X[mask]</code></pre>
                                     possible!</span>
                                 np.linalg.<span class="fn">solve</span>(A, b) <span class="cmt"># solve Ax=b (more
                                     stable than inv(A)@b)</span>
-                                np.linalg.<span class="fn">lstsq</span>(A, b, rcond=<span class="kw">None</span>) <span
-                                    class="cmt"># least-squares (OLS solution)</span>
+                                np.linalg.<span class="fn">lstsq</span>(A, b, rcond=<span class="kw">None</span>) <span class="cmt"># least-squares (OLS solution)</span>
                                 np.linalg.<span class="fn">svd</span>(a, full_matrices=<span class="kw">True</span>)
                                 <span class="cmt"># SVD decomposition</span>
                                 np.linalg.<span class="fn">eig</span>(a) <span class="cmt"># eigenvalues +
                                     eigenvectors</span>
                                 np.linalg.<span class="fn">eigh</span>(a) <span class="cmt"># for symmetric/Hermitian —
                                     more stable</span>
-                                np.linalg.<span class="fn">norm</span>(a, ord=<span class="kw">None</span>, axis=<span
-                                    class="kw">None</span>)
+                                np.linalg.<span class="fn">norm</span>(a, ord=<span class="kw">None</span>, axis=<span class="kw">None</span>)
                                 np.linalg.<span class="fn">det</span>(a)
                                 np.linalg.<span class="fn">matrix_rank</span>(a)
                                 np.linalg.<span class="fn">pinv</span>(a) <span class="cmt"># Moore-Penrose
                                     pseudo-inverse</span>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <p class="body-text"><strong>SVD — backbone of PCA and dimensionality reduction:</strong>
-                            </p>
-                            <p class="body-text">SVD decomposes X = UΣVᵀ. U: left singular vectors (scores); Σ: diagonal
+</div>
+</div>
+<div class="func-tab-content">
+<p class="body-text"><strong>SVD — backbone of PCA and dimensionality reduction:</strong>
+</p>
+<p class="body-text">SVD decomposes X = UΣVᵀ. U: left singular vectors (scores); Σ: diagonal
                                 of singular values; V: right singular vectors (loadings = principal components). PCA =
                                 SVD of the centered X.</p>
-                            <p class="body-text"><strong>linalg.solve vs inv:</strong></p>
-                            <p class="body-text"><code>np.linalg.inv(A) @ b</code> requires computing the inverse
+<p class="body-text"><strong>linalg.solve vs inv:</strong></p>
+<p class="body-text"><code>np.linalg.inv(A) @ b</code> requires computing the inverse
                                 explicitly — numerically unstable and ~2× slower. Always prefer
                                 <code>np.linalg.solve(A, b)</code> which uses LU factorization.
                             </p>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code><span class="cmt"># OLS with linalg</span>
+</div>
+<div class="func-tab-content">
+<div class="code-wrap">
+<div class="code-header"><span class="code-lang">python</span><button class="copy-btn"><span>⎘</span> Copy</button></div>
+<pre><code><span class="cmt"># OLS with linalg</span>
 X = np.<span class="fn">random</span>.<span class="fn">randn</span>(<span class="num">100</span>, <span class="num">5</span>)
 y = np.<span class="fn">random</span>.<span class="fn">randn</span>(<span class="num">100</span>)
 
@@ -513,67 +590,62 @@ cos_sim = X_unit @ X_unit.T  <span class="cmt"># (100, 100)</span>
 W1 = np.<span class="fn">random</span>.<span class="fn">randn</span>(<span class="num">784</span>, <span class="num">128</span>)
 b1 = np.<span class="fn">zeros</span>(<span class="num">128</span>)
 hidden = X_flat @ W1 + b1    <span class="cmt"># forward pass</span></code></pre>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="perf-grid">
-                                <div class="perf-item">
-                                    <div class="perf-item-label">BLAS Backend</div>
-                                    <div class="perf-item-value">np.dot / matmul delegate to BLAS (MKL, OpenBLAS).
+</div>
+</div>
+<div class="func-tab-content">
+<div class="perf-grid">
+<div class="perf-item">
+<div class="perf-item-label">BLAS Backend</div>
+<div class="perf-item-value">np.dot / matmul delegate to BLAS (MKL, OpenBLAS).
                                         Ensure NumPy is built against optimized BLAS: <code>np.show_config()</code>.
                                         MKL-linked NumPy (Anaconda) is typically fastest.</div>
-                                </div>
-                                <div class="perf-item">
-                                    <div class="perf-item-label">Contiguous Arrays</div>
-                                    <div class="perf-item-value">BLAS requires C-contiguous (row-major) arrays.
+</div>
+<div class="perf-item">
+<div class="perf-item-label">Contiguous Arrays</div>
+<div class="perf-item-value">BLAS requires C-contiguous (row-major) arrays.
                                         Non-contiguous arrays trigger copies. Check:
                                         <code>a.flags['C_CONTIGUOUS']</code>. Use <code>np.ascontiguousarray(a)</code>
                                         if needed.
                                     </div>
-                                </div>
-                                <div class="perf-item">
-                                    <div class="perf-item-label">Batched matmul</div>
-                                    <div class="perf-item-value"><code>np.matmul</code> supports batched matrix
+</div>
+<div class="perf-item">
+<div class="perf-item-label">Batched matmul</div>
+<div class="perf-item-value"><code>np.matmul</code> supports batched matrix
                                         multiplication for 3D+ arrays: <code>A @ B</code> where A is (batch, n, m) and B
                                         is (batch, m, k) → (batch, n, k).</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ═══ SECTION 5: Random ═══ -->
-                <h2 class="section-title" id="s-random">Random Module</h2>
-
-                <div class="func-card" id="random">
-                    <div class="func-card-header">
-                        <div class="func-icon">🎲</div>
-                        <div class="func-info">
-                            <div class="func-name">np.random.default_rng — Modern Random API</div>
-                            <div class="func-tagline">Reproducible experiments, data augmentation, shuffling, and
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ═══ SECTION 5: Random ═══ -->
+<h2 class="section-title" id="s-random">Random Module</h2>
+<div class="func-card" id="random">
+<div class="func-card-header">
+<div class="func-icon">🎲</div>
+<div class="func-info">
+<div class="func-name">np.random.default_rng — Modern Random API</div>
+<div class="func-tagline">Reproducible experiments, data augmentation, shuffling, and
                                 sampling</div>
-                            <div class="func-tags"><span class="func-tag">random</span><span
-                                    class="func-tag">reproducibility</span><span class="func-tag">sampling</span></div>
-                        </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Syntax</div>
-                            <div class="func-tab">Example</div>
-                            <div class="func-tab">Mistakes</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box"><span class="cmt"># Modern API (NumPy 1.17+) — prefer over
+<div class="func-tags"><span class="func-tag">random</span><span class="func-tag">reproducibility</span><span class="func-tag">sampling</span></div>
+</div>
+<div class="func-toggle">▾</div>
+</div>
+<div class="func-body">
+<div class="func-tabs">
+<div class="func-tab">Syntax</div>
+<div class="func-tab">Example</div>
+<div class="func-tab">Mistakes</div>
+</div>
+<div class="func-tab-content">
+<div class="sig-box"><span class="cmt"># Modern API (NumPy 1.17+) — prefer over
                                     np.random.*</span>
                                 rng = np.random.<span class="fn">default_rng</span>(seed=<span class="num">42</span>)
 
                                 rng.<span class="fn">random</span>((m, n)) <span class="cmt"># uniform [0, 1)</span>
                                 rng.<span class="fn">standard_normal</span>((m, n)) <span class="cmt"># N(0,1)</span>
-                                rng.<span class="fn">normal</span>(loc=<span class="num">0</span>, scale=<span
-                                    class="num">1</span>, size=(...))
-                                rng.<span class="fn">uniform</span>(low=<span class="num">0</span>, high=<span
-                                    class="num">1</span>, size=(...))
+                                rng.<span class="fn">normal</span>(loc=<span class="num">0</span>, scale=<span class="num">1</span>, size=(...))
+                                rng.<span class="fn">uniform</span>(low=<span class="num">0</span>, high=<span class="num">1</span>, size=(...))
                                 rng.<span class="fn">integers</span>(low, high, size=(...)) <span class="cmt">#
                                     exclusive high</span>
                                 rng.<span class="fn">choice</span>(a, size, replace=<span class="kw">True</span>,
@@ -581,12 +653,11 @@ hidden = X_flat @ W1 + b1    <span class="cmt"># forward pass</span></code></pre
                                 rng.<span class="fn">shuffle</span>(x) <span class="cmt"># in-place shuffle</span>
                                 rng.<span class="fn">permutation</span>(x) <span class="cmt"># returns shuffled
                                     copy</span></div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code>rng = np.random.<span class="fn">default_rng</span>(<span class="num">42</span>)
+</div>
+<div class="func-tab-content">
+<div class="code-wrap">
+<div class="code-header"><span class="code-lang">python</span><button class="copy-btn"><span>⎘</span> Copy</button></div>
+<pre><code>rng = np.random.<span class="fn">default_rng</span>(<span class="num">42</span>)
 
 <span class="cmt"># Xavier / Glorot initialization</span>
 n_in, n_out = <span class="num">784</span>, <span class="num">128</span>
@@ -618,45 +689,42 @@ n_mc = <span class="num">50</span>
 mc_preds = np.<span class="fn">stack</span>([<span class="fn">model_forward</span>(X, training=<span class="kw">True</span>) <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(n_mc)])
 mean_pred = mc_preds.<span class="fn">mean</span>(axis=<span class="num">0</span>)
 uncertainty = mc_preds.<span class="fn">std</span>(axis=<span class="num">0</span>)</code></pre>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <ul class="warning-list">
-                                <li><strong>Legacy np.random.seed():</strong> Global seed affects all code. The modern
+</div>
+</div>
+<div class="func-tab-content">
+<ul class="warning-list">
+<li><strong>Legacy np.random.seed():</strong> Global seed affects all code. The modern
                                     <code>default_rng(seed)</code> creates an isolated RNG — instances don't interfere.
                                 </li>
-                                <li><strong>rng.shuffle vs rng.permutation:</strong> <code>shuffle</code> is in-place;
+<li><strong>rng.shuffle vs rng.permutation:</strong> <code>shuffle</code> is in-place;
                                     <code>permutation</code> returns a new array. Both shuffle the first axis only for
                                     2D arrays.
                                 </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ═══ SECTION 6: Broadcasting ═══ -->
-                <h2 class="section-title" id="s-broadcasting">Broadcasting & Vectorization</h2>
-
-                <div class="func-card" id="broadcasting">
-                    <div class="func-card-header">
-                        <div class="func-icon">📡</div>
-                        <div class="func-info">
-                            <div class="func-name">Broadcasting Rules + np.einsum</div>
-                            <div class="func-tagline">Eliminate Python loops — broadcasting semantics, common patterns,
+</ul>
+</div>
+</div>
+</div>
+<!-- ═══ SECTION 6: Broadcasting ═══ -->
+<h2 class="section-title" id="s-broadcasting">Broadcasting &amp; Vectorization</h2>
+<div class="func-card" id="broadcasting">
+<div class="func-card-header">
+<div class="func-icon">📡</div>
+<div class="func-info">
+<div class="func-name">Broadcasting Rules + np.einsum</div>
+<div class="func-tagline">Eliminate Python loops — broadcasting semantics, common patterns,
                                 and einsum for arbitrary contractions</div>
-                            <div class="func-tags"><span class="func-tag">broadcasting</span><span
-                                    class="func-tag">einsum</span><span class="func-tag">vectorization</span></div>
-                        </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Rules</div>
-                            <div class="func-tab">Example</div>
-                            <div class="func-tab">einsum</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box"><span class="cmt"># Broadcasting rules (align from right, expand where
+<div class="func-tags"><span class="func-tag">broadcasting</span><span class="func-tag">einsum</span><span class="func-tag">vectorization</span></div>
+</div>
+<div class="func-toggle">▾</div>
+</div>
+<div class="func-body">
+<div class="func-tabs">
+<div class="func-tab">Rules</div>
+<div class="func-tab">Example</div>
+<div class="func-tab">einsum</div>
+</div>
+<div class="func-tab-content">
+<div class="sig-box"><span class="cmt"># Broadcasting rules (align from right, expand where
                                     needed):
                                     # 1. Prepend 1s to the smaller shape until lengths match
                                     # 2. Dimensions of size 1 stretch to match the other
@@ -668,17 +736,16 @@ uncertainty = mc_preds.<span class="fn">std</span>(axis=<span class="num">0</spa
 
                                     np.<span class="fn">einsum</span>(subscripts, *operands)
                                     <span class="cmt"># Subscript notation:
-                                        # 'ij,jk->ik' : matrix multiply
-                                        # 'ij->i' : row sum
-                                        # 'ii->i' : diagonal
-                                        # 'ij,ij->ij' : element-wise multiply
-                                        # 'ijk,ik->ij' : batched dot product</span></div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code><span class="cmt"># Manual StandardScaler (broadcasting)</span>
+                                        # 'ij,jk-&gt;ik' : matrix multiply
+                                        # 'ij-&gt;i' : row sum
+                                        # 'ii-&gt;i' : diagonal
+                                        # 'ij,ij-&gt;ij' : element-wise multiply
+                                        # 'ijk,ik-&gt;ij' : batched dot product</span></span></div>
+</div>
+<div class="func-tab-content">
+<div class="code-wrap">
+<div class="code-header"><span class="code-lang">python</span><button class="copy-btn"><span>⎘</span> Copy</button></div>
+<pre><code><span class="cmt"># Manual StandardScaler (broadcasting)</span>
 X = np.<span class="fn">random</span>.<span class="fn">randn</span>(<span class="num">1000</span>, <span class="num">20</span>)
 mean = X.<span class="fn">mean</span>(axis=<span class="num">0</span>)     <span class="cmt"># (20,)</span>
 std  = X.<span class="fn">std</span>(axis=<span class="num">0</span>)      <span class="cmt"># (20,)</span>
@@ -698,82 +765,72 @@ def <span class="fn">softmax</span>(logits):
 a = np.<span class="fn">array</span>([<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>])
 b = np.<span class="fn">array</span>([<span class="num">4</span>,<span class="num">5</span>,<span class="num">6</span>])
 outer = a[:, np.<span class="fn">newaxis</span>] * b[np.<span class="fn">newaxis</span>, :]  <span class="cmt"># (3,1)*(1,3) → (3,3)</span></code></pre>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code"><span class="cmt"># einsum examples — concise, often faster than explicit ops</span>
+</div>
+</div>
+<div class="func-tab-content">
+<div class="code-wrap">
+<div class="code-header"><span class="code-lang">python</span><button class="copy-btn"><span>⎘</span> Copy</button></div>
+<pre><code"><span class="cmt"># einsum examples — concise, often faster than explicit ops</span>
 A = np.<span class="fn">random</span>.<span class="fn">randn</span>(<span class="num">32</span>, <span class="num">10</span>)   <span class="cmt"># batch of 32, 10-dim vectors</span>
 B = np.<span class="fn">random</span>.<span class="fn">randn</span>(<span class="num">10</span>, <span class="num">5</span>)   <span class="cmt"># weight matrix</span>
 
 <span class="cmt"># Matrix multiply</span>
-out = np.<span class="fn">einsum</span>(<span class="str">'ij,jk->ik'</span>, A, B)            <span class="cmt"># (32, 5)</span>
+out = np.<span class="fn">einsum</span>(<span class="str">'ij,jk-&gt;ik'</span>, A, B)            <span class="cmt"># (32, 5)</span>
 
 <span class="cmt"># Batch dot product (pair-wise)</span>
-dots = np.<span class="fn">einsum</span>(<span class="str">'bi,bi->b'</span>, A, A)            <span class="cmt"># (32,) — row-wise norms²</span>
+dots = np.<span class="fn">einsum</span>(<span class="str">'bi,bi-&gt;b'</span>, A, A)            <span class="cmt"># (32,) — row-wise norms²</span>
 
 <span class="cmt"># Trace of matrix</span>
 M = np.<span class="fn">random</span>.<span class="fn">randn</span>(<span class="num">5</span>, <span class="num">5</span>)
-trace = np.<span class="fn">einsum</span>(<span class="str">'ii->'</span>, M)                  <span class="cmt"># scalar
+trace = np.<span class="fn">einsum</span>(<span class="str">'ii-&gt;'</span>, M)                  <span class="cmt"># scalar
 
 # Attention scores (Q·Kᵀ / √d)</span>
 Q = np.<span class="fn">random</span>.<span class="fn">randn</span>(<span class="num">8</span>, <span class="num">64</span>, <span class="num">32</span>)  <span class="cmt"># (batch, seq, d_k)</span>
 K = np.<span class="fn">random</span>.<span class="fn">randn</span>(<span class="num">8</span>, <span class="num">64</span>, <span class="num">32</span>)
-scores = np.<span class="fn">einsum</span>(<span class="str">'bqd,bkd->bqk'</span>, Q, K) / np.<span class="fn">sqrt</span>(<span class="num">32</span>)  <span class="cmt"># (batch,q,k)</span></code></pre>
+scores = np.<span class="fn">einsum</span>(<span class="str">'bqd,bkd-&gt;bqk'</span>, Q, K) / np.<span class="fn">sqrt</span>(<span class="num">32</span>)  <span class="cmt"># (batch,q,k)</span></code"></pre>
+</div>
+</div>
+</div>
+</div>
+<!-- ═══ SECTION 7: Structured Ops ═══ -->
+<h2 class="section-title" id="s-structured">Utility Operations</h2>
+<div class="func-card" id="utility-ops">
+<div class="func-card-header">
+<div class="func-icon">🔧</div>
+<div class="func-info">
+<div class="func-name">clip / abs / sign / log / exp / power / isnan / nanmean</div>
+<div class="func-tagline">Element-wise math, NaN handling, and numerical stability utilities
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ═══ SECTION 7: Structured Ops ═══ -->
-                <h2 class="section-title" id="s-structured">Utility Operations</h2>
-
-                <div class="func-card" id="utility-ops">
-                    <div class="func-card-header">
-                        <div class="func-icon">🔧</div>
-                        <div class="func-info">
-                            <div class="func-name">clip / abs / sign / log / exp / power / isnan / nanmean</div>
-                            <div class="func-tagline">Element-wise math, NaN handling, and numerical stability utilities
-                            </div>
-                            <div class="func-tags"><span class="func-tag">clip</span><span
-                                    class="func-tag">NaN</span><span class="func-tag">numerical stability</span></div>
-                        </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Syntax</div>
-                            <div class="func-tab">Example</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box">np.<span class="fn">clip</span>(a, a_min, a_max)
+<div class="func-tags"><span class="func-tag">clip</span><span class="func-tag">NaN</span><span class="func-tag">numerical stability</span></div>
+</div>
+<div class="func-toggle">▾</div>
+</div>
+<div class="func-body">
+<div class="func-tabs">
+<div class="func-tab">Syntax</div>
+<div class="func-tab">Example</div>
+</div>
+<div class="func-tab-content">
+<div class="sig-box">np.<span class="fn">clip</span>(a, a_min, a_max)
                                 np.<span class="fn">abs</span>(a) / np.<span class="fn">sign</span>(a)
-                                np.<span class="fn">log</span>(a) / np.<span class="fn">log2</span>(a) / np.<span
-                                    class="fn">log1p</span>(a)
+                                np.<span class="fn">log</span>(a) / np.<span class="fn">log2</span>(a) / np.<span class="fn">log1p</span>(a)
                                 np.<span class="fn">exp</span>(a) / np.<span class="fn">expm1</span>(a)
                                 np.<span class="fn">power</span>(a, exp) / np.<span class="fn">sqrt</span>(a)
 
                                 <span class="cmt"># NaN utilities</span>
-                                np.<span class="fn">isnan</span>(a) / np.<span class="fn">isinf</span>(a) / np.<span
-                                    class="fn">isfinite</span>(a)
-                                np.<span class="fn">nanmean</span>(a) / np.<span class="fn">nanstd</span>(a) / np.<span
-                                    class="fn">nansum</span>(a)
-                                np.<span class="fn">nan_to_num</span>(a, nan=<span class="num">0.0</span>, posinf=<span
-                                    class="num">0</span>, neginf=<span class="num">0</span>)
+                                np.<span class="fn">isnan</span>(a) / np.<span class="fn">isinf</span>(a) / np.<span class="fn">isfinite</span>(a)
+                                np.<span class="fn">nanmean</span>(a) / np.<span class="fn">nanstd</span>(a) / np.<span class="fn">nansum</span>(a)
+                                np.<span class="fn">nan_to_num</span>(a, nan=<span class="num">0.0</span>, posinf=<span class="num">0</span>, neginf=<span class="num">0</span>)
 
-                                <span class="cmt"># Comparisons & logical</span>
-                                np.<span class="fn">allclose</span>(a, b, rtol=<span class="num">1e-5</span>, atol=<span
-                                    class="num">1e-8</span>) <span class="cmt"># float comparison</span>
+                                <span class="cmt"># Comparisons &amp; logical</span>
+                                np.<span class="fn">allclose</span>(a, b, rtol=<span class="num">1e-5</span>, atol=<span class="num">1e-8</span>) <span class="cmt"># float comparison</span>
                                 np.<span class="fn">any</span>(a) / np.<span class="fn">all</span>(a)
                             </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code><span class="cmt"># Numerically stable log-sum-exp (for softmax/cross-entropy)</span>
+</div>
+<div class="func-tab-content">
+<div class="code-wrap">
+<div class="code-header"><span class="code-lang">python</span><button class="copy-btn"><span>⎘</span> Copy</button></div>
+<pre><code><span class="cmt"># Numerically stable log-sum-exp (for softmax/cross-entropy)</span>
 def <span class="fn">logsumexp</span>(x):
     c = x.<span class="fn">max</span>(axis=-<span class="num">1</span>, keepdims=<span class="kw">True</span>)
     <span class="kw">return</span> c + np.<span class="fn">log</span>(np.<span class="fn">exp</span>(x - c).<span class="fn">sum</span>(axis=-<span class="num">1</span>, keepdims=<span class="kw">True</span>))
@@ -782,7 +839,7 @@ def <span class="fn">logsumexp</span>(x):
 def <span class="fn">clip_gradients</span>(grads, max_norm=<span class="num">1.0</span>):
     total_norm = np.<span class="fn">sqrt</span>(<span class="fn">sum</span>(np.<span class="fn">sum</span>(g**<span class="num">2</span>) <span class="kw">for</span> g <span class="kw">in</span> grads))
     clip_coef = max_norm / (total_norm + <span class="num">1e-6</span>)
-    <span class="kw">if</span> clip_coef < <span class="num">1</span>:
+    <span class="kw">if</span> clip_coef &lt; <span class="num">1</span>:
         grads = [g * clip_coef <span class="kw">for</span> g <span class="kw">in</span> grads]
     <span class="kw">return</span> grads
 
@@ -799,42 +856,38 @@ def <span class="fn">bce_loss</span>(y_true, y_prob):
 
 <span class="cmt"># Test floating point equality</span>
 np.<span class="fn">allclose</span>(a, b)  <span class="cmt"># NEVER use == for floats</span></code></pre>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="doc-footer">
-                    <span>NumPy Reference — TWSS</span>
-                    <div class="footer-links">
-                        <a href="pandas.html">Pandas →</a>
-                    </div>
-                </div>
-
-            </div><!-- /content-inner -->
-        </main>
-
-        <div class="toc-panel">
-            <div class="toc-heading">On This Page</div>
-            <a href="#s-creation" class="toc-link">Array Creation</a>
-            <a href="#np-array" class="toc-link toc-h3">array / zeros / linspace</a>
-            <a href="#s-indexing" class="toc-link">Indexing & Masking</a>
-            <a href="#indexing" class="toc-link toc-h3">Slicing / Fancy / Boolean</a>
-            <a href="#reshape" class="toc-link toc-h3">reshape / stack / split</a>
-            <a href="#s-math" class="toc-link">Math & Statistics</a>
-            <a href="#math-stats" class="toc-link toc-h3">mean / std / argsort</a>
-            <a href="#s-linalg" class="toc-link">Linear Algebra</a>
-            <a href="#linalg" class="toc-link toc-h3">matmul / SVD / solve</a>
-            <a href="#s-random" class="toc-link">Random Module</a>
-            <a href="#random" class="toc-link toc-h3">default_rng / sampling</a>
-            <a href="#s-broadcasting" class="toc-link">Broadcasting</a>
-            <a href="#broadcasting" class="toc-link toc-h3">Rules / einsum</a>
-            <a href="#s-structured" class="toc-link">Utility Ops</a>
-            <a href="#utility-ops" class="toc-link toc-h3">clip / NaN / stability</a>
-        </div>
-    </div>
-    <script src="js/main.js"></script>
-    <script src="js/ai-chat.js"></script>
+</div>
+</div>
+</div>
+</div>
+<div class="doc-footer">
+<span>NumPy Reference — TWSS</span>
+<div class="footer-links">
+<a href="pandas.html">Pandas →</a>
+</div>
+</div>
+</div><!-- /content-inner -->
+</main>
+<div class="toc-panel">
+<div class="toc-heading">On This Page</div>
+<a class="toc-link" href="#s-creation">Array Creation</a>
+<a class="toc-link toc-h3" href="#np-array">array / zeros / linspace</a>
+<a class="toc-link" href="#s-indexing">Indexing &amp; Masking</a>
+<a class="toc-link toc-h3" href="#indexing">Slicing / Fancy / Boolean</a>
+<a class="toc-link toc-h3" href="#reshape">reshape / stack / split</a>
+<a class="toc-link" href="#s-math">Math &amp; Statistics</a>
+<a class="toc-link toc-h3" href="#math-stats">mean / std / argsort</a>
+<a class="toc-link" href="#s-linalg">Linear Algebra</a>
+<a class="toc-link toc-h3" href="#linalg">matmul / SVD / solve</a>
+<a class="toc-link" href="#s-random">Random Module</a>
+<a class="toc-link toc-h3" href="#random">default_rng / sampling</a>
+<a class="toc-link" href="#s-broadcasting">Broadcasting</a>
+<a class="toc-link toc-h3" href="#broadcasting">Rules / einsum</a>
+<a class="toc-link" href="#s-structured">Utility Ops</a>
+<a class="toc-link toc-h3" href="#utility-ops">clip / NaN / stability</a>
+</div>
+</div>
+<script src="js/main.js"></script>
+<script src="js/ai-chat.js"></script>
 </body>
-
 </html>

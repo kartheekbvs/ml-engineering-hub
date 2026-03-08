@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Cloud Architecture &amp; CI/CD — TWSS</title>
+<link href="css/style.css" rel="stylesheet"/>
+</head>
+<body>
+<script src="js/shared-layout.js"></script>
+<div class="app-layout has-toc">
+<main class="main-content">
+<div class="content-inner">
+<div class="page-header">
+<div class="page-breadcrumb"><a href="roadmap.html">Roadmap</a> › MLOps &amp; Deployment</div>
+<h1 class="page-title">Cloud Deployment &amp; CI/CD</h1>
+<p class="page-subtitle">Master AWS EC2, Serverless Scaling, and automated GitHub Actions pipelines.
+                    </p>
+</div>
+<div class="edu-concept" id="mlops-cloud">
+<div class="edu-concept-title">Global Distribution Infrastructure</div>
+<div class="edu-section edu-section-intro">
+<div class="edu-section-title">1. Concept Introduction</div>
+<p>If you seal your AI model into a pristine Docker container, how do millions of users on the
+                            other side of the planet actually interact with it?</p>
+<p>You cannot host it on your bedroom laptop (Dynamic IPs, power outages, local firewalls).
+                            <strong>Cloud Computing (AWS / GCP / Azure)</strong> allows you to rent military-grade data
+                            centers by the millisecond. <strong>CI/CD (Continuous Integration / Continuous
+                                Deployment)</strong> is the robotic automation pipeline that detects the second you push
+                            new code to GitHub, automatically wraps it in Docker, and teleports it straight to the AWS
+                            servers without a human ever touching a terminal.</p>
+</div>
+<div class="edu-section edu-section-intuition">
+<div class="edu-section-title">2. Concept Intuition</div>
+<p><strong>Traditional Deployment:</strong> You buy a $5,000 server. You plug it into your wall.
+                            On Christmas morning at 8:00 AM, traffic spikes 1000% from new users. The physical server
+                            melts under the load and the website crashes entirely.</p>
+<p><strong>Cloud Auto-Scaling:</strong> You rent a tiny $5/month cloud server. On Christmas
+                            morning, traffic surges. AWS mathematically detects the CPU hitting 90%. Without asking
+                            permission, AWS instantly turns on 500 identical clone servers, dynamically routes traffic
+                            evenly among all 500, processes the massive wave perfectly, and at 9:00 AM, AWS executes the
+                            500 clone servers, only charging you exactly $2 for the single hour of computational usage.
+                        </p>
+</div>
+<div class="edu-section edu-section-syntax">
+<div class="edu-section-title">3. YAML Syntax (GitHub Actions CI/CD)</div>
+<div class="sig-box">
+                            name: AI Model Deployment Pipeline
+
+                            # 1. trigger the robot when code pushes to main
+                            on:
+                            push:
+                            branches:
+                            - main
+
+                            jobs:
+                            deploy:
+                            runs-on: ubuntu-latest
+
+                            steps:
+                            # 2. Rip the code from the repository
+                            - name: Checkout Code
+                            uses: actions/checkout@v3
+
+                            # 3. Log into AWS Servers
+                            - name: Connect to AWS ECR
+                            run: aws ecr get-login-password --region us-east-1
+
+                            # 4. Compile the Docker Blueprint
+                            - name: Build Docker Image
+                            run: docker build -t my-ai-app .
+
+                            # 5. Teleport the image to global data centers
+                            - name: Push to AWS Cloud
+                            run: docker push my-aws-endpoint/my-ai-app:latest
+                        </div>
+</div>
+<div class="edu-section edu-section-code">
+<div class="edu-section-title">4. EC2 vs Fully Managed (The Cloud Paradox)</div>
+<div class="code-wrap">
+<div class="code-header"><span class="code-lang">bash</span></div>
+<pre><code># The defining choice of ML Engineering: IaaS vs PaaS
+
+# Option A: Infrastructure as a Service (IaaS) -&gt; AWS EC2
+# You rent the raw, naked motherboard. 
+ssh ubuntu@aws-ip-address
+sudo apt update
+sudo apt install docker
+git clone repo
+docker-compose up
+# Result: Maximum control, cheapest cost, but you are 100% legally 
+# responsible if a Russian hacker breaches the Linux OS kernel.
+
+# Option B: Platform as a Service (PaaS) -&gt; AWS AppRunner / Heroku / Render
+# You don't even know what Linux is. You literally just click "Connect to GitHub".
+# The Cloud provider detects the Dockerfile, builds it completely invisibly, 
+# wraps it in SSL certificates, and gives you a beautiful `myapp.com` URL.
+# Result: Zero DevOps skills required, scales infinitely, but costs 3x more money.
+</code></pre>
+</div>
+</div>
+<div class="edu-section edu-section-line-by-line">
+<div class="edu-section-title">5. Line-by-Line Explanation (The CI/CD Flow)</div>
+<table>
+<tr>
+<th>Process Phase</th>
+<th>Explanation</th>
+</tr>
+<tr>
+<td><code>Continuous Integration (CI)</code></td>
+<td>The safety net before deployment. When you push your AI model to GitHub, GitHub
+                                    spins up a temporary virtual machine, runs `pytest` mathematically checking 1,000
+                                    edge cases. If your new code destroys the prediction accuracy (a failed test), the
+                                    robotic pipeline turns RED and violently aborts the deployment process, saving your
+                                    career.</td>
+</tr>
+<tr>
+<td><code>AWS Elastic Container Registry (ECR)</code></td>
+<td>GitHub cannot "push" an active API server directly into the internet. It pushes the
+                                    sealed Docker Image to an AWS Vault (The ECR). This is essentially a massive Dropbox
+                                    folder exclusively for your Docker Blueprints.</td>
+</tr>
+<tr>
+<td><code>Continuous Deployment (CD)</code></td>
+<td>Once the Docker Blueprint is safe inside the vault, a web-hook signals AWS Elastic
+                                    Container Service (ECS) to pull the blueprint, overwrite the old servers, and
+                                    silently reboot the fleet with the new code. Users experience 0 seconds of downtime
+                                    during the update.</td>
+</tr>
+</table>
+</div>
+<div class="edu-section edu-section-internals">
+<div class="edu-section-title">6. Internal Mechanism (Reverse Proxies &amp; Nginx)</div>
+<p>You boot Uvicorn/FastAPI inside Docker on Port 8000. But users don't type
+                            `mywebsite.com:8000` into Chrome. Users only know Port 80 (HTTP) and Port 443
+                            (HTTPS/Secure).</p>
+<p><strong>Nginx (Engine-X)</strong> is the industry standard Reverse Proxy. Nginx sits at the
+                            absolute edge of your cloud architecture. It intercepts the HTTP Port 80 request from the
+                            user's browser, mathematically hashes an SSL/TLS security encryption certificate (HTTPS
+                            443), and secretly forwards the traffic internally to the Docker container waiting blindly
+                            on Port 8000. It also shields the Python server from DDoS attacks by instantly dropping
+                            millions of malicious junk connections in C++ before they reach Python.</p>
+</div>
+<div class="edu-section edu-section-shapes">
+<div class="edu-section-title">7. Load Balancing (Horizontal Scaling)</div>
+<p>What happens when you Auto-Scale to 500 Docker containers? How does the iPhone know
+                            <em>which</em> of the 500 iPads to talk to?</p>
+<p>It doesn't. The iPhone talks to ONE single IP Address: The <strong>AWS Application Load
+                                Balancer (ALB)</strong>. The Load Balancer executes a Round-Robin algorithm. It sends
+                            User 1 to Container A. User 2 to Container B. Furthermore, it Pings all containers every 5
+                            seconds (Health Checks). If Container C crashes due to a Python exception, the ALB instantly
+                            detects the death, mathematically removes Container C from the 500-list, diverting all
+                            future traffic away from the exploding sector until Kubernetes re-spawns it.</p>
+</div>
+<div class="edu-section edu-section-edge-cases">
+<div class="edu-section-title">8. Edge Cases (The Cold Start Problem)</div>
+<p>There is a 3rd deployment methodology: <strong>Serverless (AWS Lambda)</strong>. You don't
+                            use Docker. You just upload a single python function (e.g. `predict(image)`). AWS charges
+                            you absolute $0 per month when nobody is clicking it. In reality, the AWS server is
+                            completely turned OFF.</p>
+<p>When a user clicks it, AWS frantically attempts to turn ON a Linux machine, inject python,
+                            and run the math. This causes a <strong>Cold Start Penalty</strong>. The very first user to
+                            click the model experiences a terrifying 10-second delay. The 2nd user gets a
+                            100-millisecond response because the server is now "warm". For massive AI models (which take
+                            5 seconds just to load into RAM), Serverless is often a fundamentally catastrophic
+                            deployment choice.</p>
+</div>
+<div class="edu-section edu-section-variations">
+<div class="edu-section-title">9. Variations &amp; Alternatives (SaaS APIs - OpenAI)</div>
+<p>Many Data Scientists in 2024 don't deploy models at all. The LLM revolution created
+                            Model-as-a-Service.</p>
+<p>Instead of wrestling with Docker, GPUs, PyTorch, Kubernetes, and Nginx... you literally just
+                            send a raw JSON string to `api.openai.com/v1/chat/completions` containing an API Key and a
+                            Prompt. Sam Altman handles the $100 Million data-center orchestration, and charges you a
+                            fraction of a penny per word. This completely obliterates MLOps overhead for 90% of standard
+                            NLP tasks.</p>
+</div>
+<div class="edu-section edu-section-mistakes">
+<div class="edu-section-title">10. Common Mistakes</div>
+<p><strong>Mistake:</strong> Hardcoding AWS Secret Keys in Python.</p>
+<p><strong>Why is this disastrous?:</strong>
+<code>boto3.client('s3', aws_access_key_id='AKIA123SECRETXYZ')</code>. Junior devs write
+                            this in `server.py` and push to GitHub. Scraper bots run by hackers scan the entirety of
+                            GitHub every second. Exactly 5 minutes after pushing your code, hackers will execute a
+                            script to mine Bitcoin using your AWS account. You will wake up to a $50,000 Amazon Cloud
+                            bill. <strong>Fix:</strong> You MUST use <code>os.environ.get('AWS_KEY')</code>. The secrets
+                            are stored physically in the Cloud OS environment, entirely invisible to the python code
+                            repository.</p>
+</div>
+<div class="edu-section edu-section-advanced">
+<div class="edu-section-title">11. Advanced Explanation (Terraform &amp; IaC)</div>
+<p>Clicking around the AWS Graphical Interface to deploy servers is amateur hour. If you
+                            accidentally delete your Database with a misclick, your company goes bankrupt.</p>
+<p><strong>Infrastructure as Code (IaC) - Terraform:</strong> You write a `.tf` text file that
+                            describes hardware exactly like a programming language. `resource "aws_instance" { size =
+                            "t3.micro" }`. You run `terraform apply`. The engine talks to the AWS API and physically
+                            spawns real silicon hardware on the other side of the planet perfectly matching your text
+                            file. If the Data Center burns down, you just run the Terraform script again, and your exact
+                            identical 50-server architecture is perfectly cloned into Paris in 3 minutes.</p>
+</div>
+<div class="edu-next-steps">
+                        ✅ <strong>Next Steps:</strong> If you want, I can also give you a "100 Most Important Concepts for AI/ML Engineers" (a compact list that interviews and advanced courses focus on).
+                    </div></div>
+</div>
+<div class="toc-panel" id="toc">
+<div class="toc-heading">On this page</div>
+<a class="toc-link" href="#mlops-cloud">Cloud Deployment</a>
+</div>
+</main>
+</div>
+</body>
+</html>

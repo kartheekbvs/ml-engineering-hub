@@ -2025,3 +2025,146 @@ mark {
         opacity: 1;
     }
 }
+
+/* =========================================================
+   16-SECTION UNIVERSAL TEACHING FORMAT
+   ========================================================= */
+.edu-concept {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 40px;
+    padding: 32px;
+    box-shadow: var(--shadow-sm);
+}
+
+.edu-concept-title {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--primary-light);
+    margin-bottom: 24px;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 12px;
+}
+
+.edu-section {
+    margin-bottom: 32px;
+}
+
+.edu-section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-heading);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.edu-section-title::before {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 18px;
+    background: var(--primary);
+    border-radius: 4px;
+}
+
+/* Specific Section Modifiers */
+.edu-section-intro,
+.edu-section-intuition {
+    font-size: 16px;
+    color: var(--text);
+    line-height: 1.8;
+}
+
+.edu-section-syntax .sig-box {
+    background: var(--bg-code);
+    padding: 16px;
+    border-left: 4px solid var(--primary-light);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--text);
+}
+
+.edu-section-line-by-line table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+}
+
+.edu-section-line-by-line th,
+.edu-section-line-by-line td {
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    text-align: left;
+}
+
+.edu-section-line-by-line th {
+    background: var(--bg-card-hover);
+    color: var(--text-heading);
+    font-weight: 600;
+}
+
+.edu-section-line-by-line td:first-child {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--primary-light);
+    white-space: nowrap;
+    width: 40%;
+}
+
+.edu-section-io,
+.edu-section-shapes,
+.edu-section-returns {
+    background: rgba(52, 211, 153, 0.05);
+    border: 1px solid rgba(52, 211, 153, 0.2);
+    border-radius: var(--radius);
+    padding: 16px;
+}
+
+.edu-section-edge-cases,
+.edu-section-mistakes {
+    background: rgba(245, 158, 11, 0.05);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-left: 4px solid var(--warning);
+    border-radius: var(--radius);
+    padding: 16px;
+}
+
+.edu-section-internals,
+.edu-section-data-structure {
+    background: rgba(167, 139, 250, 0.05);
+    border: 1px solid rgba(167, 139, 250, 0.2);
+    border-radius: var(--radius);
+    padding: 16px;
+}
+
+.edu-section-practice {
+    background: rgba(78, 163, 255, 0.05);
+    border: 1px solid rgba(78, 163, 255, 0.2);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-top: 24px;
+}
+
+.edu-section-advanced {
+    border-top: 1px dashed var(--border-strong);
+    padding-top: 24px;
+    margin-top: 32px;
+}
+
+.edu-next-steps {
+    margin-top: 32px;
+    padding: 16px 24px;
+    background: rgba(16, 185, 129, 0.1);
+    border-left: 4px solid var(--accent);
+    border-radius: var(--radius);
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text-light);
+}
+
+.edu-next-steps strong {
+    color: var(--accent);
+}

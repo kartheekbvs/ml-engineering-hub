@@ -1,843 +1,194 @@
 <!DOCTYPE html>
+
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sklearn Models — TWSS</title>
-    <link rel="stylesheet" href="css/style.css" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Scikit-Learn Core Models — TWSS</title>
+<link href="css/style.css" rel="stylesheet"/>
 </head>
-
 <body>
-    <script src="js/shared-layout.js"></script>
-    <div class="app-layout has-toc">
-        <main class="main-content">
-            <div class="content-inner">
+<script src="js/shared-layout.js"></script>
+<div class="app-layout has-toc">
+<main class="main-content">
+<div class="content-inner">
+<div class="page-header">
+<div class="page-breadcrumb"><a href="roadmap.html">Roadmap</a> › Machine Learning</div>
+<h1 class="page-title">Scikit-Learn Core Models</h1>
+<p class="page-subtitle">Master the <code>.fit()</code> / <code>.predict()</code> interface,
+                        Decision Tree entropy, and SVM kernel tricks.</p>
+</div>
+<div class="edu-concept" id="sk-models">
+<div class="edu-concept-title">Algorithmic Inference Engines</div>
+<div class="edu-section edu-section-intro">
+<div class="edu-section-title">1. Concept Introduction</div>
+<p>While Deep Learning (Neural Networks) gets all the media hype, 80% of corporate Machine
+                            Learning is still driven by traditional statistical algorithms. They are vastly faster to
+                            train, require 90% less data, and are highly interpretable (you can explain to a bank
+                            auditor exactly <em>why</em> the model denied a loan).</p>
+<p>Scikit-Learn is the undisputed king of classical Machine Learning. Its genius lies in its
+                            unified API: Every single model—from a simple Linear Regression to a massive Gradient
+                            Boosting Ensemble—uses the exact same <code>model.fit(X, y)</code> and
+                            <code>model.predict(X)</code> syntax.</p>
+</div>
+<div class="edu-section edu-section-intuition">
+<div class="edu-section-title">2. Concept Intuition</div>
+<p><strong>The Decision Tree (The Flowchart):</strong></p>
+<p>Imagine playing "20 Questions". You ask: "Is it an animal?" (Yes/No). The Tree physically
+                            splits the data in half based on that answer. It keeps asking Yes/No questions until it
+                            reaches a definitive answer at the bottom leaf.</p>
+<p><strong>The Random Forest (The Wisdom of Crowds):</strong></p>
+<p>One person answering "20 Questions" might be biased or stupid. A Random Forest hires 1,000
+                            people. It gives each person a slightly different set of clues. All 1,000 people vote on the
+                            final answer, and the majority wins. This mathematically obliterates statistical variance.
+                        </p>
+</div>
+<div class="edu-section edu-section-syntax">
+<div class="edu-section-title">3. Python Syntax</div>
+<div class="sig-box">
+                            from sklearn.ensemble import RandomForestClassifier
+                            from sklearn.svm import SVC
 
-                <div class="page-header">
-                    <div class="page-breadcrumb"><a href="index.html">Home</a> › Scikit-learn › Models</div>
-                    <h1 class="page-title">Sklearn — Models</h1>
-                    <p class="page-subtitle">Linear models, tree ensembles, SVMs, neighbors, clustering, and
-                        hyperparameter search — implementation internals and practical guidance.</p>
-                    <div class="page-meta">
-                        <span class="page-badge badge-sklearn">🤖 Scikit-learn</span>
-                        <span class="page-badge badge-sklearn">8 Sections · 20+ Models</span>
-                    </div>
-                </div>
+                            # 1. Instantiation (Defining the Hyperparameters)
+                            rf_model = RandomForestClassifier(n_estimators=100, max_depth=5)
+                            svm_model = SVC(kernel='rbf', C=1.0)
 
-                <!-- ═══ SECTION 1: Linear Regression ═══ -->
-                <h2 class="section-title" id="s-regression">Linear Regression Family</h2>
+                            # 2. Training (The Optimization Phase)
+                            # X must be a 2D Matrix. y must be a 1D Vector.
+                            rf_model.fit(X_train, y_train)
 
-                <div class="func-card expanded" id="linear-reg">
-                    <div class="func-card-header">
-                        <div class="func-icon">📈</div>
-                        <div class="func-info">
-                            <div class="func-name">LinearRegression / Ridge / Lasso / ElasticNet</div>
-                            <div class="func-tagline">OLS and regularized regression — when to use each and key
-                                parameters</div>
-                            <div class="func-tags"><span class="func-tag">regression</span><span
-                                    class="func-tag">Ridge</span><span class="func-tag">Lasso</span><span
-                                    class="func-tag">regularization</span></div>
+                            # 3. Inference (Generating Predictions)
+                            predictions = rf_model.predict(X_test)
+
+                            # 4. Probabilistic Output (Vital for Risk thresholds)
+                            probabilities = rf_model.predict_proba(X_test)
                         </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Syntax</div>
-                            <div class="func-tab">Internals</div>
-                            <div class="func-tab">Example</div>
-                            <div class="func-tab">When to Use</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box"><span class="kw">from</span> sklearn.linear_model <span
-                                    class="kw">import</span> (
-                                LinearRegression, Ridge, Lasso, ElasticNet, RidgeCV, LassoCV
-                                )
+</div>
+<div class="edu-section edu-section-code">
+<div class="edu-section-title">4. Python Code Example</div>
+<div class="code-wrap">
+<div class="code-header"><span class="code-lang">python</span></div>
+<pre><code>from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
 
-                                <span class="fn">LinearRegression</span>(fit_intercept=<span class="kw">True</span>,
-                                n_jobs=<span class="kw">None</span>)
+# 1. Load the dataset (569 patients, 30 tumor measurements)
+# Target (y): 0 = Malignant (Cancer), 1 = Benign
+data = load_breast_cancer()
+X, y = data.data, data.target
 
-                                <span class="fn">Ridge</span>(alpha=<span class="num">1.0</span>, <span class="cmt"># L2
-                                    penalty strength</span>
-                                solver=<span class="str">'auto'</span>) <span class="cmt">#
-                                    'svd','cholesky','lsqr','saga'</span>
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
-                                <span class="fn">Lasso</span>(alpha=<span class="num">1.0</span>, <span class="cmt"># L1
-                                    penalty — induces sparsity</span>
-                                max_iter=<span class="num">1000</span>)
+# 2. Build the Forest
+# n_estimators: Boot up 100 isolated Decision Trees
+# n_jobs=-1: Force Scikit-Learn to lock onto all 8 OS CPU Cores for parallel training!
+model = RandomForestClassifier(n_estimators=100, n_jobs=-1, random_state=42)
 
-                                <span class="fn">ElasticNet</span>(alpha=<span class="num">1.0</span>, <span
-                                    class="cmt"># overall regularization</span>
-                                l1_ratio=<span class="num">0.5</span>) <span class="cmt"># 0=Ridge, 1=Lasso
+# 3. FIT: The C-backend calculates Gini Impurity splits across millions of nodes
+model.fit(X_train, y_train)
 
-                                    # Built-in CV variants (efficient)</span>
-                                <span class="fn">RidgeCV</span>(alphas=[<span class="num">0.1</span>, <span
-                                    class="num">1</span>, <span class="num">10</span>, <span class="num">100</span>])
-                                <span class="fn">LassoCV</span>(cv=<span class="num">5</span>, n_alphas=<span
-                                    class="num">100</span>)
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <ul class="doc-list">
-                                <li><strong>LinearRegression</strong> — minimizes ‖Xw - y‖₂² exactly via Normal
-                                    Equations (XᵀX)⁻¹Xᵀy. Closed-form, no hyperparameters. Fails with multicollinearity
-                                    (singular XᵀX).</li>
-                                <li><strong>Ridge (L2)</strong> — adds α‖w‖₂² penalty. Invertible even with
-                                    collinearity. All features kept; coefficients shrunk toward zero but never exactly
-                                    zero.</li>
-                                <li><strong>Lasso (L1)</strong> — adds α‖w‖₁ penalty. Produces sparse solutions (zero
-                                    coefficients = feature selection). Solved via coordinate descent.</li>
-                                <li><strong>ElasticNet</strong> — combines L1+L2. Better than Lasso alone for grouped
-                                    correlated features (Lasso arbitrarily picks one).</li>
-                            </ul>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code><span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> LassoCV, RidgeCV
-<span class="kw">from</span> sklearn.pipeline <span class="kw">import</span> Pipeline
-<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> StandardScaler
-
-<span class="cmt"># LassoCV: auto-tunes alpha with cross-validation</span>
-lasso_pipe = <span class="fn">Pipeline</span>([
-    (<span class="str">'scaler'</span>, <span class="fn">StandardScaler</span>()),
-    (<span class="str">'model'</span>,  <span class="fn">LassoCV</span>(cv=<span class="num">5</span>, max_iter=<span class="num">5000</span>, n_jobs=-<span class="num">1</span>))
-])
-lasso_pipe.<span class="fn">fit</span>(X_train, y_train)
-best_alpha = lasso_pipe[<span class="str">'model'</span>].alpha_
-<span class="fn">print</span>(<span class="str">f'Best alpha: {best_alpha:.4f}'</span>)
-<span class="cmt"># Feature selection: non-zero coefficients</span>
-coefs = lasso_pipe[<span class="str">'model'</span>].coef_
-selected = np.<span class="fn">where</span>(coefs != <span class="num">0</span>)[<span class="num">0</span>]
-<span class="fn">print</span>(<span class="str">f'{len(selected)} features selected out of {len(coefs)}'</span>)
-
-<span class="cmt"># RidgeCV: efficient LOO or k-fold CV</span>
-ridge = <span class="fn">RidgeCV</span>(alphas=np.<span class="fn">logspace</span>(-<span class="num">4</span>, <span class="num">4</span>, <span class="num">50</span>), cv=<span class="num">5</span>)
-ridge.<span class="fn">fit</span>(X_train_scaled, y_train)
-<span class="fn">print</span>(<span class="str">f'Best Ridge alpha: {ridge.alpha_:.4f}'</span>)</code></pre>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <table class="param-table">
-                                <thead>
-                                    <tr>
-                                        <th>Model</th>
-                                        <th>Multicollinearity</th>
-                                        <th>Feature Selection</th>
-                                        <th>Best When</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="param-name">LinearRegression</td>
-                                        <td>❌ Unstable</td>
-                                        <td>❌ No</td>
-                                        <td>n ≫ p, no collinearity</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="param-name">Ridge</td>
-                                        <td>✅ Handles</td>
-                                        <td>❌ No</td>
-                                        <td>Many correlated features</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="param-name">Lasso</td>
-                                        <td>⚠️ Picks one</td>
-                                        <td>✅ Yes</td>
-                                        <td>Sparse true signal</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="param-name">ElasticNet</td>
-                                        <td>✅ Handles</td>
-                                        <td>✅ Partial</td>
-                                        <td>Grouped correlated features</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ═══ SECTION 2: Logistic Regression ═══ -->
-                <h2 class="section-title" id="s-logreg">Logistic Regression</h2>
-
-                <div class="func-card" id="logistic">
-                    <div class="func-card-header">
-                        <div class="func-icon">🎯</div>
-                        <div class="func-info">
-                            <div class="func-name">LogisticRegression</div>
-                            <div class="func-tagline">Probabilistic linear classifier — solver selection, multi-class
-                                strategies, calibration</div>
-                            <div class="func-tags"><span class="func-tag">classification</span><span
-                                    class="func-tag">solver</span><span class="func-tag">multi-class</span></div>
-                        </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Syntax</div>
-                            <div class="func-tab">Example</div>
-                            <div class="func-tab">Internals</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box"><span class="kw">from</span> sklearn.linear_model <span
-                                    class="kw">import</span> LogisticRegression
-
-                                <span class="fn">LogisticRegression</span>(
-                                penalty=<span class="str">'l2'</span>, <span class="cmt">#
-                                    'l1','l2','elasticnet',None</span>
-                                C=<span class="num">1.0</span>, <span class="cmt"># inverse regularization (smaller =
-                                    stronger)</span>
-                                solver=<span class="str">'lbfgs'</span>, <span class="cmt"># 'saga' for L1; 'liblinear'
-                                    for small data</span>
-                                multi_class=<span class="str">'auto'</span>, <span class="cmt"># 'ovr','multinomial'
-                                    (lbfgs=multinomial)</span>
-                                max_iter=<span class="num">100</span>, <span class="cmt"># increase if
-                                    ConvergenceWarning</span>
-                                class_weight=<span class="kw">None</span>, <span class="cmt"># 'balanced' for imbalanced
-                                    classes</span>
-                                n_jobs=-<span class="num">1</span>
-                                )
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code><span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> LogisticRegressionCV
-
-<span class="cmt"># Built-in CV tuning of C</span>
-lr = <span class="fn">LogisticRegressionCV</span>(
-    Cs=<span class="num">20</span>,                 <span class="cmt"># 20 values of C on log scale</span>
-    cv=<span class="num">5</span>, scoring=<span class="str">'roc_auc'</span>,
-    solver=<span class="str">'lbfgs'</span>, max_iter=<span class="num">500</span>,
-    class_weight=<span class="str">'balanced'</span>, n_jobs=-<span class="num">1</span>
-)
-lr.<span class="fn">fit</span>(X_train_scaled, y_train)
-<span class="fn">print</span>(<span class="str">f'Best C: {lr.C_[0]:.4f}'</span>)
-
-<span class="cmt"># Predict probabilities</span>
-y_prob = lr.<span class="fn">predict_proba</span>(X_test)[:, <span class="num">1</span>]
-
-<span class="cmt"># Coefficient analysis (after standardization: comparable magnitudes)</span>
-feat_coef = pd.<span class="fn">Series</span>(lr.coef_[<span class="num">0</span>], index=feature_names)
-feat_coef.<span class="fn">abs</span>().<span class="fn">sort_values</span>(ascending=<span class="kw">False</span>).<span class="fn">head</span>(<span class="num">10</span>)</code></pre>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <table class="param-table">
-                                <thead>
-                                    <tr>
-                                        <th>Solver</th>
-                                        <th>Penalty</th>
-                                        <th>Best For</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="param-name">lbfgs</td>
-                                        <td>L2</td>
-                                        <td>Default; multiclass; medium datasets</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="param-name">liblinear</td>
-                                        <td>L1, L2</td>
-                                        <td>Small datasets; binary</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="param-name">saga</td>
-                                        <td>L1, L2, ElasticNet</td>
-                                        <td>Large datasets; sparse features</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="param-name">sag</td>
-                                        <td>L2</td>
-                                        <td>Large dense datasets</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ═══ SECTION 3: Tree Ensembles ═══ -->
-                <h2 class="section-title" id="s-trees">Tree Ensembles</h2>
-
-                <div class="func-card" id="random-forest">
-                    <div class="func-card-header">
-                        <div class="func-icon">🌲</div>
-                        <div class="func-info">
-                            <div class="func-name">RandomForestClassifier / RandomForestRegressor</div>
-                            <div class="func-tagline">Bagging of decision trees — OOB score, feature importance, and
-                                variance reduction</div>
-                            <div class="func-tags"><span class="func-tag">Random Forest</span><span
-                                    class="func-tag">bagging</span><span class="func-tag">OOB</span><span
-                                    class="func-tag">feature importance</span></div>
-                        </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Syntax</div>
-                            <div class="func-tab">Example</div>
-                            <div class="func-tab">Performance</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box"><span class="kw">from</span> sklearn.ensemble <span
-                                    class="kw">import</span> RandomForestClassifier
-
-                                <span class="fn">RandomForestClassifier</span>(
-                                n_estimators=<span class="num">300</span>, <span class="cmt"># more trees = lower
-                                    variance (plateau~300)</span>
-                                max_depth=<span class="kw">None</span>, <span class="cmt"># None = full depth; set 10-30
-                                    to reduce overfit</span>
-                                max_features=<span class="str">'sqrt'</span>, <span class="cmt"># features tried per
-                                    split: sqrt(n) for clf</span>
-                                min_samples_leaf=<span class="num">2</span>, <span class="cmt"># min samples in leaf
-                                    (regularizes)</span>
-                                oob_score=<span class="kw">True</span>, <span class="cmt"># free OOB validation
-                                    estimate</span>
-                                class_weight=<span class="str">'balanced'</span>,
-                                n_jobs=-<span class="num">1</span>, random_state=<span class="num">42</span>
-                                )
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code>rf = <span class="fn">RandomForestClassifier</span>(n_estimators=<span class="num">300</span>, oob_score=<span class="kw">True</span>,
-                              n_jobs=-<span class="num">1</span>, random_state=<span class="num">42</span>)
-rf.<span class="fn">fit</span>(X_train, y_train)
-
-<span class="cmt"># OOB score: unbiased estimate without touching test set</span>
-<span class="fn">print</span>(<span class="str">f'OOB accuracy: {rf.oob_score_:.4f}'</span>)
-
-<span class="cmt"># Feature importances (MDI — Mean Decrease Impurity)</span>
-importances = pd.<span class="fn">Series</span>(rf.feature_importances_, index=feature_names)
-importances.<span class="fn">nlargest</span>(<span class="num">15</span>).<span class="fn">plot</span>(kind=<span class="str">'barh'</span>)
-
-<span class="cmt"># Permutation importances (more reliable than MDI for high-cardinality)</span>
-<span class="kw">from</span> sklearn.inspection <span class="kw">import</span> permutation_importance
-perm = <span class="fn">permutation_importance</span>(rf, X_test, y_test,
-    n_repeats=<span class="num">20</span>, scoring=<span class="str">'roc_auc'</span>, n_jobs=-<span class="num">1</span>)
-pi = pd.<span class="fn">Series</span>(perm.importances_mean, index=feature_names)
-pi.<span class="fn">sort_values</span>().<span class="fn">plot</span>(kind=<span class="str">'barh'</span>)</code></pre>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="perf-grid">
-                                <div class="perf-item">
-                                    <div class="perf-item-label">n_jobs</div>
-                                    <div class="perf-item-value">Set <code>n_jobs=-1</code> to use all cores. Trees are
-                                        built independently — perfect parallelism. Training time ~ O(n_estimators /
-                                        n_jobs).</div>
-                                </div>
-                                <div class="perf-item">
-                                    <div class="perf-item-label">MDI vs Permutation</div>
-                                    <div class="perf-item-value">MDI (built-in importance) overestimates
-                                        high-cardinality and numeric features. For unbiased importance, use
-                                        <code>permutation_importance</code> on the test set.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="func-card" id="gradient-boosting">
-                    <div class="func-card-header">
-                        <div class="func-icon">🚀</div>
-                        <div class="func-info">
-                            <div class="func-name">HistGradientBoostingClassifier / GradientBoostingClassifier</div>
-                            <div class="func-tagline">State-of-the-art on tabular data — histogram-based boosting with
-                                native NaN/categoricals support</div>
-                            <div class="func-tags"><span class="func-tag">GBM</span><span
-                                    class="func-tag">boosting</span><span class="func-tag">HistGBM</span><span
-                                    class="func-tag">tabular</span></div>
-                        </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Syntax</div>
-                            <div class="func-tab">Example</div>
-                            <div class="func-tab">Internals</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box"><span class="kw">from</span> sklearn.ensemble <span
-                                    class="kw">import</span> HistGradientBoostingClassifier
-
-                                <span class="fn">HistGradientBoostingClassifier</span>(
-                                max_iter=<span class="num">500</span>, <span class="cmt"># n_estimators
-                                    equivalent</span>
-                                learning_rate=<span class="num">0.05</span>, <span class="cmt"># shrinkage (lower = more
-                                    iters needed)</span>
-                                max_depth=<span class="num">6</span>, <span class="cmt"># depth of each tree</span>
-                                max_leaf_nodes=<span class="num">31</span>, <span class="cmt"># controls complexity
-                                    (XGBoost default=31)</span>
-                                min_samples_leaf=<span class="num">20</span>, <span class="cmt"># regularize leaf
-                                    size</span>
-                                l2_regularization=<span class="num">0.1</span>, <span class="cmt"># L2 on leaf
-                                    weights</span>
-                                early_stopping=<span class="kw">True</span>, <span class="cmt"># auto early stopping on
-                                    val set</span>
-                                validation_fraction=<span class="num">0.1</span>,
-                                n_iter_no_change=<span class="num">20</span>, <span class="cmt"># patience</span>
-                                categorical_features=<span class="kw">None</span>, <span class="cmt"># list of
-                                    categorical col indices</span>
-                                random_state=<span class="num">42</span>
-                                )
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code><span class="kw">from</span> sklearn.ensemble <span class="kw">import</span> HistGradientBoostingClassifier
-<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> RandomizedSearchCV
-<span class="kw">from</span> scipy.stats <span class="kw">import</span> loguniform, randint
-
-hgb = <span class="fn">HistGradientBoostingClassifier</span>(
-    early_stopping=<span class="kw">True</span>, n_iter_no_change=<span class="num">30</span>, random_state=<span class="num">42</span>
-)
-
-param_dist = {
-    <span class="str">'learning_rate'</span>:     <span class="fn">loguniform</span>(<span class="num">0.01</span>, <span class="num">0.3</span>),
-    <span class="str">'max_leaf_nodes'</span>:    <span class="fn">randint</span>(<span class="num">20</span>, <span class="num">80</span>),
-    <span class="str">'min_samples_leaf'</span>:  <span class="fn">randint</span>(<span class="num">10</span>, <span class="num">50</span>),
-    <span class="str">'l2_regularization'</span>: <span class="fn">loguniform</span>(<span class="num">1e-4</span>, <span class="num">1</span>),
-    <span class="str">'max_iter'</span>: [<span class="num">500</span>]
-}
-rs = <span class="fn">RandomizedSearchCV</span>(hgb, param_dist, n_iter=<span class="num">40</span>,
-    scoring=<span class="str">'roc_auc'</span>, cv=<span class="num">5</span>, n_jobs=-<span class="num">1</span>, random_state=<span class="num">42</span>)
-rs.<span class="fn">fit</span>(X_train, y_train)
-<span class="fn">print</span>(<span class="str">f'Best AUC: {rs.best_score_:.4f}'</span>)
-<span class="fn">print</span>(rs.best_params_)</code></pre>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <ul class="doc-list">
-                                <li><strong>Histogram binning:</strong> HistGBM bins continuous values into max 255
-                                    bins. Dramatically reduces split-finding cost vs GBM (O(n) vs O(n log n)).</li>
-                                <li><strong>Native NaN support:</strong> HistGBM handles NaN natively — learns the best
-                                    direction for missing values at each split. No imputation needed.</li>
-                                <li><strong>HistGBM vs GBM:</strong> HistGBM is 10-100× faster, especially on large
-                                    datasets. Use HistGBM by default; switch to XGBoost/LightGBM for GPU or distributed
-                                    training.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ═══ SECTION 4: SVM ═══ -->
-                <h2 class="section-title" id="s-svm">Support Vector Machines</h2>
-
-                <div class="func-card" id="svm">
-                    <div class="func-card-header">
-                        <div class="func-icon">✂️</div>
-                        <div class="func-info">
-                            <div class="func-name">SVC / LinearSVC / SVR</div>
-                            <div class="func-tagline">Maximum-margin classifier — kernels, C parameter, and scaling
-                                requirements</div>
-                            <div class="func-tags"><span class="func-tag">SVM</span><span
-                                    class="func-tag">kernel</span><span class="func-tag">C</span><span
-                                    class="func-tag">scaling required</span></div>
-                        </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Syntax</div>
-                            <div class="func-tab">Example</div>
-                            <div class="func-tab">Internals</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box"><span class="kw">from</span> sklearn.svm <span class="kw">import</span>
-                                SVC, LinearSVC, SVR
-
-                                <span class="fn">SVC</span>(
-                                C=<span class="num">1.0</span>, <span class="cmt"># penalty; larger = less
-                                    regularization</span>
-                                kernel=<span class="str">'rbf'</span>, <span class="cmt">#
-                                    'linear','poly','rbf','sigmoid'</span>
-                                gamma=<span class="str">'scale'</span>, <span class="cmt"># 'scale'=1/(n_feat*X.var());
-                                    'auto'=1/n_feat</span>
-                                probability=<span class="kw">False</span>, <span class="cmt"># True enables
-                                    predict_proba (Platt scaling, slow)</span>
-                                class_weight=<span class="str">'balanced'</span>
-                                )
-
-                                <span class="fn">LinearSVC</span>(C=<span class="num">1.0</span>, max_iter=<span
-                                    class="num">2000</span>) <span class="cmt"># much faster than
-                                    SVC(kernel='linear')</span>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code><span class="kw">from</span> sklearn.pipeline <span class="kw">import</span> Pipeline
-<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> StandardScaler
-<span class="kw">from</span> sklearn.svm <span class="kw">import</span> SVC
-
-<span class="cmt"># Always scale before SVM!</span>
-pipe = <span class="fn">Pipeline</span>([
-    (<span class="str">'scaler'</span>, <span class="fn">StandardScaler</span>()),
-    (<span class="str">'svc'</span>,    <span class="fn">SVC</span>(C=<span class="num">10</span>, kernel=<span class="str">'rbf'</span>, gamma=<span class="str">'scale'</span>,
-                   class_weight=<span class="str">'balanced'</span>))
-])
-pipe.<span class="fn">fit</span>(X_train, y_train)
-
-<span class="cmt"># Grid search C and gamma</span>
-<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> GridSearchCV
-param_grid = {
-    <span class="str">'svc__C'</span>:     [<span class="num">0.1</span>, <span class="num">1</span>, <span class="num">10</span>, <span class="num">100</span>],
-    <span class="str">'svc__gamma'</span>: [<span class="str">'scale'</span>, <span class="str">'auto'</span>, <span class="num">0.001</span>, <span class="num">0.01</span>]
-}
-gs = <span class="fn">GridSearchCV</span>(pipe, param_grid, cv=<span class="num">5</span>,
-                   scoring=<span class="str">'roc_auc'</span>, n_jobs=-<span class="num">1</span>)
-gs.<span class="fn">fit</span>(X_train, y_train)
-<span class="fn">print</span>(gs.best_params_, gs.best_score_)</code></pre>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <ul class="doc-list">
-                                <li><strong>Scaling critical:</strong> SVM optimizes on distances. Unscaled features
-                                    with large ranges dominate the kernel. Always use StandardScaler or MinMaxScaler
-                                    before SVM.</li>
-                                <li><strong>RBF kernel bandwidth (gamma):</strong> Too small = underfitting (wide
-                                    Gaussian); too large = overfitting (narrow Gaussian). Start with
-                                    <code>gamma='scale'</code>.
-                                </li>
-                                <li><strong>probability=True cost:</strong> Enables <code>predict_proba</code> by
-                                    fitting Platt scaling (extra 5-fold CV). Adds significant training time.</li>
-                                <li><strong>Scalability:</strong> SVC is O(n²–n³). Use LinearSVC or SGDClassifier for n
-                                    &gt; 50k samples.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ═══ SECTION 5: KNN ═══ -->
-                <h2 class="section-title" id="s-knn">K-Nearest Neighbors</h2>
-
-                <div class="func-card" id="knn">
-                    <div class="func-card-header">
-                        <div class="func-icon">🔵</div>
-                        <div class="func-info">
-                            <div class="func-name">KNeighborsClassifier / KNeighborsRegressor</div>
-                            <div class="func-tagline">Non-parametric lazy learner — distance metrics, k selection, and
-                                scaling requirements</div>
-                            <div class="func-tags"><span class="func-tag">KNN</span><span
-                                    class="func-tag">non-parametric</span><span class="func-tag">distance</span></div>
-                        </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Syntax</div>
-                            <div class="func-tab">Example</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box"><span class="kw">from</span> sklearn.neighbors <span
-                                    class="kw">import</span> KNeighborsClassifier
-
-                                <span class="fn">KNeighborsClassifier</span>(
-                                n_neighbors=<span class="num">5</span>, <span class="cmt"># k — tune via CV</span>
-                                weights=<span class="str">'uniform'</span>, <span class="cmt"># 'distance': closer
-                                    neighbors matter more</span>
-                                metric=<span class="str">'minkowski'</span>, <span class="cmt">#
-                                    'euclidean','manhattan','cosine'</span>
-                                p=<span class="num">2</span>, <span class="cmt"># Minkowski p (2=Euclidean,
-                                    1=Manhattan)</span>
-                                algorithm=<span class="str">'auto'</span>, <span class="cmt">#
-                                    'ball_tree','kd_tree','brute'</span>
-                                leaf_size=<span class="num">30</span>, <span class="cmt"># for ball_tree/kd_tree</span>
-                                n_jobs=-<span class="num">1</span>
-                                )
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code><span class="kw">from</span> sklearn.neighbors <span class="kw">import</span> KNeighborsClassifier
-<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> cross_val_score
-
-<span class="cmt"># Always scale — KNN is distance-based</span>
-pipe = <span class="fn">Pipeline</span>([
-    (<span class="str">'scaler'</span>, <span class="fn">StandardScaler</span>()),
-    (<span class="str">'knn'</span>,    <span class="fn">KNeighborsClassifier</span>(weights=<span class="str">'distance'</span>))
-])
-
-<span class="cmt"># Tune k via cross-validation</span>
-k_vals = <span class="fn">range</span>(<span class="num">1</span>, <span class="num">31</span>)
-cv_scores = []
-<span class="kw">for</span> k <span class="kw">in</span> k_vals:
-    pipe.<span class="fn">set_params</span>(knn__n_neighbors=k)
-    score = <span class="fn">cross_val_score</span>(pipe, X_train, y_train,
-                             cv=<span class="num">5</span>, scoring=<span class="str">'roc_auc'</span>).<span class="fn">mean</span>()
-    cv_scores.<span class="fn">append</span>(score)
-
-best_k = k_vals[np.<span class="fn">argmax</span>(cv_scores)]
-<span class="fn">print</span>(<span class="str">f'Best k: {best_k}, AUC: {max(cv_scores):.4f}'</span>)
-
-<span class="cmt"># Use for anomaly: low neighbor distance = normal</span>
-nbrs = <span class="fn">KNeighborsClassifier</span>(n_neighbors=<span class="num">5</span>)
-nbrs.<span class="fn">fit</span>(X_train)
-dists, _ = nbrs.kneighbors_.<span class="fn">kneighbors</span>(X_test)
-anomaly_score = dists.<span class="fn">mean</span>(axis=<span class="num">1</span>)</code></pre>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ═══ SECTION 6: Clustering ═══ -->
-                <h2 class="section-title" id="s-clustering">Clustering</h2>
-
-                <div class="func-card" id="kmeans-dbscan">
-                    <div class="func-card-header">
-                        <div class="func-icon">🌀</div>
-                        <div class="func-info">
-                            <div class="func-name">KMeans / DBSCAN / AgglomerativeClustering</div>
-                            <div class="func-tagline">Unsupervised segmentation — choosing k, density-based clustering,
-                                and cluster evaluation</div>
-                            <div class="func-tags"><span class="func-tag">KMeans</span><span
-                                    class="func-tag">DBSCAN</span><span class="func-tag">clustering</span><span
-                                    class="func-tag">elbow</span></div>
-                        </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Syntax</div>
-                            <div class="func-tab">Example</div>
-                            <div class="func-tab">Internals</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box"><span class="kw">from</span> sklearn.cluster <span
-                                    class="kw">import</span> KMeans, DBSCAN, AgglomerativeClustering
-
-                                <span class="fn">KMeans</span>(
-                                n_clusters=<span class="num">8</span>, init=<span class="str">'k-means++'</span>,
-                                n_init=<span class="num">10</span>, <span class="cmt"># run n_init times, keep best
-                                    inertia</span>
-                                max_iter=<span class="num">300</span>,
-                                random_state=<span class="num">42</span>
-                                )
-
-                                <span class="fn">DBSCAN</span>(
-                                eps=<span class="num">0.5</span>, <span class="cmt"># max distance between
-                                    neighbors</span>
-                                min_samples=<span class="num">5</span>, <span class="cmt"># minimum neighbors to form
-                                    core point</span>
-                                metric=<span class="str">'euclidean'</span> <span class="cmt"># or
-                                    'cosine','manhattan'</span>
-                                ) <span class="cmt"># label=-1 → noise/outlier</span>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code><span class="kw">from</span> sklearn.cluster <span class="kw">import</span> KMeans, DBSCAN
-<span class="kw">from</span> sklearn.metrics <span class="kw">import</span> silhouette_score
-
-<span class="cmt"># Elbow method + Silhouette for choosing k</span>
-inertias, silhouettes = [], []
-K_range = <span class="fn">range</span>(<span class="num">2</span>, <span class="num">12</span>)
-<span class="kw">for</span> k <span class="kw">in</span> K_range:
-    km = <span class="fn">KMeans</span>(n_clusters=k, n_init=<span class="num">10</span>, random_state=<span class="num">42</span>)
-    labels = km.<span class="fn">fit_predict</span>(X_scaled)
-    inertias.<span class="fn">append</span>(km.inertia_)
-    silhouettes.<span class="fn">append</span>(<span class="fn">silhouette_score</span>(X_scaled, labels))
-
-<span class="cmt"># Use cluster labels as features</span>
-km_final = <span class="fn">KMeans</span>(n_clusters=<span class="num">5</span>, random_state=<span class="num">42</span>)
-df[<span class="str">'cluster'</span>] = km_final.<span class="fn">fit_predict</span>(X_scaled)
-
-<span class="cmt"># DBSCAN — auto discovers clusters, labels outliers as -1</span>
-db = <span class="fn">DBSCAN</span>(eps=<span class="num">0.4</span>, min_samples=<span class="num">10</span>)
-db_labels = db.<span class="fn">fit_predict</span>(X_scaled)
-n_clusters = <span class="fn">len</span>(<span class="fn">set</span>(db_labels)) - (<span class="num">1</span> <span class="kw">if</span> -<span class="num">1</span> <span class="kw">in</span> db_labels <span class="kw">else</span> <span class="num">0</span>)
-n_noise = (db_labels == -<span class="num">1</span>).<span class="fn">sum</span>()
-<span class="fn">print</span>(<span class="str">f'Clusters: {n_clusters}, Noise: {n_noise}'</span>)
-
-<span class="cmt"># Tune DBSCAN eps via k-distance graph</span>
-<span class="kw">from</span> sklearn.neighbors <span class="kw">import</span> NearestNeighbors
-nn = <span class="fn">NearestNeighbors</span>(n_neighbors=<span class="num">10</span>).<span class="fn">fit</span>(X_scaled)
-dists, _ = nn.<span class="fn">kneighbors</span>(X_scaled)
-kth_dists = np.<span class="fn">sort</span>(dists[:, -<span class="num">1</span>])[::-<span class="num">1</span>]
-<span class="cmt"># Plot kth_dists — "elbow" = good eps value</span></code></pre>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <ul class="doc-list">
-                                <li><strong>k-means++:</strong> Smart initialization — seeds centroids proportional to
-                                    distance from existing centroids. Reduces iterations and improves convergence vs
-                                    random init.</li>
-                                <li><strong>DBSCAN eps selection:</strong> Plot sorted k-NN distances. The "elbow"
-                                    (sharp bend) indicates the natural cluster density threshold.</li>
-                                <li><strong>DBSCAN vs KMeans:</strong> DBSCAN handles arbitrary shapes and finds
-                                    outliers; KMeans assumes spherical clusters and is sensitive to outliers.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ═══ SECTION 7: Cross-Validation ═══ -->
-                <h2 class="section-title" id="s-cv">Cross-Validation & Hyperparameter Tuning</h2>
-
-                <div class="func-card" id="cv-search">
-                    <div class="func-card-header">
-                        <div class="func-icon">🔁</div>
-                        <div class="func-info">
-                            <div class="func-name">cross_validate / GridSearchCV / RandomizedSearchCV /
-                                HalvingRandomSearchCV</div>
-                            <div class="func-tagline">Reliable model evaluation and efficient hyperparameter search
-                                strategies</div>
-                            <div class="func-tags"><span class="func-tag">CV</span><span
-                                    class="func-tag">GridSearch</span><span
-                                    class="func-tag">RandomizedSearch</span><span class="func-tag">halving</span></div>
-                        </div>
-                        <div class="func-toggle">▾</div>
-                    </div>
-                    <div class="func-body">
-                        <div class="func-tabs">
-                            <div class="func-tab">Syntax</div>
-                            <div class="func-tab">Example</div>
-                            <div class="func-tab">Strategy Guide</div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="sig-box"><span class="kw">from</span> sklearn.model_selection <span
-                                    class="kw">import</span> (
-                                cross_validate, GridSearchCV,
-                                RandomizedSearchCV, StratifiedKFold
-                                )
-
-                                <span class="fn">cross_validate</span>(
-                                estimator, X, y,
-                                cv=<span class="num">5</span>,
-                                scoring=[<span class="str">'roc_auc'</span>, <span class="str">'f1'</span>, <span
-                                    class="str">'average_precision'</span>],
-                                return_train_score=<span class="kw">True</span>,
-                                n_jobs=-<span class="num">1</span>
-                                ) <span class="cmt"># returns dict of arrays
-
-                                    RandomizedSearchCV(
-                                    estimator, param_distributions,
-                                    n_iter=50, # random combinations to try
-                                    scoring='roc_auc', cv=5,
-                                    refit=True, # refit best on full train data
-                                    n_jobs=-1, random_state=42
-                                    )</span>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <div class="code-wrap">
-                                <div class="code-header"><span class="code-lang">python</span><button
-                                        class="copy-btn"><span>⎘</span> Copy</button></div>
-                                <pre><code><span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> cross_validate, StratifiedKFold
-<span class="kw">from</span> scipy.stats <span class="kw">import</span> loguniform, randint
-
-<span class="cmt"># Multiple metrics in one CV run</span>
-cv = <span class="fn">StratifiedKFold</span>(n_splits=<span class="num">5</span>, shuffle=<span class="kw">True</span>, random_state=<span class="num">42</span>)
-results = <span class="fn">cross_validate</span>(pipe, X_train, y_train, cv=cv,
-    scoring={<span class="str">'auc'</span>: <span class="str">'roc_auc'</span>, <span class="str">'ap'</span>: <span class="str">'average_precision'</span>,
-             <span class="str">'f1'</span>: <span class="str">'f1'</span>},
-    return_train_score=<span class="kw">True</span>, n_jobs=-<span class="num">1</span>)
-
-<span class="fn">print</span>(<span class="str">f"Val AUC: {results['test_auc'].mean():.4f} ± {results['test_auc'].std():.4f}"</span>)
-<span class="cmt"># Detect overfitting: large gap between train and val = overfit</span>
-gap = results[<span class="str">'train_auc'</span>].<span class="fn">mean</span>() - results[<span class="str">'test_auc'</span>].<span class="fn">mean</span>()
-<span class="fn">print</span>(<span class="str">f'Train-Val gap: {gap:.4f}'</span>)
-
-<span class="cmt"># HalvingRandomSearch: faster with successive halving</span>
-<span class="kw">from</span> sklearn.experimental <span class="kw">import</span> enable_halving_search_cv  <span class="cmt"># noqa</span>
-<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> HalvingRandomSearchCV
-
-hrsv = <span class="fn">HalvingRandomSearchCV</span>(
-    hgb, param_dist, factor=<span class="num">3</span>,   <span class="cmt"># 3× more resources each round</span>
-    scoring=<span class="str">'roc_auc'</span>, cv=<span class="num">5</span>, n_jobs=-<span class="num">1</span>, random_state=<span class="num">42</span>
-)
-hrsv.<span class="fn">fit</span>(X_train, y_train)
-<span class="fn">print</span>(hrsv.best_params_)</code></pre>
-                            </div>
-                        </div>
-                        <div class="func-tab-content">
-                            <table class="param-table">
-                                <thead>
-                                    <tr>
-                                        <th>Strategy</th>
-                                        <th>Grid Size</th>
-                                        <th>Speed</th>
-                                        <th>Best For</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="param-name">GridSearchCV</td>
-                                        <td>Small (≤100)</td>
-                                        <td>🐢 Slow</td>
-                                        <td>When exact grid is known; exhaustive</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="param-name">RandomizedSearchCV</td>
-                                        <td>Large continuous</td>
-                                        <td>🚀 Fast</td>
-                                        <td>Most cases; use loguniform for LR, C</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="param-name">HalvingRandomSearch</td>
-                                        <td>Very large</td>
-                                        <td>Fastest</td>
-                                        <td>Large datasets; many hyperparams</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="param-name">Optuna / BOHB</td>
-                                        <td>Any</td>
-                                        <td>🏎️ Smart</td>
-                                        <td>Bayesian optimization; complex search spaces</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="doc-footer">
-                    <span>Sklearn Models — TWSS</span>
-                    <div class="footer-links">
-                        <a href="sklearn-preprocessing.html">← Preprocessing</a>
-                        <a href="sklearn-evaluation.html">Evaluation →</a>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <div class="toc-panel">
-            <div class="toc-heading">On This Page</div>
-            <a href="#s-regression" class="toc-link">Linear Regression</a>
-            <a href="#linear-reg" class="toc-link toc-h3">Ridge / Lasso / ElasticNet</a>
-            <a href="#s-logreg" class="toc-link">Logistic Regression</a>
-            <a href="#logistic" class="toc-link toc-h3">LogisticRegressionCV</a>
-            <a href="#s-trees" class="toc-link">Tree Ensembles</a>
-            <a href="#random-forest" class="toc-link toc-h3">RandomForest</a>
-            <a href="#gradient-boosting" class="toc-link toc-h3">HistGradientBoosting</a>
-            <a href="#s-svm" class="toc-link">SVM</a>
-            <a href="#svm" class="toc-link toc-h3">SVC / LinearSVC</a>
-            <a href="#s-knn" class="toc-link">K-Nearest Neighbors</a>
-            <a href="#knn" class="toc-link toc-h3">KNeighborsClassifier</a>
-            <a href="#s-clustering" class="toc-link">Clustering</a>
-            <a href="#kmeans-dbscan" class="toc-link toc-h3">KMeans / DBSCAN</a>
-            <a href="#s-cv" class="toc-link">Cross-Validation</a>
-            <a href="#cv-search" class="toc-link toc-h3">RandomizedSearchCV</a>
-        </div>
-    </div>
-    <script src="js/main.js"></script>
-    <script src="js/ai-chat.js"></script>
+# 4. PREDICT: Pass the 20% unseen data through the 100 trees and aggregate the votes
+preds = model.predict(X_test)
+</code></pre>
+</div>
+</div>
+<div class="edu-section edu-section-line-by-line">
+<div class="edu-section-title">5. Line-by-Line Explanation</div>
+<table>
+<tr>
+<th>Code Line</th>
+<th>Explanation</th>
+</tr>
+<tr>
+<td><code>n_jobs=-1</code></td>
+<td>Bypasses Python's single-threaded GIL. Scikit-Learn drops down into C++, spawns
+                                    worker threads equal to your exact hardware core count, and assigns 12 Trees to each
+                                    Core to train simultaneously.</td>
+</tr>
+<tr>
+<td><code>model.fit(...)</code></td>
+<td>The 100 Trees are built using <strong>Bagging (Bootstrap Aggregating)</strong>. Each
+                                    tree is fed a slightly randomized, distorted subset of the `X_train` rows. This
+                                    forces the trees to learn completely different perspectives of the tumor data.</td>
+</tr>
+<tr>
+<td><code>model.predict(X_test)</code></td>
+<td>The patient data falls through all 100 trees. Tree 1 votes `Malignant`. Tree 2 votes
+                                    `Benign`. The Random Forest executes an internal tally. If 85 trees vote
+                                    `Malignant`, the final output array contains a `0`.</td>
+</tr>
+</table>
+</div>
+<div class="edu-section edu-section-internals">
+<div class="edu-section-title">6. Internal Mechanism (Gini Impurity &amp; Information Gain)</div>
+<p>How does a single Decision Tree know <em>where</em> to split the data?</p>
+<p>It iterates through every single column (e.g., Tumor Radius). It tests thousands of split
+                            points (e.g., `Radius &gt; 15mm`). For each split, it calculates the <strong>Gini
+                                Impurity</strong>—a mathematical metric of chaos. If the split perfectly segregates all
+                            Cancer patients to the left, and Healthy patients to the right, the Gini Impurity drops to
+                            `0.0` (Perfect Information Gain). The algorithm permanently locks that split into the tree
+                            structure, and recursively attacks the remaining subset until the depth limit is reached.
+                        </p>
+</div>
+<div class="edu-section edu-section-shapes">
+<div class="edu-section-title">7. Support Vector Machines (SVM)</div>
+<p>While Trees draw literal rectangular boxes around data, <strong>SVMs</strong> draw a
+                            hyperplane (A sword slice) through the data.</p>
+<p>The SVM algorithm calculates the vector coordinates of the outermost data points of both
+                            classes (The Support Vectors). It then mathematically pushes the hyperplane blade exactly
+                            into the center between them to maximize the "Street Margin". This relies heavily on
+                            <code>O(N^3)</code> Matrix Inversion, making SVMs flawless on small datasets, but
+                            disastrously slow if you have more than 100,000 rows.</p>
+</div>
+<div class="edu-section edu-section-edge-cases">
+<div class="edu-section-title">8. Edge Cases (The Kernel Trick)</div>
+<p>What if the data cannot be cut with a straight line? (e.g., The healthy points form a circle
+                            completely surrounding a core of cancerous points).</p>
+<p>You cannot slice a bullseye target with a straight sword. To solve this, the SVM uses the
+                            <strong>RBF Kernel Trick</strong>. Instead of trying to cut the 2D circle, the math maps the
+                            2D coordinates into a 3rd Dimensional Z-axis (height). It literally pops the center
+                            cancerous points upwards into the air. The SVM then easily slices a flat 2D plane
+                            horizontally underneath the popped points, perfectly separating the classes without ever
+                            drawing curves!</p>
+</div>
+<div class="edu-section edu-section-variations">
+<div class="edu-section-title">9. Variations &amp; Alternatives (XGBoost)</div>
+<p>Random Forests build 100 trees independently (Parallel). <strong>Gradient Boosting (XGBoost /
+                                LightGBM)</strong> builds 100 trees in <em>Series</em>.</p>
+<p>Tree 1 makes predictions. It identifies the exact patients it got wrong. Tree 2 is explicitly
+                            mathematically designed to focus ONLY on fixing the errors of Tree 1. Tree 3 fixes the
+                            errors of Tree 2. This Sequential Gradient Descent makes XGBoost the most dominant,
+                            competition-winning Tabular algorithm in the world today.</p>
+</div>
+<div class="edu-section edu-section-mistakes">
+<div class="edu-section-title">10. Common Mistakes</div>
+<p><strong>Mistake:</strong> Overfitting a Decision Tree.</p>
+<p>If you execute <code>DecisionTreeClassifier()</code> without setting a `max_depth`,
+                            Scikit-Learn allows the tree to grow infinitely deep until every single training row has its
+                            own personal leaf node. The tree achieves 100% accuracy on the Training Data by literally
+                            memorizing every single patient. When the Test Set arrives, it fails miserably because it
+                            memorized noise instead of learning general patterns. <strong>Fix:</strong> Always prune
+                            your trees: <code>max_depth=5, min_samples_split=10</code>.</p>
+</div>
+<div class="edu-section edu-section-advanced">
+<div class="edu-section-title">11. Advanced Explanation (Hyperparameter Tuning)</div>
+<p>How do you know if a Forest needs `100` trees or `500` trees? You cannot guess.</p>
+<p>You use <code>GridSearchCV</code>. You provide a dictionary:
+                            <code>{'n_estimators': [100, 300, 500], 'max_depth': [5, 10, 15]}</code>. Scikit-Learn
+                            physically boots up 9 entirely different Random Forests in a massive `for` loop, trains
+                            every single one of them, measures their accuracy against Cross-Validation folds, and
+                            scientifically returns the ultimate, computationally perfect set of parameters for your
+                            specific dataset.</p>
+</div>
+<div class="edu-next-steps">
+                        ✅ <strong>Next Steps:</strong> If you want, I can also give you a "100 Most Important Concepts for AI/ML Engineers" (a compact list that interviews and advanced courses focus on).
+                    </div></div>
+</div>
+<div class="toc-panel" id="toc">
+<div class="toc-heading">On this page</div>
+<a class="toc-link" href="#sk-models">Scikit-Learn Models</a>
+</div>
+</main>
+</div>
 </body>
-
 </html>

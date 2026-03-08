@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Deep Learning for NLP &amp; Embeddings — TWSS</title>
+<link href="css/style.css" rel="stylesheet"/>
+</head>
+<body>
+<script src="js/shared-layout.js"></script>
+<div class="app-layout has-toc">
+<main class="main-content">
+<div class="content-inner">
+<div class="page-header">
+<div class="page-breadcrumb"><a href="roadmap.html">Roadmap</a> › Deep Learning</div>
+<h1 class="page-title">Natural Language Processing (NLP)</h1>
+<p class="page-subtitle">Master the <code>Tokenizer</code>, Sequence Padding, and the
+                        <code>Embedding</code> Layer.</p>
+</div>
+<div class="edu-concept" id="tf-nlp">
+<div class="edu-concept-title">Mathematical Representation of Language</div>
+<div class="edu-section edu-section-intro">
+<div class="edu-section-title">1. Concept Introduction</div>
+<p>Neural Networks are blind calculators. You cannot feed the string `"I love Python"` into a
+                            matrix multiplication equation. The entire discipline of <strong>Natural Language Processing
+                                (NLP)</strong> is dedicated to one single goal: Squeezing the complex nuance of human
+                            language into cold, rigid arrays of floating-point numbers.</p>
+<p>This process requires two distinct mathematical bridges: <strong>Tokenization</strong>
+                            (Converting words into integer IDs) and <strong>Embeddings</strong> (Converting integer IDs
+                            into multi-dimensional spatial vectors).</p>
+</div>
+<div class="edu-section edu-section-intuition">
+<div class="edu-section-title">2. Concept Intuition</div>
+<p>Imagine reading a foreign book as a machine.</p>
+<p><strong>Step 1 (Tokenization):</strong> You buy a Dictionary. You look up the word "Apple".
+                            The dictionary says it's word #451. You cross out "Apple" in your book and write `451`. Your
+                            book is now just a sequence of integers: `[12, 451, 9]`. But `451` doesn't explain what a
+                            fruit actually is.</p>
+<p><strong>Step 2 (Embedding):</strong> You place every single word on a massive 3D Cartesian
+                            grid. You place `Apple` physically next to `Orange`. You place `King` next to `Queen`. When
+                            the AI reads the coordinate `[0.5, 0.9, -0.2]` for Apple, it instantly realizes it is
+                            mathematically surrounded by fruits, inherently understanding its semantic meaning due to
+                            its physical geometry in space.</p>
+</div>
+<div class="edu-section edu-section-syntax">
+<div class="edu-section-title">3. Python Syntax</div>
+<div class="sig-box">
+                            from tensorflow.keras.preprocessing.text import Tokenizer
+                            from tensorflow.keras.preprocessing.sequence import pad_sequences
+                            from tensorflow.keras.layers import Embedding
+
+                            # 1. Boot up the Dictionary Builder
+                            tokenizer = Tokenizer(num_words=10000, oov_token="<unk>")
+
+                                # 2. Learn the Vocabulary
+                                tokenizer.fit_on_texts(training_sentences)
+
+                                # 3. Convert Strings to Integer Sequences
+                                sequences = tokenizer.texts_to_sequences(training_sentences)
+
+                                # 4. Standardize the sequence lengths (Padding)
+                                padded_seqs = pad_sequences(sequences, maxlen=50, padding='post')
+                        </unk></div>
+</div>
+<div class="edu-section edu-section-code">
+<div class="edu-section-title">4. Python Code Example</div>
+<div class="code-wrap">
+<div class="code-header"><span class="code-lang">python</span></div>
+<pre><code>from tensorflow.keras.preprocessing.text import Tokenizer
+
+# Scenario: You have massive textual data
+eng = ['hi', 'hello', 'what is your name', 'thank you']
+spa = ['hola', 'que tal', 'como estas', 'gracias']
+
+# 1. The Tokenizer Engine
+token_eng = Tokenizer()
+
+# 2. Scanning Phase
+# The AI reads every letter, splits by spaces, strips punctuation, 
+# and builds a massive Dictionary mapping string keys to int values.
+token_eng.fit_on_texts(eng)
+
+# 3. Translation Phase
+# We feed the raw strings back in. It outputs the Integer Matrix.
+x = token_eng.texts_to_sequences(eng)
+
+print("Vocabulary Dictionary (Word -&gt; ID):")
+print(token_eng.word_index)
+# Outputs: {'hi': 1, 'hello': 2, 'what': 3, 'is': 4...}
+
+print("\nInteger Translation Matrix:")
+print(x)
+# Outputs: [[1], [2], [3, 4, 5, 6], [7, 8]]
+</code></pre>
+</div>
+</div>
+<div class="edu-section edu-section-line-by-line">
+<div class="edu-section-title">5. Line-by-Line Explanation</div>
+<table>
+<tr>
+<th>Code Line</th>
+<th>Explanation</th>
+</tr>
+<tr>
+<td><code>Tokenizer(num_words=10000)</code></td>
+<td>The English language has 170,000 words. Most (like "Aardvark") appear exactly once.
+                                    To save RAM, the Tokenizer mathematically ranks words by frequency. Setting `10000`
+                                    forces the engine to instantly throw away the bottom 160,000 useless words, keeping
+                                    the Neural Network perfectly optimized.</td>
+</tr>
+<tr>
+<td><code>texts_to_sequences()</code></td>
+<td>It loops through the string arrays, executes an `O(1)` HashMap dictionary lookup for
+                                    each word, and outputs pure lists of integers. Neural Nets can natively multiply
+                                    integers.</td>
+</tr>
+<tr>
+<td><code>[[1], [3, 4, 5, 6]]</code></td>
+<td>Neural Networks cannot process Jagged Arrays (where Row 1 has 1 number, but Row 2
+                                    has 4 numbers). The GPU requires perfect rectangular C-matrices. This requires the
+                                    `pad_sequences` function to append `0`s to make them equal length.</td>
+</tr>
+</table>
+</div>
+<div class="edu-section edu-section-internals">
+<div class="edu-section-title">6. Internal Mechanism (The Embedding Layer)</div>
+<p>We just turned the word "Dog" into the ID `7`, and "Cat" into `8`. By standard math rules,
+                            the AI assumes `8 is greater than 7` (Cat is greater than Dog). This is devastatingly false.
+                            They are fundamentally equally-weighted Categories, not hierarchical magnitudes!</p>
+<p>In TensorFlow, the <code>layers.Embedding(input_dim=10000, output_dim=64)</code> acts as a
+                            massive Lookup Table (A weights matrix). When the integer `8` hits the layer, the Embedding
+                            mathematically bypasses multiplication entirely. It physically grabs the exact Row 8 from
+                            its massive matrix. Row 8 contains exactly 64 floating point decimals (e.g. `[0.1, -0.4,
+                            0.99...]`). The Embedding just seamlessly swapped the fake ID integer '8' for a rich,
+                            beautiful 64-dimensional spatial coordinate vector. The AI then trains these 64 numbers
+                            using Calculus Gradient Descent, physically dragging the "Cat" coordinate vector closer to
+                            the "Dog" coordinate vector in cyberspace over millions of epochs.</p>
+</div>
+<div class="edu-section edu-section-shapes">
+<div class="edu-section-title">7. Shape and Dimensionality Expansion</div>
+<p>This is the most confusing aspect of NLP architecture:</p>
+<p><strong>Input:</strong> `[Batch_Size, Sentence_Length]` (e.g., A batch of 32 sentences, each
+                            cut exactly to 50 words via Padding). The Matrix is `(32, 50)` containing integers.</p>
+<p><strong>Through Embedding:</strong> Every single integer is blown up into a massive 128-float
+                            array.</p>
+<p><strong>Output:</strong> `[Batch_Size, Sentence_Length, Embedding_Dim]`. The tensor expands
+                            dimensionally to `(32, 50, 128)`. Your 2D spreadsheet just became a 3D Rubik's Cube of data,
+                            ready to be fed into heavy sequential filters like 1D-Convolutions or LSTMs.</p>
+</div>
+<div class="edu-section edu-section-edge-cases">
+<div class="edu-section-title">8. Edge Cases (Out of Vocabulary - OOV)</div>
+<p>When you put your NLP Sentiment Analysis AI into Production, a teenager types a tweet
+                            containing the slang word "Rizz".</p>
+<p>Your Tokenizer was trained in 2018. It searches its HashMap for "Rizz", fails to find it, and
+                            violently throws a python <code>KeyError</code>, crashing the multi-million dollar backend.
+                            <strong>Solution:</strong> You must always initialize
+                            <code>Tokenizer(oov_token='&lt;UNK&gt;')</code>. During evaluation, if a string word escapes
+                            the dictionary, the Tokenizer gracefully strips the string and violently overwrites it with
+                            the literal ID for `&lt;UNK&gt;` (Unknown). The Neural Net processes it as "An Unknown
+                            Word", preventing the server explosion.</p>
+</div>
+<div class="edu-section edu-section-variations">
+<div class="edu-section-title">9. Variations &amp; Alternatives (Pre-Trained Embeddings)</div>
+<p>Training an Embedding Layer from scratch takes weeks of GPU time. You are trying to teach a
+                            machine the entire English dictionary purely from scratch.</p>
+<p>Instead, Data Scientists use <strong>Transfer Learning</strong> via <strong>Word2Vec</strong>
+                            or <strong>GloVe</strong> (Global Vectors). Stanford University bought 1,000 GPUs, trained
+                            an embedding matrix on the entirety of Wikipedia for 6 months, and released the raw `.txt`
+                            file of weights. You literally just open the file with Pandas, dump Stanford's
+                            floating-point coordinates directly into your Keras <code>Embedding</code> layer, freeze the
+                            weights, and your tiny home-AI instantly understands the spatial semantic relationship of
+                            the entire English language before epoch 1 even begins.</p>
+</div>
+<div class="edu-section edu-section-mistakes">
+<div class="edu-section-title">10. Common Mistakes</div>
+<p><strong>Mistake:</strong> Post-Padding vs Pre-Padding for Sequence Models (RNNs).</p>
+<p><strong>Why is this disastrous?:</strong> <code>pad_sequences(padding='post')</code> places
+                            trailing zeros at the end: `[12, 45, 9, 0, 0, 0]`. If you feed this into a Recurrent Neural
+                            Network (LSTM), the LSTM reads the final `0` the hardest! It suffers catastrophic
+                            forgetting—the 3 zeros overrode the actual words! <strong>Fix:</strong> Sequence models MUST
+                            use <code>padding='pre'</code>: `[0, 0, 0, 12, 45, 9]`. The network ignores the zeros early,
+                            and the most recent token (9) hits the calculation wall directly before output.</p>
+</div>
+<div class="edu-section edu-section-advanced">
+<div class="edu-section-title">11. Advanced Explanation (Sub-Word Tokenization)</div>
+<p>Word Tokenization (mapping space-separated words) is dead. It requires massive 100,000+
+                            vocabularies to work, and fails violently on foreign languages or typos ("hellooo").</p>
+<p>Modern Large Language Models (LLMs) like ChatGPT use <strong>BPE (Byte-Pair Encoding)
+                                Sub-word Tokenization</strong>. Instead of tokenizing "unbelievable", it breaks it into
+                            physical morphological chunks: `["un", "believ", "able"]`. This genius mechanism restricts
+                            the entire global vocabulary to exactly 50,000 sub-words, allowing the model to flawlessly
+                            parse misspelled words, unseen medical jargon, and new grammatical syntax by literally
+                            putting the Lego blocks together algebraically.</p>
+</div>
+<div class="edu-next-steps">
+                        ✅ <strong>Next Steps:</strong> If you want, I can also give you a "100 Most Important Concepts for AI/ML Engineers" (a compact list that interviews and advanced courses focus on).
+                    </div></div>
+</div>
+<div class="toc-panel" id="toc">
+<div class="toc-heading">On this page</div>
+<a class="toc-link" href="#tf-nlp">NLP Tokenization</a>
+</div>
+</main>
+</div>
+</body>
+</html>

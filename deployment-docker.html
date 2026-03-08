@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Docker &amp; Containerization — TWSS</title>
+<link href="css/style.css" rel="stylesheet"/>
+</head>
+<body>
+<script src="js/shared-layout.js"></script>
+<div class="app-layout has-toc">
+<main class="main-content">
+<div class="content-inner">
+<div class="page-header">
+<div class="page-breadcrumb"><a href="roadmap.html">Roadmap</a> › MLOps &amp; Deployment</div>
+<h1 class="page-title">Docker &amp; Containerization</h1>
+<p class="page-subtitle">Master Linux Namespaces, `Dockerfile` caching layers, and OS-level
+                        virtualization.</p>
+</div>
+<div class="edu-concept" id="mlops-docker">
+<div class="edu-concept-title">Environment Synchronization</div>
+<div class="edu-section edu-section-intro">
+<div class="edu-section-title">1. Concept Introduction</div>
+<p>The most famous, frustrating sentence in all of Software Engineering is: <strong>"But it
+                                works on my machine!"</strong></p>
+<p>Your AI model works flawlessly on your Windows laptop because you installed Python 3.9,
+                            TensorFlow 2.10, and specific C++ Cuda drivers. When you upload that Python file to a
+                            pristine Ubuntu Cloud Server, the script instantly crashes because the server is missing
+                            your exact driver ecosystem. <strong>Docker</strong> solves this permanently. It places your
+                            code, Python interpreter, Linux OS files, and hardware drivers into a sealed, immutable,
+                            portable <i>Container</i>. When the Cloud Server runs the container, it essentially boots up
+                            an exact clone of your laptop inside the server.</p>
+</div>
+<div class="edu-section edu-section-intuition">
+<div class="edu-section-title">2. Concept Intuition</div>
+<p>Imagine trying to ship a custom V8 Engine (Your AI Model) across the ocean.</p>
+<p><strong>Without Docker:</strong> You dis-assemble the engine, mail the parts, and email a
+                            30-page instruction manual to a mechanic in London telling him how to construct it, what
+                            screws to buy, and what oil to use. He messes it up (Dependency Hell).</p>
+<p><strong>With Docker:</strong> You place the fully assembled V8 Engine inside a massive,
+                            sealed, standardized metal Shipping Container. You drop the entire container on a ship. When
+                            it arrives in London, they don't even need a mechanic. A crane simply drops the standardized
+                            container onto a truck bed, and it works flawlessly.</p>
+</div>
+<div class="edu-section edu-section-syntax">
+<div class="edu-section-title">3. Dockerfile Syntax (The Blueprint)</div>
+<div class="sig-box">
+                            # 1. Base Image - Download a pristine Linux OS with Python pre-installed
+                            FROM python:3.9-slim
+
+                            # 2. Set the working directory inside the sealed container
+                            WORKDIR /app
+
+                            # 3. Copy only the requirements first (To utilize Cache Layers)
+                            COPY requirements.txt .
+
+                            # 4. Install dependencies into the container's isolated OS
+                            RUN pip install --no-cache-dir -r requirements.txt
+
+                            # 5. Copy your AI model, weights, and server files into the container
+                            COPY . .
+
+                            # 6. Open a physical hole in the container's firewall
+                            EXPOSE 8000
+
+                            # 7. The execution command triggered when the ship arrives
+                            CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"]
+                        </div>
+</div>
+<div class="edu-section edu-section-code">
+<div class="edu-section-title">4. Shell Code Example (Building and Shipping)</div>
+<div class="code-wrap">
+<div class="code-header"><span class="code-lang">bash</span></div>
+<pre><code># Scenario: Compiling your AI app into a Docker Image
+
+# Step 1: BUILD (Creating the Blueprint)
+# The `.` means "look in the current folder for the Dockerfile".
+# It literally compiles the Linux OS and PyTorch into a single 2GB `.tar` file!
+docker build -t my-ai-prediction-api:v1.0 .
+
+# Step 2: VERIFY
+docker images  
+# Displays your massive 2GB image sitting on your laptop hard drive.
+
+# Step 3: RUN (Spawning the Container)
+# The `-p 8080:8000` maps your laptop's physical port 8080 
+# to the Container's internal isolated port 8000.
+docker run -d -p 8080:8000 my-ai-prediction-api:v1.0
+
+# You can now navigate to localhost:8080 on your laptop and hit the FastAPI server!
+</code></pre>
+</div>
+</div>
+<div class="edu-section edu-section-line-by-line">
+<div class="edu-section-title">5. Line-by-Line Explanation</div>
+<table>
+<tr>
+<th>Code Line</th>
+<th>Explanation</th>
+</tr>
+<tr>
+<td><code>FROM python:3.9-slim</code></td>
+<td>Docker reaches into DockerHub (The GitHub of OS Images) and downloads a condensed,
+                                    100MB version of Debian Linux that already has the exact C-compiled Python binary
+                                    installed.</td>
+</tr>
+<tr>
+<td><code>COPY requirements.txt .</code></td>
+<td>Copies the text file from your Windows laptop directly into the Linux file system
+                                    `/app` inside the container.</td>
+</tr>
+<tr>
+<td><code>RUN pip install</code></td>
+<td>Executes bash commands <em>inside the Linux environment during the build phase</em>.
+                                    It downloads Scikit-Learn. The `--no-cache-dir` ensures it deletes the downloaded
+                                    ZIP files after unzipping, keeping your final Docker Image as small as possible.
+                                </td>
+</tr>
+</table>
+</div>
+<div class="edu-section edu-section-internals">
+<div class="edu-section-title">6. Internal Mechanism (Namespaces &amp; Cgroups)</div>
+<p>How does Docker differ from a Virtual Machine (VMware/VirtualBox)?</p>
+<p>A Virtual Machine is incredibly heavy. To run a Linux VM on Windows, the software has to
+                            literally boot an entire secondary Operating System, demanding 4GB of RAM and 20GB of hard
+                            drive space just for the OS Kernel.</p>
+<p>Docker is <strong>OS-Level Virtualization</strong>. It does NOT boot a new Kernel. It shares
+                            the physical host's Kernel. It uses native hardware features called <strong>Linux
+                                Namespaces</strong> and <strong>Control Groups (Cgroups)</strong>. Namespaces
+                            mathematically trick the python script into thinking it is the only program running on the
+                            computer (Process Isolation). Cgroups place physical hardware limits (e.g., "This container
+                            can only use 512MB RAM"). Because there is no guest OS, Docker turns on in 50 milliseconds
+                            and uses near-zero overhead.</p>
+</div>
+<div class="edu-section edu-section-shapes">
+<div class="edu-section-title">7. The Layer Caching Architecture</div>
+<p>Look at the Dockerfile. Why did we `COPY requirements.txt` BEFORE we `COPY . .` (copying the
+                            actual python code)?</p>
+<p>Docker uses <strong>Layer Caching</strong>. Every single line in a Dockerfile creates a
+                            permanent snapshot of the hard drive. If you change a typo in your `server.py` and hit
+                            Build, Docker checks line 4 (pip install). Since `requirements.txt` didn't change, Docker
+                            completely skips the 5-minute pip install process and instantly reuses the cached hard drive
+                            snapshot. If you foolishly `COPY . .` first, Docker detects that a file changed, invalidates
+                            the cache, and wildly re-downloads 2GB of PyTorch every single time you fix a typo in your
+                            python code.</p>
+</div>
+<div class="edu-section edu-section-edge-cases">
+<div class="edu-section-title">8. Edge Cases (The GPU Passthrough Problem)</div>
+<p>By default, a Docker container is perfectly sealed. If you run a TensorFlow model inside
+                            Docker, it searches the container for an NVIDIA GPU, finds nothing, and crashes.</p>
+<p>You must poke a hardware hole in the container to allow the GPU signals to route directly
+                            through the VM firewall. <strong>Solution:</strong> NVIDIA Container Toolkit. You must
+                            launch the container with: <code>docker run --gpus all -d my-ai-api</code>. This mounts the
+                            host server's physical Cuda drivers directly into the Linux Namespace, allowing the sealed
+                            container to physically torch the external GPU processors.</p>
+</div>
+<div class="edu-section edu-section-variations">
+<div class="edu-section-title">9. Variations &amp; Alternatives (Kubernetes)</div>
+<p>Docker runs 1 container on 1 laptop. What if Netflix has 10 million users, and needs to boot
+                            50,000 Docker containers dynamically across 3,000 physical AWS servers?</p>
+<p>Docker cannot do this. You need an Orchestrator. <strong>Kubernetes (K8s)</strong> is
+                            Google's master cluster-management system. It acts like a massive naval fleet admiral. It
+                            monitors traffic, detecting that Server 5 is running out of RAM, instantly terminates the
+                            Docker container on Server 5, and teleports the container onto Server 8. Kubernetes is the
+                            undisputed sovereign architecture of the modern internet.</p>
+</div>
+<div class="edu-section edu-section-mistakes">
+<div class="edu-section-title">10. Common Mistakes</div>
+<p><strong>Mistake:</strong> Storing state (Databases) <em>inside</em> the Container.</p>
+<p><strong>Why is this disastrous?:</strong> Docker containers are natively
+                            <strong>Ephemeral</strong> (Disposable). If your server restarts, the Docker container is
+                            physically deleted and re-built from the raw blueprint. If you saved your SQLite database
+                            inside the container, 100% of your user data was just permanently nuked from orbit.
+                            <strong>Fix:</strong> You MUST use <strong>Docker Volumes</strong> (`-v
+                            /host_db:/container_db`) to magnetically bind the internal folder to an immortal folder on
+                            the physical external hard drive.</p>
+</div>
+<div class="edu-section edu-section-advanced">
+<div class="edu-section-title">11. Advanced Explanation (Docker Compose)</div>
+<p>Your AI startup doesn't just need one Python API. You need: 1 Container for FastAPI, 1
+                            Container for a PostgreSQL Database, and 1 Container for a Redis Cache.</p>
+<p>Typing out 3 massive `docker run` commands with 50 port-mapping variables is a nightmare.
+                            <strong>Docker Compose</strong> solves this. You write a single `docker-compose.yml` file
+                            describing all 3 containers and how they connect. You type
+                            <code>docker-compose up -d</code>. Docker instantly bridges a private, virtual LAN network
+                            between the 3 containers, allowing the Python API to securely talk to the Database
+                            seamlessly behind a firewall without exposing the DB to the open internet.</p>
+</div>
+<div class="edu-next-steps">
+                        ✅ <strong>Next Steps:</strong> If you want, I can also give you a "100 Most Important Concepts for AI/ML Engineers" (a compact list that interviews and advanced courses focus on).
+                    </div></div>
+</div>
+<div class="toc-panel" id="toc">
+<div class="toc-heading">On this page</div>
+<a class="toc-link" href="#mlops-docker">Docker Containment</a>
+</div>
+</main>
+</div>
+</body>
+</html>

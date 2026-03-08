@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Python OOP &amp; Protocols — TWSS</title>
+<link href="css/style.css" rel="stylesheet"/>
+</head>
+<body>
+<script src="js/shared-layout.js"></script>
+<div class="app-layout has-toc">
+<main class="main-content">
+<div class="content-inner">
+<div class="page-header">
+<div class="page-breadcrumb"><a href="roadmap.html">Roadmap</a> › Python Core</div>
+<h1 class="page-title">Object-Oriented Programming (OOP)</h1>
+<p class="page-subtitle">Understand <code>PyTypeObject</code> architecture, the Method Resolution
+                        Order (MRO), and Dunder Protocols.</p>
+</div>
+<div class="edu-concept" id="py-oop">
+<div class="edu-concept-title">Data Blueprint Compilation</div>
+<div class="edu-section edu-section-intro">
+<div class="edu-section-title">1. Concept Introduction</div>
+<p>Object-Oriented Programming (OOP) is a paradigm where code is organized into
+                            <strong>Classes</strong> (Blueprints) and <strong>Objects/Instances</strong> (Physical
+                            Manifestations). Instead of having disconnected variables and functions floating in the
+                            abyss, OOP binds related data (Attributes) and behaviors (Methods) together into a single,
+                            cohesive payload.</p>
+<p>In Python, the OOP architecture is absolute. Everything is an object. A string is an object
+                            of the <code>str</code> class. A number is an object of the <code>int</code> class. Even a
+                            Class definition itself is an object spawned from a higher architectural blueprint called a
+                            <code>type</code> (Metaclass)!</p>
+</div>
+<div class="edu-section edu-section-intuition">
+<div class="edu-section-title">2. Concept Intuition</div>
+<p>Imagine a Car Factory.</p>
+<p>A <strong>Class</strong> is the engineering blueprint paper sitting on the manager's desk.
+                            You cannot drive a blueprint. It just explains *how* to build a car.</p>
+<p>An <strong>Object (Instance)</strong> is the physical car that rolls off the assembly line.
+                            Because it was stamped from the blueprint, it possesses the guaranteed Attributes
+                            (`color="Red"`, `engine="V8"`) and the guaranteed Methods (`accelerate()`, `brake()`). You
+                            can stamp out 10,000 independent physical cars (Objects) from exactly 1 piece of paper
+                            (Class).</p>
+</div>
+<div class="edu-section edu-section-syntax">
+<div class="edu-section-title">3. Python Syntax</div>
+<div class="sig-box">
+                            # 1. Defining a Blueprint (Class)
+                            class NeuralNetwork:
+                            # Class-Level Attribute (Shared across all objects)
+                            framework = "PyTorch"
+
+                            # 2. The Initialization Protocol (Constructor)
+                            def __init__(self, layers):
+                            self.layers = layers # Instance-Level Attribute
+
+                            # 3. Instance Method (Must take 'self' as first argument)
+                            def train(self, data):
+                            print(f"Training {self.layers} layers.")
+
+                            # 4. Instantiation (Building an object)
+                            model = NeuralNetwork(layers=50)
+                            model.train([1, 2, 3])
+                        </div>
+</div>
+<div class="edu-section edu-section-code">
+<div class="edu-section-title">4. Python Code Example</div>
+<div class="code-wrap">
+<div class="code-header"><span class="code-lang">python</span></div>
+<pre><code># Scenario: Inheritance and Polymorphism in an ML Pipeline
+class BaseEstimator:
+    def __init__(self, name):
+        self.name = name
+        
+    def predict(self, x):
+        raise NotImplementedError("Subclasses must implement this.")
+
+# Random Forest INHERITS from the Base Estimator
+class RandomForest(BaseEstimator):
+    def __init__(self, name, trees):
+        super().__init__(name)  # Boot up the parent's memory logic
+        self.trees = trees
+        
+    def predict(self, x):       # Polymorphic Override
+        return sum(x) / self.trees
+
+model = RandomForest("RF_Classifier", 100)
+print(model.predict([10, 20]))
+</code></pre>
+</div>
+</div>
+<div class="edu-section edu-section-line-by-line">
+<div class="edu-section-title">5. Line-by-Line Explanation</div>
+<table>
+<tr>
+<th>Code Line</th>
+<th>Explanation</th>
+</tr>
+<tr>
+<td><code>class RandomForest(BaseEstimator):</code></td>
+<td>Python evaluates the class block. It intercepts the inheritance parenthesis and
+                                    mathematically links the new class blueprint dict to the parent class blueprint dict
+                                    sequentially in memory.</td>
+</tr>
+<tr>
+<td><code>model = RandomForest(...)</code></td>
+<td>Python allocates a brand new blank block of RAM. It then searches the `RandomForest`
+                                    blueprint for the <code>__init__</code> method and calls it, literally passing the
+                                    new blank memory block in as the <code>self</code> pointer argument!</td>
+</tr>
+<tr>
+<td><code>super().__init__(name)</code></td>
+<td>The <code>super()</code> proxy bypasses the current blueprint, locates the
+                                    mathematical Parent blueprint (`BaseEstimator`), and forces its `__init__` logic to
+                                    execute ON the current block of RAM (`self`).</td>
+</tr>
+<tr>
+<td><code>self.trees = trees</code></td>
+<td>The blank RAM block's internal Dictionary hash table is injected with a new key
+                                    `"trees"` mapped to the integer pointer `100`.</td>
+</tr>
+</table>
+</div>
+<div class="edu-section edu-section-internals">
+<div class="edu-section-title">6. Internal Mechanism (The <code>self</code> dictionary)</div>
+<p>When you type <code>model.train(data)</code>, how does the function know what data belongs to
+                            `model`?</p>
+<p>Under the hood, Python perfectly translates that syntax into this C-equivalent:
+                            <code>NeuralNetwork.train(model, data)</code>. The word <code>self</code> acts as a massive
+                            hidden Dictionary passing literal memory locations into functions. Every single object in
+                            Python (except specialized ones) has a hidden <code>__dict__</code> attribute. When you type
+                            <code>self.layers = 50</code>, Python executes <code>self.__dict__["layers"] = 50</code>.
+                        </p>
+</div>
+<div class="edu-section edu-section-shapes">
+<div class="edu-section-title">7. Method Resolution Order (MRO)</div>
+<p>Unlike Java, Python supports <strong>Multiple Inheritance</strong>:
+                            <code>class AI(Robot, Computer):</code>.</p>
+<p>If both `Robot` and `Computer` have a `calculate()` method, which one gets used? Python
+                            relies on the <strong>C3 Linearization Algorithm</strong> (MRO). The MRO mathematically
+                            scans the inheritance tree bottom-up, left-to-right. It generates a rigid 1D Array of
+                            Classes. When searching for a method, Python scans down the MRO array. The exact second it
+                            finds a matching function name, it executes it and ignores the rest of the tree. (You can
+                            view this array via <code>AI.__mro__</code>).</p>
+</div>
+<div class="edu-section edu-section-edge-cases">
+<div class="edu-section-title">8. Edge Cases</div>
+<p><strong>The Class Variable Contamination Bug:</strong></p>
+<pre><code>class Employee:
+    skills = []   # Class Variable (Danger!)
+
+e1 = Employee()
+e2 = Employee()
+e1.skills.append("Python")
+print(e2.skills) # Prints ["Python"]! e2 was infected!</code></pre>
+<p>Variables declared directly under `class` are glued to the Blueprint Paper, NOT the physical
+                            Cars. If Employee 1 writes his skills on the Blueprint Paper, Employee 2 (who also looks at
+                            the Blueprint) will see them! <strong>Fix:</strong> Always declare dynamic variables inside
+                            <code>def __init__(self): self.skills = []</code>, which legally binds them to the
+                            individual independent Car.</p>
+</div>
+<div class="edu-section edu-section-variations">
+<div class="edu-section-title">9. Variations &amp; Alternatives</div>
+<p><strong>DataClasses (PEP 557):</strong></p>
+<p>If you are building an AI Training Config object that strictly holds data and no deep
+                            functions, writing <code>__init__</code> functions with 20 <code>self.x = x</code> lines is
+                            excruciating. Python introduced the <code>@dataclass</code> decorator. It reads your typed
+                            variables and uses C-metaclasses to literally code a flawless, hyper-optimized
+                            <code>__init__</code>, <code>__repr__</code>, and <code>__eq__</code> engine for you
+                            automatically in milliseconds.</p>
+</div>
+<div class="edu-section edu-section-mistakes">
+<div class="edu-section-title">10. Common Mistakes</div>
+<p><strong>Mistake:</strong> Accessing "Private" variables from the outside.</p>
+<p>In Java, <code>private float salary;</code> structurally prevents outside code from reading
+                            the salary. In Python, typing <code>self.__salary = 100</code> does NOT make the variable
+                            private. Python just executes <strong>Name Mangling</strong>, silently renaming the variable
+                            in memory to <code>_ClassName__salary</code> to prevent accidental inheritance overriding.
+                            Any malicious programmer can easily bypass this by simply calling the mangled name. Python
+                            relies on developer trust (the single underscore convention <code>self._salary</code>
+                            indicating "please do not touch this"), lacking actual C-level memory occlusion.</p>
+</div>
+<div class="edu-section edu-section-advanced">
+<div class="edu-section-title">11. Advanced Explanation (The Metaclass)</div>
+<p>How does Python construct the `class` blueprint itself?</p>
+<p>When the Python compiler hits the word <code>class</code>, it essentially compiles all the
+                            nested functions into a Dictionary, creates a name string, gathers the Parent classes into a
+                            Tuple, and hands all 3 components to a supreme god-class called
+                            <code>type(name, bases, dict)</code>. <strong>The Metaclass</strong> is the overarching
+                            universal factory that physically mints the Class blueprints in RAM. By intercepting and
+                            replacing Python's default Metaclass, Data Scientists can build massive Frameworks (like
+                            Django ORM or SQLAlchemy) that read Python class variables and automatically rewrite them
+                            into SQL database query protocols before the class even finishes compiling!</p>
+</div>
+<div class="edu-next-steps">
+                        ✅ <strong>Next Steps:</strong> If you want, I can also give you a "100 Most Important Concepts for AI/ML Engineers" (a compact list that interviews and advanced courses focus on).
+                    </div></div>
+</div>
+<div class="toc-panel" id="toc">
+<div class="toc-heading">On this page</div>
+<a class="toc-link" href="#py-oop">Object-Oriented Logic</a>
+</div>
+</main>
+</div>
+</body>
+</html>
